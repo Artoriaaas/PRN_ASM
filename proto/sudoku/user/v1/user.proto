@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package sudoku.user.v1;
+
+option csharp_namespace = "Sudoku.User.V1";
+
+service UserService {
+  rpc GetOrCreateProfile(GetOrCreateProfileRequest) returns (GetOrCreateProfileResponse);
+  rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
+  rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
+}
+
+message UserProfile {
+  string id = 1;
+  string display_name = 2;
+  string email = 3;
+  string avatar_url = 4;
+  int32 total_games = 5;
+  int32 wins = 6;
+}
+
+message GetOrCreateProfileRequest {
+  string display_name = 1;
+  string email = 2;
+}
+
+message GetOrCreateProfileResponse {
+  UserProfile profile = 1;
+  bool is_new_user = 2;
+}
+
+message GetProfileRequest {
+}
+
+message GetProfileResponse {
+  UserProfile profile = 1;
+}
+
+message UpdateProfileRequest {
+  string display_name = 1;
+  string avatar_url = 2;
+}
+
+message UpdateProfileResponse {
+  UserProfile profile = 1;
+}

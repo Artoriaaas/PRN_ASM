@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package sudoku.events.v1;
+
+option csharp_namespace = "Sudoku.Events.V1";
+
+message EventEnvelope {
+  string event_id = 1;
+  string type = 2;
+  string occurred_at = 3;
+  string user_id = 4;
+  bytes payload = 5;
+}
+
+message GameFinished {
+  string session_id = 1;
+  string user_id = 2;
+  string difficulty = 3;
+  bool is_win = 4;
+  int32 duration_seconds = 5;
+  int32 reward_coins = 6;
+  int32 score = 7;
+}
+
+message MatchCompleted {
+  string match_id = 1;
+  string winner_user_id = 2;
+  string loser_user_id = 3;
+  int32 winner_reward_coins = 4;
+  int32 rating_delta = 5;
+}

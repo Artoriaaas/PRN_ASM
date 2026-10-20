@@ -1,0 +1,202 @@
+static_resources:
+  listeners:
+    - name: edge
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8080
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: edge
+                access_log:
+                  - name: envoy.access_loggers.stdout
+                    typed_config:
+                      '@type': type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
+                      log_format:
+                        text_format_source:
+                          inline_string: "[%START_TIME%] \"%REQ(:METHOD)% %REQ_WITHOUT_QUERY(:PATH)% %PROTOCOL%\" %RESPONSE_CODE% %GRPC_STATUS% \"%RESP(GRPC-MESSAGE)%\"\n"
+                route_config:
+                  virtual_hosts:
+                    - name: api
+                      domains:
+                        - '*'
+                      typed_per_filter_config:
+                        envoy.filters.http.cors:
+                          '@type': type.googleapis.com/envoy.extensions.filters.http.cors.v3.CorsPolicy
+                          allow_origin_string_match:
+                            - exact: 'http://localhost:5173'
+                          allow_methods: 'GET, POST, OPTIONS'
+                          allow_headers: 'authorization,content-type,x-grpc-web,x-user-agent,grpc-timeout'
+                          expose_headers: 'grpc-status,grpc-message'
+                      routes:
+                        - match:
+                            prefix: '/sudoku.game.v1.'
+                          route:
+                            cluster: game
+                            timeout: 15s
+                        - match:
+                            prefix: '/sudoku.user.v1.'
+                          route:
+                            cluster: user
+                            timeout: 15s
+                        - match:
+                            prefix: '/sudoku.support.v1.'
+                          route:
+                            cluster: support
+                            timeout: 15s
+                        - match:
+                            prefix: '/sudoku.multi.v1.'
+                          route:
+                            cluster: multi_grpc
+                            timeout: 15s
+                        - match:
+                            prefix: '/hubs/match'
+                          route:
+                            cluster: multi_ws
+                            timeout: 0s
+                            upgrade_configs:
+                              - upgrade_type: websocket
+                http_filters:
+                  - name: envoy.filters.http.grpc_web
+                    typed_config:
+                      '@type': type.googleapis.com/envoy.extensions.filters.http.grpc_web.v3.GrpcWeb
+                  - name: envoy.filters.http.cors
+                    typed_config:
+                      '@type': type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors
+                  - name: envoy.filters.http.jwt_authn
+                    typed_config:
+                      '@type': type.googleapis.com/envoy.extensions.filters.http.jwt_authn.v3.JwtAuthentication
+                      providers:
+                        firebase:
+                          issuer: 'https://securetoken.google.com/YOUR_FIREBASE_PROJECT_ID'
+                          audiences:
+                            - 'YOUR_FIREBASE_PROJECT_ID'
+                          from_headers:
+                            - name: authorization
+                              value_prefix: 'Bearer '
+                          from_params:
+                            - 'access_token'
+                          forward: true
+                          remote_jwks:
+                            http_uri:
+                              uri: 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com'
+                              cluster: jwks
+                              timeout: 5s
+                            cache_duration: 3600s
+                            async_fetch:
+                              fast_listener: true
+                      rules:
+                        - match:
+                            prefix: '/sudoku.support.v1.SupportService/GetRules'
+                        - match:
+                            prefix: '/sudoku.support.v1.SupportService/ListTutorials'
+                        - match:
+                            prefix: '/sudoku.support.v1.SupportService/ListNotices'
+                        - match:
+                            prefix: '/'
+                          requires:
+                            provider_name: firebase
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      '@type': type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+  clusters:
+    - name: game
+      type: STRICT_DNS
+      connect_timeout: 2s
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          '@type': type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http2_protocol_options: {}
+      load_assignment:
+        cluster_name: game
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: game-service
+                      port_value: 8080
+    - name: user
+      type: STRICT_DNS
+      connect_timeout: 2s
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          '@type': type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http2_protocol_options: {}
+      load_assignment:
+        cluster_name: user
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: user-service
+                      port_value: 8080
+    - name: support
+      type: STRICT_DNS
+      connect_timeout: 2s
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          '@type': type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http2_protocol_options: {}
+      load_assignment:
+        cluster_name: support
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: support-service
+                      port_value: 8080
+    - name: multi_grpc
+      type: STRICT_DNS
+      connect_timeout: 2s
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          '@type': type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http2_protocol_options: {}
+      load_assignment:
+        cluster_name: multi_grpc
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: multiplayer-service
+                      port_value: 8080
+    - name: multi_ws
+      type: STRICT_DNS
+      connect_timeout: 2s
+      load_assignment:
+        cluster_name: multi_ws
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: multiplayer-service
+                      port_value: 8081
+    - name: jwks
+      type: LOGICAL_DNS
+      connect_timeout: 3s
+      load_assignment:
+        cluster_name: jwks
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: www.googleapis.com
+                      port_value: 443
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          '@type': type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          sni: www.googleapis.com

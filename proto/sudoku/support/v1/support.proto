@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package sudoku.support.v1;
+
+option csharp_namespace = "Sudoku.Support.V1";
+
+service SupportService {
+  rpc GetRules(GetRulesRequest) returns (GetRulesResponse);
+  rpc ListTutorials(ListTutorialsRequest) returns (ListTutorialsResponse);
+  rpc ListNotices(ListNoticesRequest) returns (ListNoticesResponse);
+}
+
+message GetRulesRequest {
+  string game_mode = 1;
+}
+
+message RuleItem {
+  string title = 1;
+  string content = 2;
+}
+
+message GetRulesResponse {
+  repeated RuleItem rules = 1;
+}
+
+message ListTutorialsRequest {
+}
+
+message TutorialItem {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  int32 order = 4;
+}
+
+message ListTutorialsResponse {
+  repeated TutorialItem tutorials = 1;
+}
+
+message ListNoticesRequest {
+}
+
+message NoticeItem {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  string published_at = 4;
+}
+
+message ListNoticesResponse {
+  repeated NoticeItem notices = 1;
+}

@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package sudoku.game.v1;
+
+option csharp_namespace = "Sudoku.Game.V1";
+
+service GameService {
+  rpc StartGame(StartGameRequest) returns (StartGameResponse);
+  rpc SubmitResult(SubmitResultRequest) returns (SubmitResultResponse);
+  rpc ListLevels(ListLevelsRequest) returns (ListLevelsResponse);
+  rpc GetHighScores(GetHighScoresRequest) returns (GetHighScoresResponse);
+}
+
+message StartGameRequest {
+  string mode = 1;
+  string level_id = 2;
+}
+
+message StartGameResponse {
+  string session_id = 1;
+  string puzzle = 2;
+  int32 duration_seconds = 3;
+}
+
+message SubmitResultRequest {
+  string session_id = 1;
+  string solution = 2;
+  int32 time_spent_seconds = 3;
+}
+
+message SubmitResultResponse {
+  bool is_correct = 1;
+  int32 reward_coins = 2;
+  int32 score = 3;
+}
+
+message ListLevelsRequest {
+  string difficulty = 1;
+}
+
+message Level {
+  string level_id = 1;
+  string difficulty = 2;
+  string title = 3;
+}
+
+message ListLevelsResponse {
+  repeated Level levels = 1;
+}
+
+message GetHighScoresRequest {
+  string mode = 1;
+  int32 limit = 2;
+}
+
+message HighScoreEntry {
+  string player_name = 1;
+  int32 score = 2;
+  int32 rank = 3;
+}
+
+message GetHighScoresResponse {
+  repeated HighScoreEntry scores = 1;
+}

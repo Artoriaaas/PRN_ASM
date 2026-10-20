@@ -1,0 +1,4 @@
+CREATE DATABASE game_db;
+CREATE DATABASE user_db;
+CREATE DATABASE support_db;
+CREATE DATABASE multiplayer_db;
