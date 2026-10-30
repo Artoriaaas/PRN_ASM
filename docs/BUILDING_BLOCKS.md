@@ -27,8 +27,8 @@ PRN_ASM/
 ### 2.1. Trách nhiệm & Cấu trúc hiện tại
 * **Nhiệm vụ**: Xác thực Firebase JWT Bearer Token tập trung, kiểm tra tính hợp lệ của Token qua Google Remote JWKS, giải quyết bài toán WebSocket Token của SignalR (`/hubs`), và thiết lập Authorization Policy.
 * **Các file hiện có**:
-  * [Sudoku.Auth.csproj](file:///D:/GitHub/PRN_ASM/building-block/Sudoku.Auth/Sudoku.Auth.csproj): Sử dụng `Microsoft.AspNetCore.Authentication.JwtBearer (8.0.13)`.
-  * [AuthExtensions.cs](file:///D:/GitHub/PRN_ASM/building-block/Sudoku.Auth/AuthExtensions.cs): Chứa extension method `services.AddFirebaseJwt(config)`.
+  * [Sudoku.Auth.csproj](../building-block/Sudoku.Auth/Sudoku.Auth.csproj): Sử dụng `Microsoft.AspNetCore.Authentication.JwtBearer (8.0.13)`.
+  * [AuthExtensions.cs](../building-block/Sudoku.Auth/AuthExtensions.cs): Chứa extension method `services.AddFirebaseJwt(config)`.
 
 ### 2.2. Cách sử dụng trong các Microservices
 1. **Cấu hình trong `appsettings.json`** của service:
@@ -69,14 +69,18 @@ PRN_ASM/
    public class MatchHub : Hub { ... }
    ```
 4. **Trích xuất thông tin User đã xác thực**:
+
+   > [!IMPORTANT]
+   > `AddFirebaseJwt` đặt `MapInboundClaims = false`, nên claim giữ **tên gốc của JWT** (`sub`, `user_id`, `email`). `ClaimTypes.NameIdentifier` / `ClaimTypes.Email` sẽ trả về `null`, và `Context.UserIdentifier` của SignalR cũng `null` nếu chưa đăng ký `IUserIdProvider` riêng.
+
    ```csharp
    // Trong gRPC Service:
    var userClaims = context.GetHttpContext().User;
-   var userId = userClaims.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-   var email = userClaims.FindFirst(ClaimTypes.Email)?.Value;
+   var userId = userClaims.FindFirst("sub")?.Value;   // Firebase UID
+   var email = userClaims.FindFirst("email")?.Value;
 
    // Trong SignalR Hub:
-   var userId = Context.UserIdentifier; // hoặc Context.User.FindFirst(...)
+   var userId = Context.User?.FindFirst("sub")?.Value;
    ```
 
 ### 2.3. Hướng dẫn mở rộng tính năng mới trong `Sudoku.Auth`
@@ -92,14 +96,13 @@ public static class ClaimsPrincipalExtensions
 {
     public static string? GetUserId(this ClaimsPrincipal principal)
     {
-        return principal.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-            ?? principal.FindFirst("user_id")?.Value 
-            ?? principal.FindFirst("sub")?.Value;
+        return principal.FindFirst("sub")?.Value
+            ?? principal.FindFirst("user_id")?.Value;
     }
 
     public static string? GetEmail(this ClaimsPrincipal principal)
     {
-        return principal.FindFirst(ClaimTypes.Email)?.Value;
+        return principal.FindFirst("email")?.Value;
     }
 
     public static bool IsAdmin(this ClaimsPrincipal principal)
@@ -127,10 +130,10 @@ services.AddAuthorization(options =>
 ### 3.1. Trách nhiệm & Cấu trúc hiện tại
 * **Nhiệm vụ**: Cung cấp hợp đồng truyền nhận sự kiện (Event-Driven Messaging) qua Kafka, áp dụng Transactional Outbox Pattern (đảm bảo không mất event khi database commit) và Idempotent Inbox Pattern (ngăn chặn duplicate event).
 * **Các file hiện có**:
-  * [EventEnvelope.cs](file:///D:/GitHub/PRN_ASM/building-block/Sudoku.Messaging/EventEnvelope.cs): Phong bì chuẩn hóa cho mọi message gửi qua Kafka.
-  * [IEventPublisher.cs](file:///D:/GitHub/PRN_ASM/building-block/Sudoku.Messaging/IEventPublisher.cs): Interface định nghĩa việc publish event.
-  * [OutboxMessage.cs](file:///D:/GitHub/PRN_ASM/building-block/Sudoku.Messaging/OutboxMessage.cs): Entity bảng Outbox lưu sự kiện vào PostgreSQL trước khi gửi.
-  * [InboxMessage.cs](file:///D:/GitHub/PRN_ASM/building-block/Sudoku.Messaging/InboxMessage.cs): Entity bảng Inbox kiểm tra trùng lặp sự kiện tại Consumer.
+  * [EventEnvelope.cs](../building-block/Sudoku.Messaging/EventEnvelope.cs): Phong bì chuẩn hóa cho mọi message gửi qua Kafka.
+  * [IEventPublisher.cs](../building-block/Sudoku.Messaging/IEventPublisher.cs): Interface định nghĩa việc publish event.
+  * [OutboxMessage.cs](../building-block/Sudoku.Messaging/OutboxMessage.cs): Entity bảng Outbox lưu sự kiện vào PostgreSQL trước khi gửi.
+  * [InboxMessage.cs](../building-block/Sudoku.Messaging/InboxMessage.cs): Entity bảng Inbox kiểm tra trùng lặp sự kiện tại Consumer.
 
 ### 3.2. Cách sử dụng hiện tại trong các Microservices
 1. **Đăng ký bảng Outbox/Inbox trong EF Core `DbContext`**:
@@ -288,8 +291,8 @@ Tạo base class hoặc worker chạy nền trong `Sudoku.Messaging` hoặc tron
 ### 4.1. Trách nhiệm & Cấu trúc hiện tại
 * **Nhiệm vụ**: Cấu hình chuẩn hóa OpenTelemetry cho Distributed Tracing và Metrics, xuất dữ liệu qua chuẩn OTLP tới Collector (Jaeger, Prometheus, Grafana Tempo).
 * **Các file hiện có**:
-  * [Sudoku.Observability.csproj](file:///D:/GitHub/PRN_ASM/building-block/Sudoku.Observability/Sudoku.Observability.csproj): Tích hợp OTLP Exporter, AspNetCore & GrpcNetClient instrumentation.
-  * [ObservabilityExtensions.cs](file:///D:/GitHub/PRN_ASM/building-block/Sudoku.Observability/ObservabilityExtensions.cs): Hàm `AddSudokuObservability(serviceName)`.
+  * [Sudoku.Observability.csproj](../building-block/Sudoku.Observability/Sudoku.Observability.csproj): Tích hợp OTLP Exporter, AspNetCore & GrpcNetClient instrumentation.
+  * [ObservabilityExtensions.cs](../building-block/Sudoku.Observability/ObservabilityExtensions.cs): Hàm `AddSudokuObservability(serviceName)`.
 
 ### 4.2. Cách sử dụng hiện tại
 1. **Cấu hình `appsettings.json`**:
@@ -314,7 +317,7 @@ Tạo base class hoặc worker chạy nền trong `Sudoku.Messaging` hoặc tron
 
 #### Kịch bản A: Thêm Instrumentation cho Entity Framework Core & Redis
 Để phát hiện các truy vấn SQL chậm hoặc nghẽn Cache:
-1. Thêm package vào [Sudoku.Observability.csproj](file:///D:/GitHub/PRN_ASM/building-block/Sudoku.Observability/Sudoku.Observability.csproj):
+1. Thêm package vào [Sudoku.Observability.csproj](../building-block/Sudoku.Observability/Sudoku.Observability.csproj):
    ```xml
    <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.12" />
    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.14" />

@@ -251,6 +251,14 @@ Redis 7 Instance
 
 ```text
 PRN_ASM/
+├── AGENTS.md                            # [AI Agent Router] Luật bắt buộc & bản đồ tài liệu
+├── .agents/skills/                      # [AI Skills] Quy trình tự động hóa (add-grpc-feature)
+├── docs/                                # [Documentation] Tài liệu kiến trúc & quy chuẩn code
+│   ├── ARCHITECTURE.md                  # Kiến trúc hệ thống & danh mục công nghệ
+│   ├── HANDOFF.md                       # Quy ước layer, code mẫu & hướng dẫn chạy local
+│   ├── OPTIMIZATION.md                  # Tiêu chuẩn tối ưu hiệu năng Backend & Frontend
+│   └── BUILDING_BLOCKS.md               # Hướng dẫn sử dụng & mở rộng building-block
+│
 ├── proto/                               # [Single Source of Truth] Định nghĩa Protobuf
 │   ├── buf.yaml                         # Cấu hình Buf Workspace & Lint
 │   ├── buf.gen.yaml                     # Cấu hình code generation cho TypeScript
@@ -315,37 +323,6 @@ PRN_ASM/
 
 ---
 
-## 9. 🚀 Hướng dẫn Cài đặt & Vận hành (Deployment & Operations)
+## 9. 🚀 Cài đặt & Vận hành
 
-### Bước 1: Khởi động Hạ tầng Docker
-```bash
-cd deploy
-docker compose up -d
-```
-* **Envoy Gateway**: `http://localhost:8080`
-* **PostgreSQL**: `localhost:5432` (User: `postgres` / Pass: `postgres`)
-* **Apache Kafka**: `localhost:9092`
-* **Redis**: `localhost:6379`
-
-### Bước 2: Khởi chạy Microservices (.NET 8)
-```bash
-# Terminal 1 - Game Service (Port 5101)
-dotnet run --project services/Game/Game.Api
-
-# Terminal 2 - User Service (Port 5102)
-dotnet run --project services/User/User.Api
-
-# Terminal 3 - Multiplayer Service (Port gRPC 5105 / SignalR 5115)
-dotnet run --project services/Multiplayer/Multiplayer.Api
-
-# Terminal 4 - Support Service (Port 5104)
-dotnet run --project services/Support/Support.Api
-```
-
-### Bước 3: Khởi chạy Giao diện Frontend
-```bash
-cd web
-npm install
-npm run dev
-```
-* Ứng dụng chạy tại: `http://localhost:5173`
+Hướng dẫn chạy local (Docker, các service, frontend, bảng port) được duy trì tại **một nơi duy nhất**: [HANDOFF.md](HANDOFF.md) — Mục 6.

@@ -50,9 +50,16 @@ Dự án được xây dựng theo kiến trúc **Event-Driven Microservices** k
 
 ```text
 PRN_ASM/
+├── AGENTS.md                  # Luật bắt buộc & bản đồ tài liệu cho AI Coding Agent
+├── .agents/skills/            # On-demand Agent Skills (vd: add-grpc-feature)
+├── docs/                      # Bộ tài liệu kiến trúc & quy chuẩn kỹ thuật chi tiết
+│   ├── ARCHITECTURE.md        # Kiến trúc tổng thể & Tech stack
+│   ├── HANDOFF.md             # Hướng dẫn phân tầng, code mẫu & vận hành (file này)
+│   ├── OPTIMIZATION.md        # Tiêu chuẩn tối ưu hóa hiệu năng & độ trễ
+│   └── BUILDING_BLOCKS.md     # Hướng dẫn dùng & mở rộng building-block
 ├── proto/                     # Nguồn chân lý (Single Source of Truth) định nghĩa API & Events
 ├── gateway/                   # Cấu hình Envoy Proxy
-├── building-block/            # Thư viện dùng chung (Cross-cutting Concerns) — Xem chi tiết tại BUILDING_BLOCKS.md
+├── building-block/            # Thư viện dùng chung (Cross-cutting Concerns) — Xem docs/BUILDING_BLOCKS.md
 │   ├── Sudoku.Auth/           # Firebase JWT Authentication
 │   ├── Sudoku.Messaging/      # Kafka Publisher, Outbox & Inbox Pattern
 │   └── Sudoku.Observability/  # OpenTelemetry Tracing & Metrics
@@ -108,8 +115,8 @@ public class UserGrpcService : UserService.UserServiceBase
 
     public override async Task<GetProfileResponse> GetProfile(GetProfileRequest request, ServerCallContext context)
     {
-        // 1. Lấy UserId từ Claims (do đã có [Authorize] từ Firebase JWT)
-        var userId = context.GetHttpContext().User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+        // 1. Lấy UserId (Firebase UID) từ claim "sub" — Sudoku.Auth giữ tên claim gốc (MapInboundClaims = false)
+        var userId = context.GetHttpContext().User.FindFirst("sub")?.Value
             ?? throw new RpcException(new Status(StatusCode.Unauthenticated, "User is not authenticated"));
 
         var user = await _userService.GetUserByIdAsync(userId);
@@ -199,7 +206,7 @@ public class UserDbContext : DbContext
 ---
 
 ### 4.4. Event-Driven Messaging: Bắn và Nhận Kafka Events
-Khi một hành động xảy ra (ví dụ: chơi xong 1 ván game tại `Game.Api`), publish event qua `IEventPublisher` từ [building-block/Sudoku.Messaging](file:///D:/GitHub/PRN_ASM/building-block/Sudoku.Messaging):
+Khi một hành động xảy ra (ví dụ: chơi xong 1 ván game tại `Game.Api`), publish event qua `IEventPublisher` từ [building-block/Sudoku.Messaging](../building-block/Sudoku.Messaging):
 
 ```csharp
 // Publish event tại Game.Api
@@ -361,12 +368,13 @@ Khi bạn cần thêm 1 API hoặc tính năng mới, tuân thủ đúng 5 bư�
 
 ### 1. Khởi động Hạ tầng (Database, Kafka, Redis, Envoy Gateway):
 ```powershell
-cd D:\GitHub\PRN_ASM\deploy
+cd deploy
 docker compose up -d
 ```
 * Envoy Gateway sẽ lắng nghe tại: `http://localhost:8080`
-* PostgreSQL: `localhost:5432`
+* PostgreSQL: `localhost:5432` (User: `postgres` / Pass: `postgres`)
 * Kafka: `localhost:9092`
+* Redis: `localhost:6379`
 
 ### 2. Chạy Backend Services:
 Mở solution `PRN_ASM.sln` bằng Visual Studio / Rider hoặc chạy terminal:
@@ -386,7 +394,7 @@ dotnet run --project services/Support/Support.Api
 
 ### 3. Chạy Frontend (Web):
 ```powershell
-cd D:\GitHub\PRN_ASM\web
+cd web
 npm install
 npm run dev
 ```

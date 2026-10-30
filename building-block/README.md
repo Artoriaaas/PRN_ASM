@@ -7,4 +7,4 @@ Thư mục này chứa các thư viện dùng chung (Cross-Cutting Concerns) cho
 - **`Sudoku.Observability`**: OpenTelemetry Distributed Tracing & Metrics qua OTLP Exporter.
 
 👉 **Tài liệu hướng dẫn chi tiết về cách dùng, code mẫu và cách mở rộng tính năng mới:**  
-Vui lòng xem tại: [BUILDING_BLOCKS.md (ở thư mục gốc)](../BUILDING_BLOCKS.md)
+Vui lòng xem tại: [docs/BUILDING_BLOCKS.md](../docs/BUILDING_BLOCKS.md) (hoặc luật tóm tắt cho AI Agent tại [AGENTS.md](./AGENTS.md)).
