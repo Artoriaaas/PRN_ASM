@@ -88,13 +88,22 @@ public async Task<SubmitResultResponse> SubmitResultAsync(SubmitResultRequest re
     session.Complete(isValid, CalculateScore(session));
 
     // Ghi sự kiện vào bảng Outbox cùng game_db thay vì gọi thẳng Kafka đồng bộ trên request của user
-    outboxRepo.Add(OutboxMessage.FromEvent(new GameFinishedEvent
+    var eventPayload = new GameFinished
     {
         SessionId = session.Id,
-        UserId = userId,
+        UserId = userId.ToString(),
         IsWin = isValid,
         Score = session.Score
-    }));
+    };
+
+    outboxRepo.Add(new OutboxMessage
+    {
+        EventId = Guid.NewGuid().ToString(),
+        Type = nameof(GameFinished),
+        UserId = userId.ToString(),
+        Topic = "sudoku.events",
+        Payload = eventPayload.ToByteArray()
+    });
 
     // ĐÚNG 1 LẦN round-trip xuống game_db cho cả GameSession + OutboxMessage!
     await uow.SaveChangesAsync(ct);

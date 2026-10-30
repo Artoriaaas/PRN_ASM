@@ -19,10 +19,10 @@ Dự án được xây dựng theo kiến trúc **Event-Driven Microservices** k
 |                     Envoy Gateway (:8080)                   |
 |                  (Reverse Proxy & gRPC-Web)                 |
 +-------+------------------+-------------------+--------------+
-        | (gRPC :5001)     | (gRPC :5002)      | (gRPC :5003) | (gRPC :5004)
+        | (:5101)          | (:5102)           | (:5105/:5115)| (:5104)
         v                  v                   v              v
 +---------------+  +---------------+  +---------------+  +---------------+
-|   User.Api    |  |   Game.Api    |  | Multiplayer   |  |  Support.Api  |
+|   Game.Api    |  |   User.Api    |  | Multiplayer   |  |  Support.Api  |
 +-------+-------+  +-------+-------+  +-------+-------+  +-------+-------+
         |                  |                  |                  |
         +------------------+---------+--------+------------------+
@@ -32,7 +32,7 @@ Dự án được xây dựng theo kiến trúc **Event-Driven Microservices** k
                        v                           v
               +-----------------+         +-----------------+
               | PostgreSQL DB   |         |  Apache Kafka   |
-              | (Per-service schema)      |  (Event Bus)    |
+              | (Per-service DB)|         |  (Event Bus)    |
               +-----------------+         +-----------------+
 ```
 
@@ -52,7 +52,7 @@ Dự án được xây dựng theo kiến trúc **Event-Driven Microservices** k
 PRN_ASM/
 ├── proto/                     # Nguồn chân lý (Single Source of Truth) định nghĩa API & Events
 ├── gateway/                   # Cấu hình Envoy Proxy
-├── building-block/            # Thư viện dùng chung (Cross-cutting Concerns)
+├── building-block/            # Thư viện dùng chung (Cross-cutting Concerns) — Xem chi tiết tại BUILDING_BLOCKS.md
 │   ├── Sudoku.Auth/           # Firebase JWT Authentication
 │   ├── Sudoku.Messaging/      # Kafka Publisher, Outbox & Inbox Pattern
 │   └── Sudoku.Observability/  # OpenTelemetry Tracing & Metrics
@@ -108,8 +108,11 @@ public class UserGrpcService : UserService.UserServiceBase
 
     public override async Task<GetProfileResponse> GetProfile(GetProfileRequest request, ServerCallContext context)
     {
-        // 1. Lấy UserId từ Claims (nếu đã authorize) hoặc từ request
-        var user = await _userService.GetUserByIdAsync(request.UserId);
+        // 1. Lấy UserId từ Claims (do đã có [Authorize] từ Firebase JWT)
+        var userId = context.GetHttpContext().User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? throw new RpcException(new Status(StatusCode.Unauthenticated, "User is not authenticated"));
+
+        var user = await _userService.GetUserByIdAsync(userId);
         if (user == null)
         {
             throw new RpcException(new Status(StatusCode.NotFound, "User not found"));
@@ -220,14 +223,104 @@ Consumer tại `User.Api` bắt event này và cộng dồn số trận thắng 
 
 ---
 
-### 4.5. Frontend (React Client): Gọi gRPC-Web qua Envoy
+### 4.5. Inter-Service Communication: Gọi gRPC Client sang Service khác & Hứng Response
+Khi một microservice cần dữ liệu đồng bộ từ service khác (ví dụ: `Multiplayer.Api` hoặc `Game.Api` cần kiểm tra thông tin người chơi từ `User.Api`):
+
+#### Bước 1: Khai báo Protobuf Client trong `.csproj`
+Đảm bảo file `.csproj` của service gọi (ví dụ `Multiplayer.Api.csproj`) đã cấu hình thuộc tính `GrpcServices="Client"`:
+```xml
+<ItemGroup>
+  <Protobuf Include="../../../proto/sudoku/user/v1/user.proto" ProtoRoot="../../../proto" GrpcServices="Client" />
+</ItemGroup>
+```
+
+#### Bước 2: Đăng ký gRPC Client trong `Program.cs`
+Sử dụng thư viện `Grpc.Net.ClientFactory` (đã có sẵn trong project):
+```csharp
+// services/Multiplayer/Multiplayer.Api/Program.cs
+builder.Services.AddGrpcClient<Sudoku.User.V1.UserService.UserServiceClient>(options =>
+{
+    // Đọc URL từ appsettings.json ("Services:User")
+    var userUrl = builder.Configuration["Services:User"] ?? "http://localhost:5102";
+    options.Address = new Uri(userUrl);
+});
+```
+
+#### Bước 3: Inject Client vào Service, Thực thi RPC & Hứng Response
+Luôn đặt `deadline`, truyền `CancellationToken` và bắt `RpcException` chuẩn:
+
+```csharp
+// services/Multiplayer/Multiplayer.Api/Domain/Services/MatchmakerService.cs
+namespace Multiplayer.Api.Domain.Services;
+
+using Grpc.Core;
+using Sudoku.User.V1;
+
+public interface IMatchmakerService
+{
+    Task<UserProfile?> GetPlayerProfileAsync(string userId, CancellationToken ct);
+}
+
+public class MatchmakerService : IMatchmakerService
+{
+    private readonly UserService.UserServiceClient _userClient;
+    private readonly ILogger<MatchmakerService> _logger;
+
+    public MatchmakerService(
+        UserService.UserServiceClient userClient,
+        ILogger<MatchmakerService> logger)
+    {
+        _userClient = userClient;
+        _logger = logger;
+    }
+
+    public async Task<UserProfile?> GetPlayerProfileAsync(string userId, CancellationToken ct)
+    {
+        try
+        {
+            // 1. Gọi RPC đồng bộ sang User.Api kèm Deadline 3s và CancellationToken
+            var response = await _userClient.GetProfileAsync(
+                new GetProfileRequest(), // Request message
+                deadline: DateTime.UtcNow.AddSeconds(3),
+                cancellationToken: ct
+            );
+
+            // 2. Hứng và sử dụng Response trả về từ service đích
+            UserProfile profile = response.Profile;
+            _logger.LogInformation("Lấy thông tin người chơi thành công: {Name} ({Wins} wins)", 
+                profile.DisplayName, profile.Wins);
+
+            return profile;
+        }
+        catch (RpcException ex) when (ex.StatusCode == StatusCode.NotFound)
+        {
+            _logger.LogWarning("Không tìm thấy profile cho UserId: {UserId}", userId);
+            return null;
+        }
+        catch (RpcException ex) when (ex.StatusCode == StatusCode.DeadlineExceeded)
+        {
+            _logger.LogError("Gọi User.Api bị timeout quá 3s!");
+            throw;
+        }
+        catch (RpcException ex)
+        {
+            _logger.LogError(ex, "Gọi gRPC sang User.Api lỗi: [{Code}] {Detail}", ex.StatusCode, ex.Status.Detail);
+            throw;
+        }
+    }
+}
+```
+
+---
+
+### 4.6. Frontend (React Client): Gọi gRPC-Web qua Envoy
 Tất cả các lời gọi từ React **KHÔNG gọi trực tiếp tới port của backend .NET** mà gọi qua **Envoy Gateway (`http://localhost:8080`)**:
 
 ```typescript
 // web/src/api/userClient.ts
 import { createPromiseClient } from "@connectrpc/connect";
 import { createGrpcWebTransport } from "@connectrpc/connect-web";
-import { UserService } from "../gen/sudoku/user/v1/user_connect";
+import { UserService } from "../gen/sudoku/user/v1/user_pb";
 
 const transport = createGrpcWebTransport({
   baseUrl: "http://localhost:8080", // URL của Envoy Gateway
@@ -236,7 +329,7 @@ const transport = createGrpcWebTransport({
 export const userClient = createPromiseClient(UserService, transport);
 
 // Trong React Component:
-const response = await userClient.getProfile({ userId: "123" });
+const response = await userClient.getProfile({});
 console.log(response.profile);
 ```
 
@@ -278,16 +371,16 @@ docker compose up -d
 ### 2. Chạy Backend Services:
 Mở solution `PRN_ASM.sln` bằng Visual Studio / Rider hoặc chạy terminal:
 ```powershell
-# Chạy User Service (Port 5001)
-dotnet run --project services/User/User.Api
-
-# Chạy Game Service (Port 5002)
+# Chạy Game Service (Port 5101)
 dotnet run --project services/Game/Game.Api
 
-# Chạy Multiplayer Service (Port 5003)
+# Chạy User Service (Port 5102)
+dotnet run --project services/User/User.Api
+
+# Chạy Multiplayer Service (Port gRPC 5105 / SignalR 5115)
 dotnet run --project services/Multiplayer/Multiplayer.Api
 
-# Chạy Support Service (Port 5004)
+# Chạy Support Service (Port 5104)
 dotnet run --project services/Support/Support.Api
 ```
 

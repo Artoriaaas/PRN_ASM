@@ -29,10 +29,10 @@ flowchart TD
     end
 
     subgraph ServiceLayer["⚙️ Microservices Layer (.NET 8)"]
-        GameSvc["Game Service (:5001)\n(Sudoku Logic, Levels, Scoring)"]
-        UserSvc["User Service (:5002)\n(Profiles, Statistics, History)"]
-        MultiSvc["Multiplayer Service (:5003)\n(1v1 Matchmaking, SignalR Hub, Elo)"]
-        SupportSvc["Support Service (:5004)\n(Tutorials, Rules, System Notices)"]
+        GameSvc["Game Service (:5101)\n(Sudoku Logic, Levels, Scoring)"]
+        UserSvc["User Service (:5102)\n(Profiles, Statistics, History)"]
+        MultiSvc["Multiplayer Service (:5105 / :5115)\n(1v1 Matchmaking, SignalR Hub, Elo)"]
+        SupportSvc["Support Service (:5104)\n(Tutorials, Rules, System Notices)"]
     end
 
     subgraph BuildingBlocks["🧩 Shared Building Blocks"]
@@ -61,10 +61,10 @@ flowchart TD
     UI <-->|"WebSocket (/hubs/match)"| Envoy
 
     %% Gateway to Services
-    Envoy -->|"HTTP/2 gRPC (:5001)"| GameSvc
-    Envoy -->|"HTTP/2 gRPC (:5002)"| UserSvc
-    Envoy <-->|"gRPC & WS Proxy (:5003)"| MultiSvc
-    Envoy -->|"HTTP/2 gRPC (:5004)"| SupportSvc
+    Envoy -->|"HTTP/2 gRPC (:5101 / :8080)"| GameSvc
+    Envoy -->|"HTTP/2 gRPC (:5102 / :8080)"| UserSvc
+    Envoy <-->|"gRPC :5105 & WS :5115"| MultiSvc
+    Envoy -->|"HTTP/2 gRPC (:5104 / :8080)"| SupportSvc
 
     %% Shared Library Attachments
     AuthLib -.-> GameSvc & UserSvc & MultiSvc & SupportSvc
@@ -126,7 +126,7 @@ flowchart TD
 
 Hệ thống bao gồm 4 Microservices độc lập nằm trong thư mục `services/`:
 
-#### 1. Game Service (`Game.Api`) — Port nội bộ: `5001`
+#### 1. Game Service (`Game.Api`) — Port Local: `5101` (Docker: `8080`)
 * **Trách nhiệm**:
   * Sinh đề bài Sudoku ngẫu nhiên theo các cấp độ (Easy, Medium, Hard, Expert).
   * Khởi tạo phiên chơi (`StartGameRequest` ➔ `StartGameResponse`).
@@ -134,14 +134,14 @@ Hệ thống bao gồm 4 Microservices độc lập nằm trong thư mục `serv
   * Tính điểm thưởng, thời gian chơi, xếp hạng điểm cao (`GetHighScores`).
   * **Sự kiện xuất bản (Publisher)**: Gửi sự kiện `GameFinished` vào topic Kafka `sudoku.events` khi người chơi giải thành công.
 
-#### 2. User Service (`User.Api`) — Port nội bộ: `5002`
+#### 2. User Service (`User.Api`) — Port Local: `5102` (Docker: `8080`)
 * **Trách nhiệm**:
   * Quản lý thông tin hồ sơ người chơi (`UserProfile`): tên hiển thị, email, avatar URL.
   * Tự động khởi tạo profile người dùng mới khi đăng nhập lần đầu (`GetOrCreateProfile`).
   * Cập nhật thông tin tài khoản cá nhân (`UpdateProfile`).
   * **Bộ lắng nghe sự kiện (Consumer)**: Lắng nghe sự kiện `GameFinished` và `MatchCompleted` từ Kafka để cập nhật tích lũy chỉ số: `total_games`, `wins`.
 
-#### 3. Multiplayer Service (`Multiplayer.Api`) — Port nội bộ: `5003`
+#### 3. Multiplayer Service (`Multiplayer.Api`) — Port Local: gRPC `5105` / SignalR `5115` (Docker: `8080` / `8081`)
 * **Trách nhiệm**:
   * Quản lý phòng chơi đối kháng 1v1 theo thời gian thực qua **SignalR Hub** (`/hubs/match`).
   * Cơ chế ghép trận tự động (Matchmaking queue) dựa trên điểm Elo / Rating.
@@ -149,7 +149,7 @@ Hệ thống bao gồm 4 Microservices độc lập nằm trong thư mục `serv
   * Lưu trữ và tra cứu lịch sử trận đấu (`GetMatchHistory`) và bảng xếp hạng Elo (`GetRankings`).
   * **Sự kiện xuất bản (Publisher)**: Bắn sự kiện `MatchCompleted` (người thắng, người thua, cộng/trừ Elo) vào Kafka.
 
-#### 4. Support Service (`Support.Api`) — Port nội bộ: `5004`
+#### 4. Support Service (`Support.Api`) — Port Local: `5104` (Docker: `8080`)
 * **Trách nhiệm**:
   * Cung cấp luật chơi Sudoku chuẩn và các biến thể (`GetRules`).
   * Hướng dẫn các kỹ thuật giải Sudoku từ cơ bản đến nâng cao (`ListTutorials`).
@@ -329,16 +329,16 @@ docker compose up -d
 
 ### Bước 2: Khởi chạy Microservices (.NET 8)
 ```bash
-# Terminal 1 - Game Service
+# Terminal 1 - Game Service (Port 5101)
 dotnet run --project services/Game/Game.Api
 
-# Terminal 2 - User Service
+# Terminal 2 - User Service (Port 5102)
 dotnet run --project services/User/User.Api
 
-# Terminal 3 - Multiplayer Service
+# Terminal 3 - Multiplayer Service (Port gRPC 5105 / SignalR 5115)
 dotnet run --project services/Multiplayer/Multiplayer.Api
 
-# Terminal 4 - Support Service
+# Terminal 4 - Support Service (Port 5104)
 dotnet run --project services/Support/Support.Api
 ```
 
