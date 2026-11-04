@@ -17,11 +17,16 @@ message UserProfile {
   string avatar_url = 4;
   int32 total_games = 5;
   int32 wins = 6;
+  string country = 7;
+  int32 total_exp = 8;
+  int32 player_level = 9;
+  int32 trophies = 10;
 }
 
 message GetOrCreateProfileRequest {
   string display_name = 1;
   string email = 2;
+  string avatar_url = 3;
 }
 
 message GetOrCreateProfileResponse {
@@ -39,6 +44,7 @@ message GetProfileResponse {
 message UpdateProfileRequest {
   string display_name = 1;
   string avatar_url = 2;
+  string country = 3;
 }
 
 message UpdateProfileResponse {

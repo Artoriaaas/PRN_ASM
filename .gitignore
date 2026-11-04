@@ -485,7 +485,20 @@ $RECYCLE.BIN/
 node_modules/
 web/src/gen/
 .env
+.env.*
+!.env.example
+!**/.env.example
 appsettings.Local.json
+appsettings.*.Local.json
+
+# Firebase / Google Cloud credentials and local emulator state
+**/serviceAccount*.json
+**/*service-account*.json
+**/google-application-credentials*.json
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
 
 # Frontend build output
 dist/
