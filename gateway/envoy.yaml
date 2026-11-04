@@ -17,7 +17,7 @@ static_resources:
                       '@type': type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
                       log_format:
                         text_format_source:
-                          inline_string: "[%START_TIME%] \"%REQ(:METHOD)% %REQ_WITHOUT_QUERY(:PATH)% %PROTOCOL%\" %RESPONSE_CODE% %GRPC_STATUS% \"%RESP(GRPC-MESSAGE)%\"\n"
+                          inline_string: "[%START_TIME%] \"%REQ(:METHOD)% %REQ(:PATH)% %PROTOCOL%\" %RESPONSE_CODE% %GRPC_STATUS% \"%RESP(GRPC-MESSAGE)%\"\n"
                 route_config:
                   virtual_hosts:
                     - name: api
@@ -71,9 +71,9 @@ static_resources:
                       '@type': type.googleapis.com/envoy.extensions.filters.http.jwt_authn.v3.JwtAuthentication
                       providers:
                         firebase:
-                          issuer: 'https://securetoken.google.com/YOUR_FIREBASE_PROJECT_ID'
+                          issuer: 'https://securetoken.google.com/prn222-469cc'
                           audiences:
-                            - 'YOUR_FIREBASE_PROJECT_ID'
+                            - 'prn222-469cc'
                           from_headers:
                             - name: authorization
                               value_prefix: 'Bearer '
