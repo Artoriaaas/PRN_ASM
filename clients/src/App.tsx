@@ -1,0 +1,163 @@
+import { lazy, Suspense, useEffect, useState, useCallback } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import type { UserProfile } from './gen/sudoku/user/v1/user_pb'
+import { useAuth } from './auth/useAuth'
+import { getCachedProfile, syncUserProfile } from './api/userClient'
+import { RequireAuth } from './auth/RequireAuth'
+import { AppShell } from './components/AppShell'
+import { ToastProvider } from './components/ui/Toast'
+import { AuthPage } from './features/auth/AuthPage'
+import { LandingPage } from './features/landing/LandingPage'
+import { NotFoundPage } from './features/error/NotFoundPage'
+import './styles/tokens.css'
+import './styles/global.css'
+import './index.css'
+import './App.css'
+
+// Lazy load các màn hình — bundle chính chỉ có Auth + Landing + Board
+const HomePage = lazy(() => import('./features/home/HomePage').then((m) => ({ default: m.HomePage })))
+const SoloSetupPage = lazy(() => import('./features/solo/SoloSetupPage').then((m) => ({ default: m.SoloSetupPage })))
+const SoloPlayPage = lazy(() => import('./features/solo/SoloPlayPage').then((m) => ({ default: m.SoloPlayPage })))
+const SoloResultPage = lazy(() => import('./features/solo/SoloResultPage').then((m) => ({ default: m.SoloResultPage })))
+const ProfilePage = lazy(() => import('./features/profile/ProfilePage').then((m) => ({ default: m.ProfilePage })))
+
+function PageLoader() {
+  return (
+    <div className="splash-screen" aria-live="polite">
+      <div className="loader" />
+    </div>
+  )
+}
+
+function AppRoutes() {
+  const { user, loading: authLoading } = useAuth()
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+
+  // Hydrate profile từ cache + sync
+  useEffect(() => {
+    if (!user) {
+      setProfile(null)
+      return
+    }
+    const cached = getCachedProfile(user.uid)
+    if (cached) setProfile(cached)
+
+    const controller = new AbortController()
+    syncUserProfile(user, controller.signal)
+      .then(setProfile)
+      .catch(() => { /* lỗi đã có trong RequireAuth */ })
+    return () => controller.abort()
+  }, [user])
+
+  const handleProfileUpdated = useCallback((p: UserProfile) => setProfile(p), [])
+
+  if (authLoading) {
+    return (
+      <div className="splash-screen" aria-live="polite">
+        <div className="brand-logo-splash" aria-hidden="true">9</div>
+        <div className="loader" />
+        <p>Đang kiểm tra phiên đăng nhập…</p>
+      </div>
+    )
+  }
+
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/auth" element={user ? <Navigate to="/home" replace /> : <AuthPage />} />
+
+        {/* Private — bọc AppShell */}
+        <Route
+          path="/*"
+          element={
+            <RequireAuth>
+              <AppShell profile={profile}>
+                <Routes>
+                  <Route path="/home" element={<HomePage profile={profile} loading={!profile} />} />
+                  <Route path="/solo/new" element={<SoloSetupPage />} />
+                  <Route path="/solo/:sessionId" element={<SoloPlayPage />} />
+                  <Route path="/solo/:sessionId/result" element={<SoloResultPage />} />
+                  <Route
+                    path="/profile/:userId?"
+                    element={
+                      user ? (
+                        <ProfilePage
+                          user={user}
+                          profile={profile}
+                          loading={!profile}
+                          loadError=""
+                          view="profile"
+                          onNavigate={() => {}}
+                          onRetry={() => {}}
+                          onUpdated={handleProfileUpdated}
+                        />
+                      ) : null
+                    }
+                  />
+                  <Route
+                    path="/settings"
+                    element={
+                      user ? (
+                        <ProfilePage
+                          user={user}
+                          profile={profile}
+                          loading={!profile}
+                          loadError=""
+                          view="settings"
+                          onNavigate={() => {}}
+                          onRetry={() => {}}
+                          onUpdated={handleProfileUpdated}
+                        />
+                      ) : null
+                    }
+                  />
+                  {/* Placeholder screens — Giai đoạn 2+ */}
+                  <Route path="/play" element={<ComingSoon title="Sảnh Multiplayer" />} />
+                  <Route path="/play/queue" element={<ComingSoon title="Hàng chờ" />} />
+                  <Route path="/match/:matchId" element={<ComingSoon title="Trận đấu" />} />
+                  <Route path="/match/:matchId/result" element={<ComingSoon title="Kết quả trận" />} />
+                  <Route path="/leaderboard" element={<ComingSoon title="Bảng xếp hạng" />} />
+                  <Route path="/history" element={<ComingSoon title="Lịch sử đấu" />} />
+                  <Route path="/quests" element={<ComingSoon title="Nhiệm vụ" />} />
+                  <Route path="/learn" element={<ComingSoon title="Học kỹ thuật" />} />
+                  <Route path="/learn/:techniqueId" element={<ComingSoon title="Chi tiết kỹ thuật" />} />
+                  <Route path="/notices" element={<ComingSoon title="Thông báo hệ thống" />} />
+                  <Route path="/tournaments" element={<ComingSoon title="Giải đấu" />} />
+                  <Route path="/tournaments/new" element={<ComingSoon title="Tạo giải đấu" />} />
+                  <Route path="/tournaments/:id" element={<ComingSoon title="Chi tiết giải đấu" />} />
+                  <Route path="/admin/*" element={<ComingSoon title="Admin" />} />
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </AppShell>
+            </RequireAuth>
+          }
+        />
+
+        {/* Catch-all */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Suspense>
+  )
+}
+
+function ComingSoon({ title }: { title: string }) {
+  return (
+    <div className="coming-soon">
+      <p className="eyebrow">SẮP RA MẮT</p>
+      <h2>{title}</h2>
+      <p>Màn hình này đang được phát triển.</p>
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <ToastProvider>
+        <AppRoutes />
+      </ToastProvider>
+    </BrowserRouter>
+  )
+}
