@@ -5,60 +5,172 @@ package sudoku.game.v1;
 option csharp_namespace = "Sudoku.Game.V1";
 
 service GameService {
-  rpc StartGame(StartGameRequest) returns (StartGameResponse);
-  rpc SubmitResult(SubmitResultRequest) returns (SubmitResultResponse);
   rpc ListLevels(ListLevelsRequest) returns (ListLevelsResponse);
+  rpc StartGame(StartGameRequest) returns (StartGameResponse);
+  rpc GetActiveSession(GetActiveSessionRequest) returns (GetActiveSessionResponse);
+  rpc GetSession(GetSessionRequest) returns (GetSessionResponse);
+  rpc MakeMove(MakeMoveRequest) returns (MakeMoveResponse);
+  rpc UseHint(UseHintRequest) returns (UseHintResponse);
+  rpc SaveNotes(SaveNotesRequest) returns (SaveNotesResponse);
+  rpc AbandonGame(AbandonGameRequest) returns (AbandonGameResponse);
   rpc GetHighScores(GetHighScoresRequest) returns (GetHighScoresResponse);
 }
 
-message StartGameRequest {
-  string mode = 1;
+enum LayoutType {
+  LAYOUT_TYPE_UNSPECIFIED = 0;
+  LAYOUT_TYPE_STANDARD = 1;
+  LAYOUT_TYPE_IRREGULAR = 2;
+}
+
+enum SessionStatus {
+  SESSION_STATUS_UNSPECIFIED = 0;
+  SESSION_STATUS_IN_PROGRESS = 1;
+  SESSION_STATUS_COMPLETED = 2;
+  SESSION_STATUS_FAILED = 3;
+  SESSION_STATUS_ABANDONED = 4;
+}
+
+enum DifficultyTier {
+  DIFFICULTY_TIER_UNSPECIFIED = 0;
+  DIFFICULTY_TIER_NAKED_SINGLE = 1;
+  DIFFICULTY_TIER_HIDDEN_SINGLE = 2;
+  DIFFICULTY_TIER_ADVANCED = 3;
+}
+
+enum HintTechnique {
+  HINT_TECHNIQUE_UNSPECIFIED = 0;
+  HINT_TECHNIQUE_NAKED_SINGLE = 1;
+  HINT_TECHNIQUE_HIDDEN_SINGLE_ROW = 2;
+  HINT_TECHNIQUE_HIDDEN_SINGLE_COL = 3;
+  HINT_TECHNIQUE_HIDDEN_SINGLE_REGION = 4;
+  HINT_TECHNIQUE_DIRECT_REVEAL = 5;
+}
+
+message LevelInfo {
+  string level_id = 1;
+  string name = 2;
+  int32 sort_order = 3;
+  int32 min_clues = 4;
+  int32 max_clues = 5;
+  int32 max_mistakes = 6;
+  int32 max_hints = 7;
+}
+
+message CellNote {
+  int32 cell_index = 1;
+  int32 candidates_mask = 2;
+}
+
+message SessionState {
+  string session_id = 1;
   string level_id = 2;
+  LayoutType layout_type = 3;
+  SessionStatus status = 4;
+  string initial_board = 5;
+  string current_board = 6;
+  string region_map = 7;
+  repeated CellNote notes = 8;
+  int32 mistakes_count = 9;
+  int32 max_mistakes = 10;
+  int32 hints_used = 11;
+  int32 max_hints = 12;
+  int32 score = 13;
+  int64 elapsed_ms = 14;
+  double accuracy = 15;
+  reserved 20;
+}
+
+message ListLevelsRequest {}
+
+message ListLevelsResponse {
+  repeated LevelInfo levels = 1;
+}
+
+message StartGameRequest {
+  string level_id = 1;
+  LayoutType layout_type = 2;
+  reserved 10;
 }
 
 message StartGameResponse {
-  string session_id = 1;
-  string puzzle = 2;
-  int32 duration_seconds = 3;
+  SessionState session = 1;
 }
 
-message SubmitResultRequest {
-  string session_id = 1;
-  string solution = 2;
-  int32 time_spent_seconds = 3;
+message GetActiveSessionRequest {}
+
+message GetActiveSessionResponse {
+  bool has_active_session = 1;
+  SessionState session = 2;
 }
 
-message SubmitResultResponse {
+message GetSessionRequest {
+  string session_id = 1;
+}
+
+message GetSessionResponse {
+  SessionState session = 1;
+}
+
+message MakeMoveRequest {
+  string session_id = 1;
+  int32 row = 2;
+  int32 col = 3;
+  int32 value = 4;
+}
+
+message MakeMoveResponse {
   bool is_correct = 1;
-  int32 reward_coins = 2;
-  int32 score = 3;
+  bool is_duplicate_wrong = 2;
+  DifficultyTier difficulty_tier = 3;
+  int32 points_delta = 4;
+  SessionState session = 5;
 }
 
-message ListLevelsRequest {
-  string difficulty = 1;
+message UseHintRequest {
+  string session_id = 1;
+  optional int32 target_row = 2;
+  optional int32 target_col = 3;
 }
 
-message Level {
-  string level_id = 1;
-  string difficulty = 2;
-  string title = 3;
+message UseHintResponse {
+  int32 row = 1;
+  int32 col = 2;
+  int32 value = 3;
+  HintTechnique technique = 4;
+  repeated int32 highlight_cells = 5;
+  SessionState session = 6;
 }
 
-message ListLevelsResponse {
-  repeated Level levels = 1;
+message SaveNotesRequest {
+  string session_id = 1;
+  repeated CellNote notes = 2;
+}
+
+message SaveNotesResponse {}
+
+message AbandonGameRequest {
+  string session_id = 1;
+}
+
+message AbandonGameResponse {
+  SessionState session = 1;
 }
 
 message GetHighScoresRequest {
-  string mode = 1;
-  int32 limit = 2;
+  string level_id = 1;
+  LayoutType layout_type = 2;
+  int32 limit = 3;
+  reserved 10;
 }
 
 message HighScoreEntry {
-  string player_name = 1;
-  int32 score = 2;
-  int32 rank = 3;
+  int32 rank = 1;
+  string user_id = 2;
+  string player_name = 3;
+  int32 score = 4;
+  int64 elapsed_ms = 5;
 }
 
 message GetHighScoresResponse {
-  repeated HighScoreEntry scores = 1;
+  repeated HighScoreEntry entries = 1;
 }

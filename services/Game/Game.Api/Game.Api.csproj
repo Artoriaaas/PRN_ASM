@@ -16,12 +16,18 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.57.0" />
     <PackageReference Include="Grpc.AspNetCore.HealthChecks" Version="2.57.0" />
     <PackageReference Include="Grpc.Net.ClientFactory" Version="2.57.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+    <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\..\building-block\Sudoku.Auth\Sudoku.Auth.csproj" />
     <ProjectReference Include="..\..\..\building-block\Sudoku.Observability\Sudoku.Observability.csproj" />
     <ProjectReference Include="..\..\..\building-block\Sudoku.Messaging\Sudoku.Messaging.csproj" />
+    <ProjectReference Include="..\..\..\building-block\Sudoku.Core\Sudoku.Core.csproj" />
   </ItemGroup>
 
 </Project>

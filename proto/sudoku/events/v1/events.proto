@@ -20,6 +20,10 @@ message GameFinished {
   int32 duration_seconds = 5;
   int32 reward_coins = 6;
   int32 score = 7;
+  int64 elapsed_ms = 8;
+  int32 layout_type = 9;
+  int32 mistakes_count = 10;
+  int32 hints_used = 11;
 }
 
 message MatchCompleted {

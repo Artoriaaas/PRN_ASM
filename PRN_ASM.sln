@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Support.Api", "services\Sup
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Multiplayer.Api", "services\Multiplayer\Multiplayer.Api\Multiplayer.Api.csproj", "{70499C85-8EA7-459E-BEB8-87763ECAF2AE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sudoku.Core", "building-block\Sudoku.Core\Sudoku.Core.csproj", "{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +117,18 @@ Global
 		{70499C85-8EA7-459E-BEB8-87763ECAF2AE}.Release|x64.Build.0 = Release|Any CPU
 		{70499C85-8EA7-459E-BEB8-87763ECAF2AE}.Release|x86.ActiveCfg = Release|Any CPU
 		{70499C85-8EA7-459E-BEB8-87763ECAF2AE}.Release|x86.Build.0 = Release|Any CPU
+		{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74}.Debug|x64.Build.0 = Debug|Any CPU
+		{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74}.Debug|x86.Build.0 = Debug|Any CPU
+		{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74}.Release|x64.ActiveCfg = Release|Any CPU
+		{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74}.Release|x64.Build.0 = Release|Any CPU
+		{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74}.Release|x86.ActiveCfg = Release|Any CPU
+		{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -127,6 +141,7 @@ Global
 		{B03111DF-1BEC-4084-AFD0-8655746A5FF6} = {5854FF58-B8C5-05C6-5BF2-ACE42193F22B}
 		{964AA9DC-9CCD-4C29-8A3D-5376F308E878} = {5854FF58-B8C5-05C6-5BF2-ACE42193F22B}
 		{70499C85-8EA7-459E-BEB8-87763ECAF2AE} = {5854FF58-B8C5-05C6-5BF2-ACE42193F22B}
+		{25521CA7-7B9D-4552-9CD4-CBFDEEDEAA74} = {027D7413-46E8-F86D-401D-2103317CDEB7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11F2453A-DD41-44B5-815C-012C4592C871}

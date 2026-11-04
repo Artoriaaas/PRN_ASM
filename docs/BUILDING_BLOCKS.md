@@ -16,6 +16,7 @@ Thư mục `building-block/` chứa các thư viện dùng chung (**Shared Class
 PRN_ASM/
 └── building-block/
     ├── Sudoku.Auth/           # Firebase JWT & Phân quyền Policy
+    ├── Sudoku.Core/           # Thuật toán Bàn cờ Sudoku, Solver, Generator & Smart Hint
     ├── Sudoku.Messaging/      # Kafka Event Streaming, Outbox & Inbox Pattern
     └── Sudoku.Observability/  # OpenTelemetry Distributed Tracing & Metrics
 ```
@@ -366,7 +367,44 @@ SudokuMetrics.GameDurationHistogram.Record(timeSpentSeconds, new KeyValuePair<st
 
 ---
 
-## 5. 🛠️ Quy trình Tạo một Building Block Mới (Step-by-Step)
+## 5. 🧩 4. Thư viện `Sudoku.Core`
+
+### 5.1. Trách nhiệm & Cấu trúc
+* **Nhiệm vụ**: Cung cấp toàn bộ các thuật toán toán học bàn cờ Sudoku dùng chung cho cả **Game Service** (chơi solo) và **Multiplayer Service** (race/duel). Không phụ thuộc database, EF Core, HTTP hay gRPC.
+* **Các file hiện có**:
+  * `BoardConstants.cs`: Hằng số kích thước 9x9 (81 ô) và chuỗi `StandardRegionMap` chuẩn 9 khối 3x3.
+  * `CellCoord.cs`: Chuyển đổi hai chiều `row/col` $\leftrightarrow$ `index` (0..80) và validate tọa độ/giá trị.
+  * `RegionMap.cs`: Phân tích sơ đồ 9 vùng bất kỳ (`region_map`), tính trước tập ô cùng hàng/cột/vùng/peers (20 peers/ô), và kiểm tra tính liên thông trực giao của vùng bằng thuật toán BFS.
+  * `SudokuBoard.cs`: Lưu trạng thái bàn cờ 81 ký tự, tính toán nhanh bitmask ứng viên 9-bit (`ushort`, bit 0 = chữ số 1, bit 8 = chữ số 9) bằng `BitOperations.PopCount`, kiểm tra tính toàn vẹn và hợp lệ.
+  * `MoveEvaluator.cs`: Chấm điểm động từng nước đi (§1.8 trong `CORE-LOGIC.md`): `NakedSingle (+5)`, `HiddenSingle (+10)`, `Advanced (+8 × số ứng viên)`, phạt lỗi sai `-5` (không phạt đúp nếu lặp lại cùng số sai trên cùng 1 ô).
+  * `HintFinder.cs`: Tìm kiếm Smart Hint theo chuẩn sudoku.com: ưu tiên `NakedSingle` $\rightarrow$ `HiddenSingle` (hàng/cột/vùng) $\rightarrow$ `DirectReveal`, trả về tọa độ, chữ số đúng, kỹ thuật áp dụng và danh sách ô liên quan (`highlight_cells`) để UI tô sáng giải thích.
+  * `SudokuSolver.cs`: Giải Sudoku hiệu năng cao bằng Backtracking kết hợp bitmask và Heuristic MRV (Minimum Remaining Values); hỗ trợ `CountSolutions(board, regions, limit: 2)` đếm nhanh nghiệm trong vài microsecond.
+  * `SudokuGenerator.cs`: Sinh đề Sudoku ngẫu nhiên đảm bảo **duy nhất 1 nghiệm** với số ô cho sẵn theo cấu hình độ khó; tự động băm SHA-256 `puzzle_hash` (`initial_board|region_map`).
+
+### 5.2. Cách sử dụng trong Microservice
+1. Thêm tham chiếu project trong `.csproj`:
+   ```xml
+   <ItemGroup>
+     <ProjectReference Include="..\..\..\building-block\Sudoku.Core\Sudoku.Core.csproj" />
+   </ItemGroup>
+   ```
+2. Sử dụng trực tiếp các static methods:
+   ```csharp
+   using Sudoku.Core;
+
+   // 1. Sinh đề
+   var puzzle = SudokuGenerator.Generate(RegionMap.Standard, minClues: 32, maxClues: 36);
+
+   // 2. Chấm điểm nước đi
+   var eval = MoveEvaluator.Evaluate(initialBoard, currentBoard, solutionBoard, RegionMap.Standard, row, col, value);
+
+   // 3. Tìm Smart Hint
+   var hint = HintFinder.FindHint(currentBoard, solutionBoard, RegionMap.Standard, targetRow, targetCol);
+   ```
+
+---
+
+## 6. 🛠️ Quy trình Tạo một Building Block Mới (Step-by-Step)
 
 Nếu sau này dự án cần thêm một Building Block mới (ví dụ: `Sudoku.Caching` để bọc Redis, hoặc `Sudoku.Common`):
 
@@ -435,7 +473,7 @@ Sau đó gọi `builder.Services.AddSudokuRedis(builder.Configuration)` trong `P
 
 ---
 
-## 6. 📋 Bảng Tóm tắt Checklist Quy chuẩn Code trong `building-block/`
+## 7. 📋 Bảng Tóm tắt Checklist Quy chuẩn Code trong `building-block/`
 
 * [ ] Thư viện có giữ tính độc lập không? *(Không tham chiếu sang service khác)*.
 * [ ] Đã có file Extension Method (`*Extensions.cs`) để đăng ký Dependency Injection dễ dàng chưa?
