@@ -1,6 +1,7 @@
 namespace Game.Api.Domain.Services;
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Game.Api.Domain.Entities;
@@ -10,6 +11,7 @@ using Sudoku.Core;
 public interface IPuzzleBankService
 {
     Task<Puzzle> GetOrCreateUnplayedPuzzleAsync(Level level, int layoutType, string userId, CancellationToken ct = default);
+    Task<Puzzle> GetOrCreateMatchPuzzleAsync(Level level, int layoutType, bool requireEvenEmptyCells, IReadOnlyList<string> excludeUserIds, CancellationToken ct = default);
     Task<int> ReplenishBufferAsync(Level level, int layoutType, int targetBuffer, CancellationToken ct = default);
 }
 
@@ -43,6 +45,53 @@ public class PuzzleBankService : IPuzzleBankService
             regionMap,
             level.MinClues,
             level.MaxClues
+        );
+
+        var newPuzzle = new Puzzle
+        {
+            Id = Guid.NewGuid(),
+            LevelId = level.LevelId,
+            LayoutType = layoutType,
+            InitialBoard = generated.InitialBoard,
+            SolutionBoard = generated.SolutionBoard,
+            RegionMap = generated.RegionMap,
+            PuzzleHash = generated.PuzzleHash,
+            ClueCount = generated.ClueCount,
+            DifficultyScore = (BoardConstants.CellCount - generated.ClueCount) * 10,
+            IsLogicSolvable = true,
+            IsActive = true,
+            GeneratorVersion = 1,
+            PlayCount = 1,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _puzzleRepo.Add(newPuzzle);
+        return newPuzzle;
+    }
+
+    public async Task<Puzzle> GetOrCreateMatchPuzzleAsync(
+        Level level,
+        int layoutType,
+        bool requireEvenEmptyCells,
+        IReadOnlyList<string> excludeUserIds,
+        CancellationToken ct = default)
+    {
+        var existingPuzzle = await _puzzleRepo.GetPuzzleForMatchAsync(level.LevelId, layoutType, requireEvenEmptyCells, excludeUserIds, ct);
+        if (existingPuzzle != null)
+        {
+            existingPuzzle.PlayCount++;
+            return existingPuzzle;
+        }
+
+        _logger.LogInformation("Generating on-the-fly match puzzle for level {LevelId}, layout {LayoutType}, evenEmpty={EvenEmpty}",
+            level.LevelId, layoutType, requireEvenEmptyCells);
+
+        var regionMap = RegionMap.GetForLayout(layoutType);
+        var generated = SudokuGenerator.Generate(
+            regionMap,
+            level.MinClues,
+            level.MaxClues,
+            requireEvenEmptyCells: requireEvenEmptyCells
         );
 
         var newPuzzle = new Puzzle

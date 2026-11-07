@@ -51,6 +51,19 @@ public sealed class UserProfileService(
             ?? throw new ProfileNotFoundException();
     }
 
+    public Task<IReadOnlyList<UserAccount>> GetProfilesAsync(
+        IReadOnlyList<string> firebaseUids,
+        CancellationToken cancellationToken)
+    {
+        var distinct = firebaseUids
+            .Where(id => !string.IsNullOrWhiteSpace(id) && id.Length <= 128)
+            .Distinct(StringComparer.Ordinal)
+            .Take(100)
+            .ToArray();
+
+        return repository.GetByFirebaseUidsAsync(distinct, distinct.Length, cancellationToken);
+    }
+
     public async Task<UserAccount> UpdateAsync(
         string firebaseUid,
         string displayName,

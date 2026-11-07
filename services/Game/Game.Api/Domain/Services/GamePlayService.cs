@@ -1,6 +1,7 @@
 namespace Game.Api.Domain.Services;
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Game.Api.Domain.Entities;
@@ -21,6 +22,7 @@ public interface IGamePlayService
     Task<(SmartHintResult Hint, GameSession Session)> UseHintAsync(string userId, Guid sessionId, int? targetRow, int? targetCol, CancellationToken ct = default);
     Task SaveNotesAsync(string userId, Guid sessionId, string notesJson, CancellationToken ct = default);
     Task<GameSession> AbandonGameAsync(string userId, Guid sessionId, CancellationToken ct = default);
+    Task<Puzzle> AcquirePuzzleForMatchAsync(string levelId, int layoutType, bool requireEvenEmptyCells, IReadOnlyList<string> excludeUserIds, CancellationToken ct = default);
 }
 
 public class GamePlayService : IGamePlayService
@@ -266,6 +268,33 @@ public class GamePlayService : IGamePlayService
         }
 
         return session;
+    }
+
+    public async Task<Puzzle> AcquirePuzzleForMatchAsync(
+        string levelId,
+        int layoutType,
+        bool requireEvenEmptyCells,
+        IReadOnlyList<string> excludeUserIds,
+        CancellationToken ct = default)
+    {
+        string effectiveLevelId = string.IsNullOrWhiteSpace(levelId) ? "easy" : levelId.Trim().ToLowerInvariant();
+        int effectiveLayout = layoutType == (int)LayoutType.Unspecified ? (int)LayoutType.Standard : layoutType;
+
+        var level = await _levelRepo.GetByIdAsync(effectiveLevelId, ct)
+            ?? throw new NotFoundException($"Level '{effectiveLevelId}' was not found.");
+
+        _rulePolicy.ValidateCanStart(level, effectiveLayout);
+
+        var puzzle = await _puzzleBank.GetOrCreateMatchPuzzleAsync(
+            level,
+            effectiveLayout,
+            requireEvenEmptyCells,
+            excludeUserIds,
+            ct
+        );
+
+        await _uow.SaveChangesAsync(ct);
+        return puzzle;
     }
 
     private void PublishGameFinishedOutbox(GameSession session, bool isWin)

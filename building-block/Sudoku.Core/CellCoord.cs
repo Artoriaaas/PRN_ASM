@@ -16,4 +16,7 @@ public static class CellCoord
 
     public static bool IsValidDigit(int value) =>
         value >= 1 && value <= 9;
+
+    public static bool IsValidDigitOrEmpty(int value) =>
+        value >= 0 && value <= 9;
 }

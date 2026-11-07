@@ -13,6 +13,10 @@ public interface IUserProfileService
 
     Task<UserAccount> GetAsync(string firebaseUid, CancellationToken cancellationToken);
 
+    Task<IReadOnlyList<UserAccount>> GetProfilesAsync(
+        IReadOnlyList<string> firebaseUids,
+        CancellationToken cancellationToken);
+
     Task<UserAccount> UpdateAsync(
         string firebaseUid,
         string displayName,

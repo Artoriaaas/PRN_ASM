@@ -225,7 +225,7 @@ sequenceDiagram
         ME-->>S: IsCorrect = false, PointsDelta = -5 (nếu chưa thử trước đó)
     else Điền đúng (value == SolutionBoard[idx])
         ME->>ME: Phân tích độ khó ô cờ trước khi điền (PopCount / Hidden Single check)
-        ME-->>S: IsCorrect = true, Tier = NakedSingle/HiddenSingle/Advanced, PointsDelta = +5/+10/+15
+        ME-->>S: IsCorrect = true, Tier = NakedSingle/HiddenSingle/Advanced, PointsDelta = +5/+10/+(8 × số ứng viên)
     end
 
     S->>Session: ApplyMove(row, col, value, eval)
@@ -261,7 +261,7 @@ sequenceDiagram
        - Phân tích độ khó kỹ thuật của ô cờ **ngay trước khi điền số**:
          - Đếm số ứng viên khả dĩ của ô đó (`PopCount(candidatesMask)`). Nếu chỉ có 1 ứng viên duy nhất $\rightarrow$ **Naked Single** (+5 điểm).
          - Kiểm tra xem trong hàng, cột hoặc vùng 3x3 chứa ô đó, chữ số `value` có phải chỉ có thể nằm duy nhất ở ô này không $\rightarrow$ **Hidden Single** (+10 điểm).
-         - Nếu không thuộc 2 trường hợp cơ bản trên $\rightarrow$ **Advanced** (+15 điểm).
+         - Nếu không thuộc 2 trường hợp cơ bản trên $\rightarrow$ **Advanced** ($+8 \times \text{số ứng viên}$ điểm).
 4. **Cập nhật thực thể GameSession (`session.ApplyMove`)**:
    - Tăng tổng số nước đi: `MoveCount++`.
    - Ghi lại bản ghi `GameMove` vào danh sách `Moves`.

@@ -23,7 +23,8 @@ export function AppShell({ profile, children }: AppShellProps) {
 
   // Ẩn nav khi trong trận
   const inGame =
-    location.pathname.startsWith('/solo/') &&
+    (location.pathname.startsWith('/solo/') ||
+      location.pathname.startsWith('/match/')) &&
     !location.pathname.endsWith('/new') &&
     !location.pathname.endsWith('/result')
 

@@ -18,12 +18,16 @@ public static class SudokuGenerator
         RegionMap regions,
         int minClues,
         int maxClues,
-        Random? rng = null)
+        Random? rng = null,
+        bool requireEvenEmptyCells = false)
     {
         rng ??= Random.Shared;
 
         int targetClues = rng.Next(minClues, maxClues + 1);
-
+        if (requireEvenEmptyCells && (BoardConstants.CellCount - targetClues) % 2 != 0)
+        {
+            targetClues = targetClues + 1 <= maxClues ? targetClues + 1 : Math.Max(17, targetClues - 1);
+        }
         // 1. Generate a completely filled valid solution board
         char[] solution = GenerateFullBoard(regions, rng);
         char[] puzzle = (char[])solution.Clone();
@@ -34,6 +38,8 @@ public static class SudokuGenerator
         rng.Shuffle(cellOrder);
 
         int currentClues = BoardConstants.CellCount;
+        int lastRemovedIndex = -1;
+        char lastRemovedChar = BoardConstants.EmptyCellChar;
 
         foreach (int idx in cellOrder)
         {
@@ -50,6 +56,8 @@ public static class SudokuGenerator
             if (solutions == 1)
             {
                 currentClues--;
+                lastRemovedIndex = idx;
+                lastRemovedChar = original;
             }
             else
             {
@@ -58,6 +66,11 @@ public static class SudokuGenerator
             }
         }
 
+        if (requireEvenEmptyCells && (BoardConstants.CellCount - currentClues) % 2 != 0 && lastRemovedIndex >= 0)
+        {
+            puzzle[lastRemovedIndex] = lastRemovedChar;
+            currentClues++;
+        }
         string initialBoardStr = new(puzzle);
         string solutionBoardStr = new(solution);
         string regionMapStr = regions.MapString;

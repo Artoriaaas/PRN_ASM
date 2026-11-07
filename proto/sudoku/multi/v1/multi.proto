@@ -7,20 +7,55 @@ option csharp_namespace = "Sudoku.Multi.V1";
 service MultiplayerService {
   rpc GetRankings(GetRankingsRequest) returns (GetRankingsResponse);
   rpc GetMatchHistory(GetMatchHistoryRequest) returns (GetMatchHistoryResponse);
+  rpc GetPlayerRatings(GetPlayerRatingsRequest) returns (GetPlayerRatingsResponse);
+  rpc GetMatch(GetMatchRequest) returns (GetMatchResponse);
+}
+
+enum PlayFormat {
+  PLAY_FORMAT_UNSPECIFIED = 0;
+  PLAY_FORMAT_RACE = 1;
+  PLAY_FORMAT_DUEL = 2;
+}
+
+enum BoardLayoutType {
+  BOARD_LAYOUT_TYPE_UNSPECIFIED = 0;
+  BOARD_LAYOUT_TYPE_STANDARD = 1;
+  BOARD_LAYOUT_TYPE_IRREGULAR = 2;
+}
+
+enum MatchStatus {
+  MATCH_STATUS_UNSPECIFIED = 0;
+  MATCH_STATUS_IN_PROGRESS = 1;
+  MATCH_STATUS_COMPLETED = 2;
+  MATCH_STATUS_CANCELLED = 3;
+}
+
+enum MatchResult {
+  MATCH_RESULT_UNSPECIFIED = 0;
+  MATCH_RESULT_WIN = 1;
+  MATCH_RESULT_LOSS = 2;
+  MATCH_RESULT_DRAW = 3;
 }
 
 message RankingEntry {
   string player_name = 1;
   int32 rating = 2;
   int32 rank = 3;
+  string user_id = 4;
+  PlayFormat play_format = 5;
+  int32 matches_played = 6;
+  int32 matches_won = 7;
+  int32 matches_drawn = 8;
 }
 
 message GetRankingsRequest {
   int32 limit = 1;
+  PlayFormat play_format = 2;
 }
 
 message GetRankingsResponse {
   repeated RankingEntry rankings = 1;
+  optional RankingEntry caller_entry = 2;
 }
 
 message MatchHistoryItem {
@@ -29,12 +64,77 @@ message MatchHistoryItem {
   bool is_win = 3;
   int32 rating_delta = 4;
   string completed_at = 5;
+  string opponent_user_id = 6;
+  PlayFormat play_format = 7;
+  BoardLayoutType board_layout = 8;
+  string level_id = 9;
+  MatchResult result = 10;
+  int32 score = 11;
+  int32 opponent_score = 12;
+  int32 duration_seconds = 13;
+  string end_reason = 14;
 }
 
 message GetMatchHistoryRequest {
   int32 limit = 1;
+  PlayFormat play_format = 2;
 }
 
 message GetMatchHistoryResponse {
   repeated MatchHistoryItem matches = 1;
+}
+
+message PlayerRatingInfo {
+  string user_id = 1;
+  PlayFormat play_format = 2;
+  int32 rating = 3;
+  int32 matches_played = 4;
+  int32 matches_won = 5;
+  int32 matches_drawn = 6;
+  int32 rank = 7;
+}
+
+message GetPlayerRatingsRequest {}
+
+message GetPlayerRatingsResponse {
+  repeated PlayerRatingInfo ratings = 1;
+}
+
+message MatchPlayerDetail {
+  string user_id = 1;
+  string display_name = 2;
+  int32 turn_order = 3;
+  int32 lives_remaining = 4;
+  int32 mistakes_count = 5;
+  int32 correct_cells = 6;
+  int32 score = 7;
+  int32 timeout_count = 8;
+  MatchResult result = 9;
+  int32 rating_before = 10;
+  int32 rating_delta = 11;
+  int64 completion_ms = 12;
+}
+
+message GetMatchRequest {
+  string match_id = 1;
+}
+
+message MatchDetail {
+  string match_id = 1;
+  PlayFormat play_format = 2;
+  BoardLayoutType board_layout = 3;
+  string level_id = 4;
+  MatchStatus status = 5;
+  string initial_board = 6;
+  string region_map = 7;
+  string shared_board = 8;
+  string end_reason = 9;
+  int64 duration_ms = 10;
+  string started_at = 11;
+  string finished_at = 12;
+  repeated MatchPlayerDetail players = 13;
+}
+
+message GetMatchResponse {
+  MatchDetail match = 1;
 }

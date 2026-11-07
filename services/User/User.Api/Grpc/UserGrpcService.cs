@@ -88,6 +88,33 @@ public sealed class UserGrpcService(IUserProfileService profileService) : UserSe
         }
     }
 
+    [AllowAnonymous]
+    public override async Task<GetProfilesResponse> GetProfiles(
+        GetProfilesRequest request,
+        ServerCallContext context)
+    {
+        var profiles = await profileService.GetProfilesAsync(
+            request.FirebaseUids,
+            context.CancellationToken);
+
+        var response = new GetProfilesResponse();
+        foreach (var user in profiles)
+        {
+            response.Profiles.Add(new UserProfileSummary
+            {
+                FirebaseUid = user.FirebaseUid,
+                UserId = user.Id.ToString(),
+                DisplayName = user.DisplayName,
+                AvatarUrl = user.AvatarUrl,
+                Country = user.Country,
+                PlayerLevel = user.PlayerLevel,
+                Trophies = user.Trophies,
+            });
+        }
+
+        return response;
+    }
+
     private static string GetRequiredFirebaseUid(ServerCallContext context)
     {
         return context.GetHttpContext().User.FindFirst("sub")?.Value

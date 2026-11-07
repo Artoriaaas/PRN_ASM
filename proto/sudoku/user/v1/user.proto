@@ -8,6 +8,7 @@ service UserService {
   rpc GetOrCreateProfile(GetOrCreateProfileRequest) returns (GetOrCreateProfileResponse);
   rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
   rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
+  rpc GetProfiles(GetProfilesRequest) returns (GetProfilesResponse);
 }
 
 message UserProfile {
@@ -49,4 +50,22 @@ message UpdateProfileRequest {
 
 message UpdateProfileResponse {
   UserProfile profile = 1;
+}
+
+message GetProfilesRequest {
+  repeated string firebase_uids = 1;
+}
+
+message UserProfileSummary {
+  string firebase_uid = 1;
+  string user_id = 2;
+  string display_name = 3;
+  string avatar_url = 4;
+  string country = 5;
+  int32 player_level = 6;
+  int32 trophies = 7;
+}
+
+message GetProfilesResponse {
+  repeated UserProfileSummary profiles = 1;
 }

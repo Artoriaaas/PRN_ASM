@@ -2,15 +2,15 @@
 // @generated from file sudoku/multi/v1/multi.proto (package sudoku.multi.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file sudoku/multi/v1/multi.proto.
  */
 export const file_sudoku_multi_v1_multi: GenFile = /*@__PURE__*/
-  fileDesc("ChtzdWRva3UvbXVsdGkvdjEvbXVsdGkucHJvdG8SD3N1ZG9rdS5tdWx0aS52MSJBCgxSYW5raW5nRW50cnkSEwoLcGxheWVyX25hbWUYASABKAkSDgoGcmF0aW5nGAIgASgFEgwKBHJhbmsYAyABKAUiIwoSR2V0UmFua2luZ3NSZXF1ZXN0Eg0KBWxpbWl0GAEgASgFIkYKE0dldFJhbmtpbmdzUmVzcG9uc2USLwoIcmFua2luZ3MYASADKAsyHS5zdWRva3UubXVsdGkudjEuUmFua2luZ0VudHJ5IncKEE1hdGNoSGlzdG9yeUl0ZW0SEAoIbWF0Y2hfaWQYASABKAkSFQoNb3Bwb25lbnRfbmFtZRgCIAEoCRIOCgZpc193aW4YAyABKAgSFAoMcmF0aW5nX2RlbHRhGAQgASgFEhQKDGNvbXBsZXRlZF9hdBgFIAEoCSInChZHZXRNYXRjaEhpc3RvcnlSZXF1ZXN0Eg0KBWxpbWl0GAEgASgFIk0KF0dldE1hdGNoSGlzdG9yeVJlc3BvbnNlEjIKB21hdGNoZXMYASADKAsyIS5zdWRva3UubXVsdGkudjEuTWF0Y2hIaXN0b3J5SXRlbTLUAQoSTXVsdGlwbGF5ZXJTZXJ2aWNlElgKC0dldFJhbmtpbmdzEiMuc3Vkb2t1Lm11bHRpLnYxLkdldFJhbmtpbmdzUmVxdWVzdBokLnN1ZG9rdS5tdWx0aS52MS5HZXRSYW5raW5nc1Jlc3BvbnNlEmQKD0dldE1hdGNoSGlzdG9yeRInLnN1ZG9rdS5tdWx0aS52MS5HZXRNYXRjaEhpc3RvcnlSZXF1ZXN0Giguc3Vkb2t1Lm11bHRpLnYxLkdldE1hdGNoSGlzdG9yeVJlc3BvbnNlQhKqAg9TdWRva3UuTXVsdGkuVjFiBnByb3RvMw");
+  fileDesc("ChtzdWRva3UvbXVsdGkvdjEvbXVsdGkucHJvdG8SD3N1ZG9rdS5tdWx0aS52MSLIAQoMUmFua2luZ0VudHJ5EhMKC3BsYXllcl9uYW1lGAEgASgJEg4KBnJhdGluZxgCIAEoBRIMCgRyYW5rGAMgASgFEg8KB3VzZXJfaWQYBCABKAkSMAoLcGxheV9mb3JtYXQYBSABKA4yGy5zdWRva3UubXVsdGkudjEuUGxheUZvcm1hdBIWCg5tYXRjaGVzX3BsYXllZBgGIAEoBRITCgttYXRjaGVzX3dvbhgHIAEoBRIVCg1tYXRjaGVzX2RyYXduGAggASgFIlUKEkdldFJhbmtpbmdzUmVxdWVzdBINCgVsaW1pdBgBIAEoBRIwCgtwbGF5X2Zvcm1hdBgCIAEoDjIbLnN1ZG9rdS5tdWx0aS52MS5QbGF5Rm9ybWF0IpEBChNHZXRSYW5raW5nc1Jlc3BvbnNlEi8KCHJhbmtpbmdzGAEgAygLMh0uc3Vkb2t1Lm11bHRpLnYxLlJhbmtpbmdFbnRyeRI4CgxjYWxsZXJfZW50cnkYAiABKAsyHS5zdWRva3UubXVsdGkudjEuUmFua2luZ0VudHJ5SACIAQFCDwoNX2NhbGxlcl9lbnRyeSKQAwoQTWF0Y2hIaXN0b3J5SXRlbRIQCghtYXRjaF9pZBgBIAEoCRIVCg1vcHBvbmVudF9uYW1lGAIgASgJEg4KBmlzX3dpbhgDIAEoCBIUCgxyYXRpbmdfZGVsdGEYBCABKAUSFAoMY29tcGxldGVkX2F0GAUgASgJEhgKEG9wcG9uZW50X3VzZXJfaWQYBiABKAkSMAoLcGxheV9mb3JtYXQYByABKA4yGy5zdWRva3UubXVsdGkudjEuUGxheUZvcm1hdBI2Cgxib2FyZF9sYXlvdXQYCCABKA4yIC5zdWRva3UubXVsdGkudjEuQm9hcmRMYXlvdXRUeXBlEhAKCGxldmVsX2lkGAkgASgJEiwKBnJlc3VsdBgKIAEoDjIcLnN1ZG9rdS5tdWx0aS52MS5NYXRjaFJlc3VsdBINCgVzY29yZRgLIAEoBRIWCg5vcHBvbmVudF9zY29yZRgMIAEoBRIYChBkdXJhdGlvbl9zZWNvbmRzGA0gASgFEhIKCmVuZF9yZWFzb24YDiABKAkiWQoWR2V0TWF0Y2hIaXN0b3J5UmVxdWVzdBINCgVsaW1pdBgBIAEoBRIwCgtwbGF5X2Zvcm1hdBgCIAEoDjIbLnN1ZG9rdS5tdWx0aS52MS5QbGF5Rm9ybWF0Ik0KF0dldE1hdGNoSGlzdG9yeVJlc3BvbnNlEjIKB21hdGNoZXMYASADKAsyIS5zdWRva3UubXVsdGkudjEuTWF0Y2hIaXN0b3J5SXRlbSK3AQoQUGxheWVyUmF0aW5nSW5mbxIPCgd1c2VyX2lkGAEgASgJEjAKC3BsYXlfZm9ybWF0GAIgASgOMhsuc3Vkb2t1Lm11bHRpLnYxLlBsYXlGb3JtYXQSDgoGcmF0aW5nGAMgASgFEhYKDm1hdGNoZXNfcGxheWVkGAQgASgFEhMKC21hdGNoZXNfd29uGAUgASgFEhUKDW1hdGNoZXNfZHJhd24YBiABKAUSDAoEcmFuaxgHIAEoBSIZChdHZXRQbGF5ZXJSYXRpbmdzUmVxdWVzdCJOChhHZXRQbGF5ZXJSYXRpbmdzUmVzcG9uc2USMgoHcmF0aW5ncxgBIAMoCzIhLnN1ZG9rdS5tdWx0aS52MS5QbGF5ZXJSYXRpbmdJbmZvIq4CChFNYXRjaFBsYXllckRldGFpbBIPCgd1c2VyX2lkGAEgASgJEhQKDGRpc3BsYXlfbmFtZRgCIAEoCRISCgp0dXJuX29yZGVyGAMgASgFEhcKD2xpdmVzX3JlbWFpbmluZxgEIAEoBRIWCg5taXN0YWtlc19jb3VudBgFIAEoBRIVCg1jb3JyZWN0X2NlbGxzGAYgASgFEg0KBXNjb3JlGAcgASgFEhUKDXRpbWVvdXRfY291bnQYCCABKAUSLAoGcmVzdWx0GAkgASgOMhwuc3Vkb2t1Lm11bHRpLnYxLk1hdGNoUmVzdWx0EhUKDXJhdGluZ19iZWZvcmUYCiABKAUSFAoMcmF0aW5nX2RlbHRhGAsgASgFEhUKDWNvbXBsZXRpb25fbXMYDCABKAMiIwoPR2V0TWF0Y2hSZXF1ZXN0EhAKCG1hdGNoX2lkGAEgASgJIpEDCgtNYXRjaERldGFpbBIQCghtYXRjaF9pZBgBIAEoCRIwCgtwbGF5X2Zvcm1hdBgCIAEoDjIbLnN1ZG9rdS5tdWx0aS52MS5QbGF5Rm9ybWF0EjYKDGJvYXJkX2xheW91dBgDIAEoDjIgLnN1ZG9rdS5tdWx0aS52MS5Cb2FyZExheW91dFR5cGUSEAoIbGV2ZWxfaWQYBCABKAkSLAoGc3RhdHVzGAUgASgOMhwuc3Vkb2t1Lm11bHRpLnYxLk1hdGNoU3RhdHVzEhUKDWluaXRpYWxfYm9hcmQYBiABKAkSEgoKcmVnaW9uX21hcBgHIAEoCRIUCgxzaGFyZWRfYm9hcmQYCCABKAkSEgoKZW5kX3JlYXNvbhgJIAEoCRITCgtkdXJhdGlvbl9tcxgKIAEoAxISCgpzdGFydGVkX2F0GAsgASgJEhMKC2ZpbmlzaGVkX2F0GAwgASgJEjMKB3BsYXllcnMYDSADKAsyIi5zdWRva3UubXVsdGkudjEuTWF0Y2hQbGF5ZXJEZXRhaWwiPwoQR2V0TWF0Y2hSZXNwb25zZRIrCgVtYXRjaBgBIAEoCzIcLnN1ZG9rdS5tdWx0aS52MS5NYXRjaERldGFpbCpVCgpQbGF5Rm9ybWF0EhsKF1BMQVlfRk9STUFUX1VOU1BFQ0lGSUVEEAASFAoQUExBWV9GT1JNQVRfUkFDRRABEhQKEFBMQVlfRk9STUFUX0RVRUwQAip1Cg9Cb2FyZExheW91dFR5cGUSIQodQk9BUkRfTEFZT1VUX1RZUEVfVU5TUEVDSUZJRUQQABIeChpCT0FSRF9MQVlPVVRfVFlQRV9TVEFOREFSRBABEh8KG0JPQVJEX0xBWU9VVF9UWVBFX0lSUkVHVUxBUhACKoEBCgtNYXRjaFN0YXR1cxIcChhNQVRDSF9TVEFUVVNfVU5TUEVDSUZJRUQQABIcChhNQVRDSF9TVEFUVVNfSU5fUFJPR1JFU1MQARIaChZNQVRDSF9TVEFUVVNfQ09NUExFVEVEEAISGgoWTUFUQ0hfU1RBVFVTX0NBTkNFTExFRBADKm8KC01hdGNoUmVzdWx0EhwKGE1BVENIX1JFU1VMVF9VTlNQRUNJRklFRBAAEhQKEE1BVENIX1JFU1VMVF9XSU4QARIVChFNQVRDSF9SRVNVTFRfTE9TUxACEhUKEU1BVENIX1JFU1VMVF9EUkFXEAMyjgMKEk11bHRpcGxheWVyU2VydmljZRJYCgtHZXRSYW5raW5ncxIjLnN1ZG9rdS5tdWx0aS52MS5HZXRSYW5raW5nc1JlcXVlc3QaJC5zdWRva3UubXVsdGkudjEuR2V0UmFua2luZ3NSZXNwb25zZRJkCg9HZXRNYXRjaEhpc3RvcnkSJy5zdWRva3UubXVsdGkudjEuR2V0TWF0Y2hIaXN0b3J5UmVxdWVzdBooLnN1ZG9rdS5tdWx0aS52MS5HZXRNYXRjaEhpc3RvcnlSZXNwb25zZRJnChBHZXRQbGF5ZXJSYXRpbmdzEiguc3Vkb2t1Lm11bHRpLnYxLkdldFBsYXllclJhdGluZ3NSZXF1ZXN0Gikuc3Vkb2t1Lm11bHRpLnYxLkdldFBsYXllclJhdGluZ3NSZXNwb25zZRJPCghHZXRNYXRjaBIgLnN1ZG9rdS5tdWx0aS52MS5HZXRNYXRjaFJlcXVlc3QaIS5zdWRva3UubXVsdGkudjEuR2V0TWF0Y2hSZXNwb25zZUISqgIPU3Vkb2t1Lk11bHRpLlYxYgZwcm90bzM");
 
 /**
  * @generated from message sudoku.multi.v1.RankingEntry
@@ -30,6 +30,31 @@ export type RankingEntry = Message<"sudoku.multi.v1.RankingEntry"> & {
    * @generated from field: int32 rank = 3;
    */
   rank: number;
+
+  /**
+   * @generated from field: string user_id = 4;
+   */
+  userId: string;
+
+  /**
+   * @generated from field: sudoku.multi.v1.PlayFormat play_format = 5;
+   */
+  playFormat: PlayFormat;
+
+  /**
+   * @generated from field: int32 matches_played = 6;
+   */
+  matchesPlayed: number;
+
+  /**
+   * @generated from field: int32 matches_won = 7;
+   */
+  matchesWon: number;
+
+  /**
+   * @generated from field: int32 matches_drawn = 8;
+   */
+  matchesDrawn: number;
 };
 
 /**
@@ -47,6 +72,11 @@ export type GetRankingsRequest = Message<"sudoku.multi.v1.GetRankingsRequest"> &
    * @generated from field: int32 limit = 1;
    */
   limit: number;
+
+  /**
+   * @generated from field: sudoku.multi.v1.PlayFormat play_format = 2;
+   */
+  playFormat: PlayFormat;
 };
 
 /**
@@ -64,6 +94,11 @@ export type GetRankingsResponse = Message<"sudoku.multi.v1.GetRankingsResponse">
    * @generated from field: repeated sudoku.multi.v1.RankingEntry rankings = 1;
    */
   rankings: RankingEntry[];
+
+  /**
+   * @generated from field: optional sudoku.multi.v1.RankingEntry caller_entry = 2;
+   */
+  callerEntry?: RankingEntry | undefined;
 };
 
 /**
@@ -101,6 +136,51 @@ export type MatchHistoryItem = Message<"sudoku.multi.v1.MatchHistoryItem"> & {
    * @generated from field: string completed_at = 5;
    */
   completedAt: string;
+
+  /**
+   * @generated from field: string opponent_user_id = 6;
+   */
+  opponentUserId: string;
+
+  /**
+   * @generated from field: sudoku.multi.v1.PlayFormat play_format = 7;
+   */
+  playFormat: PlayFormat;
+
+  /**
+   * @generated from field: sudoku.multi.v1.BoardLayoutType board_layout = 8;
+   */
+  boardLayout: BoardLayoutType;
+
+  /**
+   * @generated from field: string level_id = 9;
+   */
+  levelId: string;
+
+  /**
+   * @generated from field: sudoku.multi.v1.MatchResult result = 10;
+   */
+  result: MatchResult;
+
+  /**
+   * @generated from field: int32 score = 11;
+   */
+  score: number;
+
+  /**
+   * @generated from field: int32 opponent_score = 12;
+   */
+  opponentScore: number;
+
+  /**
+   * @generated from field: int32 duration_seconds = 13;
+   */
+  durationSeconds: number;
+
+  /**
+   * @generated from field: string end_reason = 14;
+   */
+  endReason: string;
 };
 
 /**
@@ -118,6 +198,11 @@ export type GetMatchHistoryRequest = Message<"sudoku.multi.v1.GetMatchHistoryReq
    * @generated from field: int32 limit = 1;
    */
   limit: number;
+
+  /**
+   * @generated from field: sudoku.multi.v1.PlayFormat play_format = 2;
+   */
+  playFormat: PlayFormat;
 };
 
 /**
@@ -145,6 +230,380 @@ export const GetMatchHistoryResponseSchema: GenMessage<GetMatchHistoryResponse> 
   messageDesc(file_sudoku_multi_v1_multi, 5);
 
 /**
+ * @generated from message sudoku.multi.v1.PlayerRatingInfo
+ */
+export type PlayerRatingInfo = Message<"sudoku.multi.v1.PlayerRatingInfo"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+
+  /**
+   * @generated from field: sudoku.multi.v1.PlayFormat play_format = 2;
+   */
+  playFormat: PlayFormat;
+
+  /**
+   * @generated from field: int32 rating = 3;
+   */
+  rating: number;
+
+  /**
+   * @generated from field: int32 matches_played = 4;
+   */
+  matchesPlayed: number;
+
+  /**
+   * @generated from field: int32 matches_won = 5;
+   */
+  matchesWon: number;
+
+  /**
+   * @generated from field: int32 matches_drawn = 6;
+   */
+  matchesDrawn: number;
+
+  /**
+   * @generated from field: int32 rank = 7;
+   */
+  rank: number;
+};
+
+/**
+ * Describes the message sudoku.multi.v1.PlayerRatingInfo.
+ * Use `create(PlayerRatingInfoSchema)` to create a new message.
+ */
+export const PlayerRatingInfoSchema: GenMessage<PlayerRatingInfo> = /*@__PURE__*/
+  messageDesc(file_sudoku_multi_v1_multi, 6);
+
+/**
+ * @generated from message sudoku.multi.v1.GetPlayerRatingsRequest
+ */
+export type GetPlayerRatingsRequest = Message<"sudoku.multi.v1.GetPlayerRatingsRequest"> & {
+};
+
+/**
+ * Describes the message sudoku.multi.v1.GetPlayerRatingsRequest.
+ * Use `create(GetPlayerRatingsRequestSchema)` to create a new message.
+ */
+export const GetPlayerRatingsRequestSchema: GenMessage<GetPlayerRatingsRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_multi_v1_multi, 7);
+
+/**
+ * @generated from message sudoku.multi.v1.GetPlayerRatingsResponse
+ */
+export type GetPlayerRatingsResponse = Message<"sudoku.multi.v1.GetPlayerRatingsResponse"> & {
+  /**
+   * @generated from field: repeated sudoku.multi.v1.PlayerRatingInfo ratings = 1;
+   */
+  ratings: PlayerRatingInfo[];
+};
+
+/**
+ * Describes the message sudoku.multi.v1.GetPlayerRatingsResponse.
+ * Use `create(GetPlayerRatingsResponseSchema)` to create a new message.
+ */
+export const GetPlayerRatingsResponseSchema: GenMessage<GetPlayerRatingsResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_multi_v1_multi, 8);
+
+/**
+ * @generated from message sudoku.multi.v1.MatchPlayerDetail
+ */
+export type MatchPlayerDetail = Message<"sudoku.multi.v1.MatchPlayerDetail"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+
+  /**
+   * @generated from field: string display_name = 2;
+   */
+  displayName: string;
+
+  /**
+   * @generated from field: int32 turn_order = 3;
+   */
+  turnOrder: number;
+
+  /**
+   * @generated from field: int32 lives_remaining = 4;
+   */
+  livesRemaining: number;
+
+  /**
+   * @generated from field: int32 mistakes_count = 5;
+   */
+  mistakesCount: number;
+
+  /**
+   * @generated from field: int32 correct_cells = 6;
+   */
+  correctCells: number;
+
+  /**
+   * @generated from field: int32 score = 7;
+   */
+  score: number;
+
+  /**
+   * @generated from field: int32 timeout_count = 8;
+   */
+  timeoutCount: number;
+
+  /**
+   * @generated from field: sudoku.multi.v1.MatchResult result = 9;
+   */
+  result: MatchResult;
+
+  /**
+   * @generated from field: int32 rating_before = 10;
+   */
+  ratingBefore: number;
+
+  /**
+   * @generated from field: int32 rating_delta = 11;
+   */
+  ratingDelta: number;
+
+  /**
+   * @generated from field: int64 completion_ms = 12;
+   */
+  completionMs: bigint;
+};
+
+/**
+ * Describes the message sudoku.multi.v1.MatchPlayerDetail.
+ * Use `create(MatchPlayerDetailSchema)` to create a new message.
+ */
+export const MatchPlayerDetailSchema: GenMessage<MatchPlayerDetail> = /*@__PURE__*/
+  messageDesc(file_sudoku_multi_v1_multi, 9);
+
+/**
+ * @generated from message sudoku.multi.v1.GetMatchRequest
+ */
+export type GetMatchRequest = Message<"sudoku.multi.v1.GetMatchRequest"> & {
+  /**
+   * @generated from field: string match_id = 1;
+   */
+  matchId: string;
+};
+
+/**
+ * Describes the message sudoku.multi.v1.GetMatchRequest.
+ * Use `create(GetMatchRequestSchema)` to create a new message.
+ */
+export const GetMatchRequestSchema: GenMessage<GetMatchRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_multi_v1_multi, 10);
+
+/**
+ * @generated from message sudoku.multi.v1.MatchDetail
+ */
+export type MatchDetail = Message<"sudoku.multi.v1.MatchDetail"> & {
+  /**
+   * @generated from field: string match_id = 1;
+   */
+  matchId: string;
+
+  /**
+   * @generated from field: sudoku.multi.v1.PlayFormat play_format = 2;
+   */
+  playFormat: PlayFormat;
+
+  /**
+   * @generated from field: sudoku.multi.v1.BoardLayoutType board_layout = 3;
+   */
+  boardLayout: BoardLayoutType;
+
+  /**
+   * @generated from field: string level_id = 4;
+   */
+  levelId: string;
+
+  /**
+   * @generated from field: sudoku.multi.v1.MatchStatus status = 5;
+   */
+  status: MatchStatus;
+
+  /**
+   * @generated from field: string initial_board = 6;
+   */
+  initialBoard: string;
+
+  /**
+   * @generated from field: string region_map = 7;
+   */
+  regionMap: string;
+
+  /**
+   * @generated from field: string shared_board = 8;
+   */
+  sharedBoard: string;
+
+  /**
+   * @generated from field: string end_reason = 9;
+   */
+  endReason: string;
+
+  /**
+   * @generated from field: int64 duration_ms = 10;
+   */
+  durationMs: bigint;
+
+  /**
+   * @generated from field: string started_at = 11;
+   */
+  startedAt: string;
+
+  /**
+   * @generated from field: string finished_at = 12;
+   */
+  finishedAt: string;
+
+  /**
+   * @generated from field: repeated sudoku.multi.v1.MatchPlayerDetail players = 13;
+   */
+  players: MatchPlayerDetail[];
+};
+
+/**
+ * Describes the message sudoku.multi.v1.MatchDetail.
+ * Use `create(MatchDetailSchema)` to create a new message.
+ */
+export const MatchDetailSchema: GenMessage<MatchDetail> = /*@__PURE__*/
+  messageDesc(file_sudoku_multi_v1_multi, 11);
+
+/**
+ * @generated from message sudoku.multi.v1.GetMatchResponse
+ */
+export type GetMatchResponse = Message<"sudoku.multi.v1.GetMatchResponse"> & {
+  /**
+   * @generated from field: sudoku.multi.v1.MatchDetail match = 1;
+   */
+  match?: MatchDetail | undefined;
+};
+
+/**
+ * Describes the message sudoku.multi.v1.GetMatchResponse.
+ * Use `create(GetMatchResponseSchema)` to create a new message.
+ */
+export const GetMatchResponseSchema: GenMessage<GetMatchResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_multi_v1_multi, 12);
+
+/**
+ * @generated from enum sudoku.multi.v1.PlayFormat
+ */
+export enum PlayFormat {
+  /**
+   * @generated from enum value: PLAY_FORMAT_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: PLAY_FORMAT_RACE = 1;
+   */
+  RACE = 1,
+
+  /**
+   * @generated from enum value: PLAY_FORMAT_DUEL = 2;
+   */
+  DUEL = 2,
+}
+
+/**
+ * Describes the enum sudoku.multi.v1.PlayFormat.
+ */
+export const PlayFormatSchema: GenEnum<PlayFormat> = /*@__PURE__*/
+  enumDesc(file_sudoku_multi_v1_multi, 0);
+
+/**
+ * @generated from enum sudoku.multi.v1.BoardLayoutType
+ */
+export enum BoardLayoutType {
+  /**
+   * @generated from enum value: BOARD_LAYOUT_TYPE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: BOARD_LAYOUT_TYPE_STANDARD = 1;
+   */
+  STANDARD = 1,
+
+  /**
+   * @generated from enum value: BOARD_LAYOUT_TYPE_IRREGULAR = 2;
+   */
+  IRREGULAR = 2,
+}
+
+/**
+ * Describes the enum sudoku.multi.v1.BoardLayoutType.
+ */
+export const BoardLayoutTypeSchema: GenEnum<BoardLayoutType> = /*@__PURE__*/
+  enumDesc(file_sudoku_multi_v1_multi, 1);
+
+/**
+ * @generated from enum sudoku.multi.v1.MatchStatus
+ */
+export enum MatchStatus {
+  /**
+   * @generated from enum value: MATCH_STATUS_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: MATCH_STATUS_IN_PROGRESS = 1;
+   */
+  IN_PROGRESS = 1,
+
+  /**
+   * @generated from enum value: MATCH_STATUS_COMPLETED = 2;
+   */
+  COMPLETED = 2,
+
+  /**
+   * @generated from enum value: MATCH_STATUS_CANCELLED = 3;
+   */
+  CANCELLED = 3,
+}
+
+/**
+ * Describes the enum sudoku.multi.v1.MatchStatus.
+ */
+export const MatchStatusSchema: GenEnum<MatchStatus> = /*@__PURE__*/
+  enumDesc(file_sudoku_multi_v1_multi, 2);
+
+/**
+ * @generated from enum sudoku.multi.v1.MatchResult
+ */
+export enum MatchResult {
+  /**
+   * @generated from enum value: MATCH_RESULT_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: MATCH_RESULT_WIN = 1;
+   */
+  WIN = 1,
+
+  /**
+   * @generated from enum value: MATCH_RESULT_LOSS = 2;
+   */
+  LOSS = 2,
+
+  /**
+   * @generated from enum value: MATCH_RESULT_DRAW = 3;
+   */
+  DRAW = 3,
+}
+
+/**
+ * Describes the enum sudoku.multi.v1.MatchResult.
+ */
+export const MatchResultSchema: GenEnum<MatchResult> = /*@__PURE__*/
+  enumDesc(file_sudoku_multi_v1_multi, 3);
+
+/**
  * @generated from service sudoku.multi.v1.MultiplayerService
  */
 export const MultiplayerService: GenService<{
@@ -163,6 +622,22 @@ export const MultiplayerService: GenService<{
     methodKind: "unary";
     input: typeof GetMatchHistoryRequestSchema;
     output: typeof GetMatchHistoryResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.multi.v1.MultiplayerService.GetPlayerRatings
+   */
+  getPlayerRatings: {
+    methodKind: "unary";
+    input: typeof GetPlayerRatingsRequestSchema;
+    output: typeof GetPlayerRatingsResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.multi.v1.MultiplayerService.GetMatch
+   */
+  getMatch: {
+    methodKind: "unary";
+    input: typeof GetMatchRequestSchema;
+    output: typeof GetMatchResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_sudoku_multi_v1_multi, 0);

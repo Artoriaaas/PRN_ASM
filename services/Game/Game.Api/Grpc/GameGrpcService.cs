@@ -203,6 +203,36 @@ public class GameGrpcService : GameService.GameServiceBase
         return response;
     }
 
+    [AllowAnonymous]
+    public override async Task<AcquirePuzzleForMatchResponse> AcquirePuzzleForMatch(
+        AcquirePuzzleForMatchRequest request,
+        ServerCallContext context)
+    {
+        if (context.RequestHeaders.GetValue("x-grpc-web") != null)
+        {
+            throw new RpcException(new Status(StatusCode.PermissionDenied, "AcquirePuzzleForMatch is an internal service RPC."));
+        }
+
+        var puzzle = await _gamePlayService.AcquirePuzzleForMatchAsync(
+            request.LevelId,
+            (int)request.LayoutType,
+            request.RequireEvenEmptyCells,
+            request.ExcludeUserIds,
+            context.CancellationToken
+        );
+
+        return new AcquirePuzzleForMatchResponse
+        {
+            PuzzleId = puzzle.Id.ToString(),
+            LevelId = puzzle.LevelId,
+            LayoutType = (LayoutType)puzzle.LayoutType,
+            InitialBoard = puzzle.InitialBoard,
+            SolutionBoard = puzzle.SolutionBoard,
+            RegionMap = puzzle.RegionMap,
+            ClueCount = puzzle.ClueCount
+        };
+    }
+
     private static string GetCallerUserId(ServerCallContext context)
     {
         var user = context.GetHttpContext().User;
