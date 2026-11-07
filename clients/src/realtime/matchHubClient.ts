@@ -226,7 +226,12 @@ class MatchHubClientManager {
       this.channel.onmessage = (event) => {
         const msg = event.data
         if (!msg || typeof msg !== 'object') return
-        if (msg.type === 'CUSTOM_ROOM_MATCH_STARTED') {
+        if (msg.type === 'CUSTOM_ROOM_CREATED') {
+          const room = msg.room as StoredCustomRoom
+          const currentRooms = this.getStoredCustomRooms()
+          currentRooms[room.roomCode] = room
+          localStorage.setItem(CUSTOM_ROOMS_STORAGE_KEY, JSON.stringify(currentRooms))
+        } else if (msg.type === 'CUSTOM_ROOM_MATCH_STARTED') {
           const payload = msg.payload as MatchStartedPayload
           const solution = msg.solution as string | undefined
           const currentUid = this.getCallerIdentity().userId
@@ -269,13 +274,20 @@ class MatchHubClientManager {
         avatarUrl: user.photoURL || '',
       }
     }
+
+    // Generate or retrieve persistent guest UID for this tab/browser
+    let guestUid = sessionStorage.getItem('sudoku:guest:uid')
+    if (!guestUid) {
+      guestUid = `guest-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
+      sessionStorage.setItem('sudoku:guest:uid', guestUid)
+    }
+
     return {
-      userId: 'guest-solo-user',
-      displayName: fallbackName || 'Người chơi',
+      userId: guestUid,
+      displayName: fallbackName || `Khách-${guestUid.slice(-4)}`,
       avatarUrl: '',
     }
   }
-
   public async ensureConnected(): Promise<boolean> {
     if (
       this.connection &&
@@ -300,10 +312,12 @@ class MatchHubClientManager {
                 try {
                   return await user.getIdToken()
                 } catch {
-                  return await getDevToken()
+                  const caller = this.getCallerIdentity()
+                  return await getDevToken(caller.userId)
                 }
               }
-              return await getDevToken()
+              const caller = this.getCallerIdentity()
+              return await getDevToken(caller.userId)
             },
           })
           .withAutomaticReconnect([0, 1000, 2000, 5000])
@@ -516,6 +530,10 @@ class MatchHubClientManager {
     const rooms = this.getStoredCustomRooms()
     rooms[roomCode] = payload
     localStorage.setItem(CUSTOM_ROOMS_STORAGE_KEY, JSON.stringify(rooms))
+    this.channel?.postMessage({
+      type: 'CUSTOM_ROOM_CREATED',
+      room: payload,
+    })
 
     this.customRoomCreatedListeners.forEach((cb) => cb(payload))
     return payload

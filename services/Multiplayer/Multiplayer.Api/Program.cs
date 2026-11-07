@@ -73,7 +73,7 @@ builder.Services.AddFirebaseJwt(builder.Configuration);
 
 builder.Services.AddCors(o => o.AddPolicy("AllowWeb", p =>
 {
-    p.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
+    p.SetIsOriginAllowed(_ => true)
      .AllowAnyMethod()
      .AllowAnyHeader()
      .AllowCredentials()

@@ -184,10 +184,40 @@ export function MultiplayerQueuePage({ profile }: MultiplayerQueuePageProps) {
 
   function handleCopyRoomCode() {
     if (!createdRoom) return
-    navigator.clipboard?.writeText(createdRoom.roomCode).catch(() => {})
-    showToast(`Đã sao chép mã phòng: ${createdRoom.roomCode}`, 'success')
+    const code = createdRoom.roomCode
+
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(code).then(() => {
+        showToast(`Đã sao chép mã phòng: ${code}`, 'success')
+      }).catch(() => {
+        fallbackCopyText(code)
+      })
+      return
+    }
+
+    fallbackCopyText(code)
   }
 
+  function fallbackCopyText(text: string) {
+    try {
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      textArea.style.position = 'fixed'
+      textArea.style.left = '-9999px'
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      const successful = document.execCommand('copy')
+      document.body.removeChild(textArea)
+      if (successful) {
+        showToast(`Đã sao chép mã phòng: ${text}`, 'success')
+      } else {
+        showToast(`Mã phòng của bạn: ${text}`, 'info')
+      }
+    } catch {
+      showToast(`Mã phòng của bạn: ${text}`, 'info')
+    }
+  }
   function handlePlayWithBotNow() {
     matchHub.startSimulatedMatch({
       format: playFormat,
