@@ -539,14 +539,23 @@
   background: color-mix(in srgb, var(--primary) 10%, transparent);
 }
 
-.sudoku-cell.is-conflict .cell-value {
-  color: var(--danger);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.sudoku-cell.is-conflict {
+  background: rgba(239, 68, 68, 0.28) !important;
+  outline: 2px solid var(--danger) !important;
+  outline-offset: -2px;
+  animation: cell-shake 300ms ease-in-out;
 }
 
-.sudoku-cell.is-conflict {
-  background: var(--danger-soft);
+.sudoku-cell.is-conflict .cell-value {
+  color: var(--danger) !important;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@keyframes cell-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
 }
 
 .sudoku-cell.is-opponent-recent {

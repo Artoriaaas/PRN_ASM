@@ -14,6 +14,7 @@ export type SudokuBoardProps = {
   regionMap?: string      // 81 chars, mặc định standard
   selected: number | null
   recentOpponentCell?: number | null  // duel
+  wrongCells?: Set<number>
   readOnly?: boolean
   onSelect: (index: number) => void
 }
@@ -25,6 +26,7 @@ export function SudokuBoard({
   regionMap = STANDARD_REGION_MAP,
   selected,
   recentOpponentCell = null,
+  wrongCells,
   readOnly = false,
   onSelect,
 }: SudokuBoardProps) {
@@ -85,7 +87,7 @@ export function SudokuBoard({
           isSelected={selected === i}
           isPeer={peers.has(i)}
           isSameDigit={selectedValue !== 0 && cells[i] === selectedValue}
-          isConflict={conflicts.has(i)}
+          isConflict={conflicts.has(i) || Boolean(wrongCells?.has(i))}
           isOpponentRecent={recentOpponentCell === i}
           borderMask={borderMasks[i]}
           onClick={handleSelect}

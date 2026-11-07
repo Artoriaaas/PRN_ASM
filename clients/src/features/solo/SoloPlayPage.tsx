@@ -43,6 +43,7 @@ type SoloState = {
   failed: boolean
   isOffline: boolean
   hintText: string | null
+  wrongCells: Set<number>
   highlightCells: number[]
 }
 interface NavigationLocationState {
@@ -63,7 +64,7 @@ type SoloAction =
   | { type: 'INPUT_OPTIMISTIC'; index: number; value: number }
   | { type: 'INPUT_NOTE'; index: number; value: number }
   | { type: 'MOVE_CORRECT'; index: number; value: number; score: number; isCompleted: boolean }
-  | { type: 'MOVE_WRONG'; index: number; mistakes: number; isFailed: boolean }
+  | { type: 'MOVE_WRONG'; index: number; value: number; mistakes: number; isFailed: boolean }
   | { type: 'DELETE'; index: number }
   | { type: 'TOGGLE_NOTES' }
   | { type: 'TOGGLE_PAUSE' }
@@ -114,6 +115,7 @@ function soloReducer(state: SoloState, action: SoloAction): SoloState {
         isOffline: action.isOffline,
         finished: s.status === SessionStatus.COMPLETED,
         failed: s.status === SessionStatus.FAILED,
+        wrongCells: new Set<number>(),
       }
     }
 
@@ -137,15 +139,20 @@ function soloReducer(state: SoloState, action: SoloAction): SoloState {
       nextCells[action.index] = action.value
       const nextNotes = new Uint16Array(state.notes)
       nextNotes[action.index] = 0
-      return { ...state, cells: nextCells, notes: nextNotes }
+      const nextWrong = new Set(state.wrongCells)
+      nextWrong.delete(action.index)
+      return { ...state, cells: nextCells, notes: nextNotes, wrongCells: nextWrong }
     }
 
     case 'MOVE_CORRECT': {
       const nextCells = new Uint8Array(state.cells)
       nextCells[action.index] = action.value
+      const nextWrong = new Set(state.wrongCells)
+      nextWrong.delete(action.index)
       return {
         ...state,
         cells: nextCells,
+        wrongCells: nextWrong,
         score: action.score,
         finished: action.isCompleted,
       }
@@ -153,10 +160,13 @@ function soloReducer(state: SoloState, action: SoloAction): SoloState {
 
     case 'MOVE_WRONG': {
       const nextCells = new Uint8Array(state.cells)
-      nextCells[action.index] = 0 // Clear wrong cell
+      nextCells[action.index] = action.value // Vẫn hiển thị số sai người dùng vừa nhập
+      const nextWrong = new Set(state.wrongCells)
+      nextWrong.add(action.index) // Đánh dấu ô màu đỏ
       return {
         ...state,
         cells: nextCells,
+        wrongCells: nextWrong,
         mistakes: action.mistakes,
         failed: action.isFailed,
       }
@@ -167,7 +177,9 @@ function soloReducer(state: SoloState, action: SoloAction): SoloState {
       nextCells[action.index] = 0
       const nextNotes = new Uint16Array(state.notes)
       nextNotes[action.index] = 0
-      return { ...state, cells: nextCells, notes: nextNotes }
+      const nextWrong = new Set(state.wrongCells)
+      nextWrong.delete(action.index)
+      return { ...state, cells: nextCells, notes: nextNotes, wrongCells: nextWrong }
     }
 
     case 'HINT': {
@@ -175,10 +187,13 @@ function soloReducer(state: SoloState, action: SoloAction): SoloState {
       nextCells[action.index] = action.value
       const nextNotes = new Uint16Array(state.notes)
       nextNotes[action.index] = 0
+      const nextWrong = new Set(state.wrongCells)
+      nextWrong.delete(action.index)
       return {
         ...state,
         cells: nextCells,
         notes: nextNotes,
+        wrongCells: nextWrong,
         hints: state.hints + 1,
         hintText: action.text,
         highlightCells: action.highlightCells ?? [action.index],
@@ -226,6 +241,7 @@ export function SoloPlayPage() {
     isOffline: false,
     hintText: null,
     highlightCells: [],
+    wrongCells: new Set<number>(),
   })
 
   const [showQuitModal, setShowQuitModal] = useState(false)
@@ -329,6 +345,7 @@ export function SoloPlayPage() {
           dispatch({
             type: 'MOVE_WRONG',
             index: selected,
+            value,
             mistakes: nextMistakes,
             isFailed: nextMistakes >= state.maxMistakes,
           })
@@ -350,6 +367,7 @@ export function SoloPlayPage() {
           dispatch({
             type: 'MOVE_WRONG',
             index: selected,
+            value,
             mistakes: mistakesCount,
             isFailed,
           })
@@ -550,8 +568,8 @@ export function SoloPlayPage() {
             notes={state.notes}
             regionMap={state.regionMap}
             selected={state.paused ? null : state.selected}
+            wrongCells={state.wrongCells}
             onSelect={(i) => dispatch({ type: 'SELECT', index: i })}
-            readOnly={state.paused}
           />
         </div>
 
