@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { getAuthErrorMessage } from '../../auth/firebaseErrors'
 
@@ -218,6 +219,11 @@ export function AuthPage() {
               Quên mật khẩu?
             </button>
           )}
+          <div className="auth-guest-divider">
+            <Link to="/solo/new" className="text-button guest-play-link">
+              🎮 Chơi thử Solo ngay (Không cần đăng nhập)
+            </Link>
+          </div>
         </div>
       </section>
     </main>

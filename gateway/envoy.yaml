@@ -96,6 +96,8 @@ static_resources:
                         - match:
                             prefix: '/sudoku.support.v1.SupportService/ListNotices'
                         - match:
+                            prefix: '/sudoku.game.v1.GameService/ListLevels'
+                        - match:
                             prefix: '/'
                           requires:
                             provider_name: firebase

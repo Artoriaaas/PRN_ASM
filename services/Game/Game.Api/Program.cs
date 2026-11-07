@@ -37,13 +37,22 @@ builder.Services.AddGrpc(options =>
 });
 builder.Services.AddGrpcHealthChecks();
 builder.Services.AddFirebaseJwt(builder.Configuration);
+builder.Services.AddCors(o => o.AddPolicy("AllowWeb", p =>
+{
+    p.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
+     .AllowAnyMethod()
+     .AllowAnyHeader()
+     .WithExposedHeaders("grpc-status", "grpc-message", "grpc-encoding", "grpc-accept-encoding");
+}));
 
 var app = builder.Build();
+app.UseRouting();
+app.UseCors("AllowWeb");
+app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGrpcService<GameGrpcService>();
+app.MapGrpcService<GameGrpcService>().EnableGrpcWeb().RequireCors("AllowWeb");
 app.MapGrpcHealthChecksService();
-
 app.Run();

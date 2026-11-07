@@ -25,6 +25,7 @@ public class GameGrpcService : GameService.GameServiceBase
         _leaderboardService = leaderboardService;
     }
 
+    [AllowAnonymous]
     public override async Task<ListLevelsResponse> ListLevels(ListLevelsRequest request, ServerCallContext context)
     {
         var levels = await _leaderboardService.ListLevelsAsync(context.CancellationToken);

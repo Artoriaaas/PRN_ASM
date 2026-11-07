@@ -50,8 +50,11 @@ export function LandingPage() {
               Hai layout, hai chế độ đấu, một bảng xếp hạng thực sự.
             </p>
             <div className="hero-actions">
-              <Link to="/auth" className="btn btn-primary btn-lg">
-                Chơi ngay — Miễn phí
+              <Link to="/solo/new" className="btn btn-primary btn-lg">
+                Chơi ngay (Solo)
+              </Link>
+              <Link to="/auth" className="btn btn-ghost btn-lg">
+                Đăng nhập tài khoản
               </Link>
               <a href="#features" className="btn btn-ghost btn-lg">
                 Tìm hiểu thêm
