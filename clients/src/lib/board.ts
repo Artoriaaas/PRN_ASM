@@ -119,3 +119,302 @@ export function isBoardFilled(cells: Uint8Array): boolean {
   return true;
 }
 
+export type LogicalHintResult = {
+  targetIdx: number
+  value: number
+  technique: 'HiddenSingleRegion' | 'HiddenSingleRow' | 'HiddenSingleCol' | 'NakedSingle' | 'DirectReveal'
+  techniqueTitle: string
+  step1Text: string
+  step2Text: string
+  step3Text: string
+  clueCells: number[]
+  beamCells: number[]
+  houseCells: number[]
+  selectedHasNoEvidence?: boolean
+}
+
+export function getCandidates(cells: Uint8Array, regionMap: string, idx: number): number[] {
+  if (cells[idx] !== 0) return []
+  const peers = getPeers(idx, regionMap)
+  const used = new Set<number>()
+  for (const p of peers) {
+    if (cells[p] !== 0) used.add(cells[p])
+  }
+  const candidates: number[] = []
+  for (let v = 1; v <= 9; v++) {
+    if (!used.has(v)) candidates.push(v)
+  }
+  return candidates
+}
+
+export function findLogicalHint(
+  cells: Uint8Array,
+  regionMap: string,
+  preferredIdx: number | null = null,
+  solution?: string,
+): LogicalHintResult | null {
+  const rows: number[][] = Array.from({ length: 9 }, (_, r) =>
+    Array.from({ length: 9 }, (_, c) => r * 9 + c),
+  )
+  const cols: number[][] = Array.from({ length: 9 }, (_, c) =>
+    Array.from({ length: 9 }, (_, r) => r * 9 + c),
+  )
+  const regions: number[][] = Array.from({ length: 9 }, () => [])
+  for (let i = 0; i < 81; i++) {
+    regions[Number(regionMap[i])].push(i)
+  }
+
+  const getCellsWithValue = (v: number) => {
+    const res: number[] = []
+    for (let i = 0; i < 81; i++) {
+      if (cells[i] === v) res.push(i)
+    }
+    return res
+  }
+
+  const getBeamsForClues = (clueIndices: number[]) => {
+    const beamSet = new Set<number>()
+    for (const c of clueIndices) {
+      const [r, col] = indexToRC(c)
+      for (let i = 0; i < 9; i++) {
+        beamSet.add(r * 9 + i)
+        beamSet.add(i * 9 + col)
+      }
+    }
+    return Array.from(beamSet)
+  }
+
+  let selectedHasNoEvidence = false
+  if (
+    preferredIdx !== null &&
+    preferredIdx >= 0 &&
+    preferredIdx < 81 &&
+    cells[preferredIdx] === 0
+  ) {
+    const prefCandidates = getCandidates(cells, regionMap, preferredIdx)
+    if (prefCandidates.length > 1) {
+      const [prefR, prefC] = indexToRC(preferredIdx)
+      const prefReg = Number(regionMap[preferredIdx])
+
+      for (const v of prefCandidates) {
+        const inReg = regions[prefReg].filter(
+          (c) => cells[c] === 0 && getCandidates(cells, regionMap, c).includes(v),
+        )
+        if (inReg.length === 1 && inReg[0] === preferredIdx) {
+          const clues = getCellsWithValue(v)
+          return {
+            targetIdx: preferredIdx,
+            value: v,
+            technique: 'HiddenSingleRegion',
+            techniqueTitle: 'Last Remaining Cell',
+            step1Text: `Pay attention to these cells and the highlighted areas`,
+            step2Text: `In this block, there is only one cell remaining that can contain ${v}`,
+            step3Text: `Since it is the only possible option, this cell must be ${v}`,
+            clueCells: clues,
+            beamCells: getBeamsForClues(clues),
+            houseCells: regions[prefReg],
+          }
+        }
+
+        const inRow = rows[prefR].filter(
+          (c) => cells[c] === 0 && getCandidates(cells, regionMap, c).includes(v),
+        )
+        if (inRow.length === 1 && inRow[0] === preferredIdx) {
+          const clues = getCellsWithValue(v)
+          return {
+            targetIdx: preferredIdx,
+            value: v,
+            technique: 'HiddenSingleRow',
+            techniqueTitle: 'Last Remaining Cell',
+            step1Text: `Pay attention to these cells and the highlighted areas`,
+            step2Text: `In this row, there is only one cell remaining that can contain ${v}`,
+            step3Text: `Since it is the only possible option, this cell must be ${v}`,
+            clueCells: clues,
+            beamCells: getBeamsForClues(clues),
+            houseCells: rows[prefR],
+          }
+        }
+
+        const inCol = cols[prefC].filter(
+          (c) => cells[c] === 0 && getCandidates(cells, regionMap, c).includes(v),
+        )
+        if (inCol.length === 1 && inCol[0] === preferredIdx) {
+          const clues = getCellsWithValue(v)
+          return {
+            targetIdx: preferredIdx,
+            value: v,
+            technique: 'HiddenSingleCol',
+            techniqueTitle: 'Last Remaining Cell',
+            step1Text: `Pay attention to these cells and the highlighted areas`,
+            step2Text: `In this column, there is only one cell remaining that can contain ${v}`,
+            step3Text: `Since it is the only possible option, this cell must be ${v}`,
+            clueCells: clues,
+            beamCells: getBeamsForClues(clues),
+            houseCells: cols[prefC],
+          }
+        }
+      }
+
+      selectedHasNoEvidence = true
+    } else if (prefCandidates.length === 1) {
+      const v = prefCandidates[0]
+      const peerList = Array.from(getPeers(preferredIdx, regionMap)).filter(
+        (p) => cells[p] !== 0,
+      )
+      return {
+        targetIdx: preferredIdx,
+        value: v,
+        technique: 'NakedSingle',
+        techniqueTitle: 'Naked Single',
+        step1Text: `Pay attention to these cells and the highlighted areas`,
+        step2Text: `All other 8 digits (1–9 except ${v}) appear in its row, column, or block`,
+        step3Text: `Since it is the only possible option, this cell must be ${v}`,
+        clueCells: peerList,
+        beamCells: peerList,
+        houseCells: [preferredIdx],
+      }
+    }
+  }
+
+  // 1. Hidden Single in Region (Block) — most intuitive (Image 2, 3, 4)
+  for (let reg = 0; reg < 9; reg++) {
+    const house = regions[reg]
+    for (let v = 1; v <= 9; v++) {
+      if (house.some((c) => cells[c] === v)) continue
+      const available = house.filter(
+        (c) => cells[c] === 0 && getCandidates(cells, regionMap, c).includes(v),
+      )
+      if (available.length === 1) {
+        const target = available[0]
+        const clues = getCellsWithValue(v)
+        return {
+          targetIdx: target,
+          value: v,
+          technique: 'HiddenSingleRegion',
+          techniqueTitle: 'Last Remaining Cell',
+          step1Text: `Pay attention to these cells and the highlighted areas`,
+          step2Text: `In this block, there is only one cell remaining that can contain ${v}`,
+          step3Text: `Since it is the only possible option, this cell must be ${v}`,
+          clueCells: clues,
+          beamCells: getBeamsForClues(clues),
+          houseCells: house,
+          selectedHasNoEvidence,
+        }
+      }
+    }
+  }
+
+  // 2. Naked Single
+  for (let i = 0; i < 81; i++) {
+    if (cells[i] !== 0) continue
+    const candidates = getCandidates(cells, regionMap, i)
+    if (candidates.length === 1) {
+      const v = candidates[0]
+      const peerList = Array.from(getPeers(i, regionMap)).filter(
+        (p) => cells[p] !== 0,
+      )
+      return {
+        targetIdx: i,
+        value: v,
+        technique: 'NakedSingle',
+        techniqueTitle: 'Naked Single',
+        step1Text: `Pay attention to these cells and the highlighted areas`,
+        step2Text: `All other 8 digits (1–9 except ${v}) appear in its row, column, or block`,
+        step3Text: `Since it is the only possible option, this cell must be ${v}`,
+        clueCells: peerList,
+        beamCells: peerList,
+        houseCells: [i],
+        selectedHasNoEvidence,
+      }
+    }
+  }
+
+  // 3. Hidden Single in Row
+  for (let r = 0; r < 9; r++) {
+    const house = rows[r]
+    for (let v = 1; v <= 9; v++) {
+      if (house.some((c) => cells[c] === v)) continue
+      const available = house.filter(
+        (c) => cells[c] === 0 && getCandidates(cells, regionMap, c).includes(v),
+      )
+      if (available.length === 1) {
+        const target = available[0]
+        const clues = getCellsWithValue(v)
+        return {
+          targetIdx: target,
+          value: v,
+          technique: 'HiddenSingleRow',
+          techniqueTitle: 'Last Remaining Cell',
+          step1Text: `Pay attention to these cells and the highlighted areas`,
+          step2Text: `In this row, there is only one cell remaining that can contain ${v}`,
+          step3Text: `Since it is the only possible option, this cell must be ${v}`,
+          clueCells: clues,
+          beamCells: getBeamsForClues(clues),
+          houseCells: house,
+          selectedHasNoEvidence,
+        }
+      }
+    }
+  }
+
+  // 4. Hidden Single in Column
+  for (let c = 0; c < 9; c++) {
+    const house = cols[c]
+    for (let v = 1; v <= 9; v++) {
+      if (house.some((idx) => cells[idx] === v)) continue
+      const available = house.filter(
+        (idx) => cells[idx] === 0 && getCandidates(cells, regionMap, idx).includes(v),
+      )
+      if (available.length === 1) {
+        const target = available[0]
+        const clues = getCellsWithValue(v)
+        return {
+          targetIdx: target,
+          value: v,
+          technique: 'HiddenSingleCol',
+          techniqueTitle: 'Last Remaining Cell',
+          step1Text: `Pay attention to these cells and the highlighted areas`,
+          step2Text: `In this column, there is only one cell remaining that can contain ${v}`,
+          step3Text: `Since it is the only possible option, this cell must be ${v}`,
+          clueCells: clues,
+          beamCells: getBeamsForClues(clues),
+          houseCells: house,
+          selectedHasNoEvidence,
+        }
+      }
+    }
+  }
+
+  // 5. Fallback if solution is available
+  if (solution) {
+    let minCand = 10
+    let bestIdx = -1
+    for (let i = 0; i < 81; i++) {
+      if (cells[i] !== 0) continue
+      const count = getCandidates(cells, regionMap, i).length
+      if (count < minCand) {
+        minCand = count
+        bestIdx = i
+      }
+    }
+    if (bestIdx >= 0) {
+      const v = Number(solution[bestIdx])
+      return {
+        targetIdx: bestIdx,
+        value: v,
+        technique: 'DirectReveal',
+        techniqueTitle: 'Direct Reveal',
+        step1Text: `Pay attention to this cell with the fewest possible candidates`,
+        step2Text: `Based on board deduction, this cell must contain ${v}`,
+        step3Text: `Since it is the only possible option, this cell must be ${v}`,
+        clueCells: [bestIdx],
+        beamCells: [],
+        houseCells: [bestIdx],
+        selectedHasNoEvidence,
+      }
+    }
+  }
+
+  return null
+}
+
