@@ -22,4 +22,19 @@ public static class BoardConstants
         "666777888" +
         "666777888" +
         "666777888";
+
+    /// <summary>
+    /// Default irregular (Jigsaw/Shuffle) 9x9 Sudoku region map.
+    /// Each character in 0..8 represents an orthogonally connected 9-cell irregular polyomino.
+    /// </summary>
+    public const string IrregularRegionMap =
+        "000001111" +
+        "000022111" +
+        "222222211" +
+        "333344455" +
+        "333444455" +
+        "334466555" +
+        "776666558" +
+        "777666888" +
+        "777788888";
 }

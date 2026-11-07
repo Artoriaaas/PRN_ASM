@@ -16,6 +16,7 @@ import {
   abandonGameSession,
   getGameSession,
   SessionStatus,
+  LayoutType,
 } from '../../api/gameClient'
 import {
   evaluateOfflineMove,
@@ -262,10 +263,14 @@ export function SoloPlayPage() {
     }
 
     if (!sessionId) return
+    const layoutType =
+      locState?.layout === 'irregular' || locState?.session?.layoutType === LayoutType.IRREGULAR
+        ? LayoutType.IRREGULAR
+        : LayoutType.STANDARD
 
     if (sessionId.startsWith('offline-')) {
       const level = locState?.level ?? 'medium'
-      const offline = createOfflineSession(level)
+      const offline = createOfflineSession(level, layoutType)
       dispatch({ type: 'INIT_SESSION', session: offline, isOffline: true })
       return
     }
@@ -278,10 +283,9 @@ export function SoloPlayPage() {
       })
       .catch((err) => {
         console.warn('Failed to load session, falling back to offline:', err)
-        const offline = createOfflineSession('medium')
+        const offline = createOfflineSession(locState?.level ?? 'medium', layoutType)
         dispatch({ type: 'INIT_SESSION', session: offline, isOffline: true })
       })
-
     return () => controller.abort()
   }, [sessionId, location.state])
 

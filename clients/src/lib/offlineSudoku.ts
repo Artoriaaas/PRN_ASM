@@ -5,6 +5,9 @@ import {
 } from '../gen/sudoku/game/v1/game_pb'
 import { STANDARD_REGION_MAP } from './board'
 
+export const IRREGULAR_REGION_MAP =
+  '000001111000022111222222211333344455333444455334466555776666558777666888777788888'
+
 type SeedPuzzle = {
   initial: string
   solution: string
@@ -42,6 +45,37 @@ const SEED_PUZZLES: SeedPuzzle[] = [
   },
 ]
 
+const IRREGULAR_SEEDS: SeedPuzzle[] = [
+  {
+    tier: 'easy',
+    initial:
+      '700050386000049750680207149000060298560000900003706010009580600008000460230601805',
+    solution:
+      '741952386326849751685237149417365298562418937893726514179584623958173462234691875',
+  },
+  {
+    tier: 'medium',
+    initial:
+      '000052300306009050080007000410300008500000937890006000079000623050170062230000870',
+    solution:
+      '741952386326849751685237149417365298562418937893726514179584623958173462234691875',
+  },
+  {
+    tier: 'hard',
+    initial:
+      '700900006020009000680000049007060208002400000000000014100500620908073002030000870',
+    solution:
+      '741952386326849751685237149417365298562418937893726514179584623958173462234691875',
+  },
+  {
+    tier: 'expert',
+    initial:
+      '000002380006840000600007100017000000060410030800000000079000620008000402200090800',
+    solution:
+      '741952386326849751685237149417365298562418937893726514179584623958173462234691875',
+  },
+]
+
 function shuffleArray<T>(arr: T[]): T[] {
   const result = [...arr]
   for (let i = result.length - 1; i > 0; i--) {
@@ -73,10 +107,12 @@ export function createOfflineSession(
   levelId: string,
   layoutType: LayoutType = LayoutType.STANDARD,
 ): SessionState {
-  const matched =
-    SEED_PUZZLES.find((p) => p.tier === levelId) ?? SEED_PUZZLES[0]
+  const isIrregular = layoutType === LayoutType.IRREGULAR
+  const pool = isIrregular ? IRREGULAR_SEEDS : SEED_PUZZLES
+  const matched = pool.find((p) => p.tier === levelId) ?? pool[0]
   const { initial, solution } = permuteSudoku(matched)
   const sessionId = `offline-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  const regionMap = isIrregular ? IRREGULAR_REGION_MAP : STANDARD_REGION_MAP
 
   offlineSolutionCache.set(sessionId, solution)
 
@@ -88,7 +124,7 @@ export function createOfflineSession(
     status: SessionStatus.IN_PROGRESS,
     initialBoard: initial,
     currentBoard: initial,
-    regionMap: STANDARD_REGION_MAP,
+    regionMap,
     notes: [],
     mistakesCount: 0,
     maxMistakes: 3,

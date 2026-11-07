@@ -70,13 +70,14 @@ export function SudokuBoard({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [selected, onSelect])
 
+  const isIrregular = regionMap !== STANDARD_REGION_MAP
   return (
-    <div
-      ref={boardRef}
-      className="sudoku-board"
-      role="grid"
-      aria-label="Bàn Sudoku 9x9"
-    >
+      <div
+        ref={boardRef}
+        className={`sudoku-board${isIrregular ? ' is-irregular' : ''}`}
+        role="grid"
+        aria-label="Bàn Sudoku 9x9"
+      >
       {Array.from({ length: 81 }, (_, i) => (
         <SudokuCell
           key={i}
@@ -90,6 +91,7 @@ export function SudokuBoard({
           isConflict={conflicts.has(i) || Boolean(wrongCells?.has(i))}
           isOpponentRecent={recentOpponentCell === i}
           borderMask={borderMasks[i]}
+          regionIndex={Number(regionMap[i])}
           onClick={handleSelect}
         />
       ))}

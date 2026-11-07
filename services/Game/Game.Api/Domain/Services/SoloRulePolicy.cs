@@ -23,11 +23,9 @@ public class ClassicSoloRulePolicy : ISoloRulePolicy
             throw new ValidationException($"Level '{level.LevelId}' is currently inactive.");
         }
 
-        // Layout standard is 1. If unspecified, caller normalizes to standard.
-        // Irregular (2) is not yet enabled for generation in this phase.
-        if (layoutType != (int)LayoutType.Standard)
+        if (layoutType != (int)LayoutType.Standard && layoutType != (int)LayoutType.Irregular)
         {
-            throw new ValidationException("Only standard layout is supported in this release.");
+            throw new ValidationException($"Unsupported layout type: {layoutType}.");
         }
     }
 

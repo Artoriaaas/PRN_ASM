@@ -7,8 +7,13 @@ using System.Linq;
 public sealed class RegionMap
 {
     private static readonly Lazy<RegionMap> StandardInstance = new(() => new RegionMap(BoardConstants.StandardRegionMap));
+    private static readonly Lazy<RegionMap> IrregularInstance = new(() => new RegionMap(BoardConstants.IrregularRegionMap));
 
     public static RegionMap Standard => StandardInstance.Value;
+    public static RegionMap Irregular => IrregularInstance.Value;
+
+    public static RegionMap GetForLayout(int layoutType) =>
+        layoutType == 2 ? Irregular : Standard;
 
     public string MapString { get; }
     public int[] CellRegion { get; } = new int[BoardConstants.CellCount];

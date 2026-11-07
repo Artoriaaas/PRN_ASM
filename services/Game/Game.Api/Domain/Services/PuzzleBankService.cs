@@ -38,8 +38,9 @@ public class PuzzleBankService : IPuzzleBankService
         _logger.LogInformation("Generating on-the-fly puzzle for level {LevelId}, layout {LayoutType}, user {UserId}",
             level.LevelId, layoutType, userId);
 
+        var regionMap = RegionMap.GetForLayout(layoutType);
         var generated = SudokuGenerator.Generate(
-            RegionMap.Standard,
+            regionMap,
             level.MinClues,
             level.MaxClues
         );
@@ -82,8 +83,9 @@ public class PuzzleBankService : IPuzzleBankService
         {
             if (ct.IsCancellationRequested) break;
 
+            var regionMap = RegionMap.GetForLayout(layoutType);
             var generated = SudokuGenerator.Generate(
-                RegionMap.Standard,
+                regionMap,
                 level.MinClues,
                 level.MaxClues
             );
