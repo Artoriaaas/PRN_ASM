@@ -504,4 +504,5 @@ ui-debug.log*
 dist/
 web/dist/
 .vite-temp/
+web/
 

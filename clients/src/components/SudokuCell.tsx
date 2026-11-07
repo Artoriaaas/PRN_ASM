@@ -12,6 +12,7 @@ export type SudokuCellProps = {
   isConflict: boolean
   isOpponentRecent: boolean // duel: đối thủ vừa điền
   borderMask: number  // top=8, right=4, bottom=2, left=1 (1=viền đậm)
+  regionIndex?: number
   onClick: (index: number) => void
 }
 
@@ -26,6 +27,7 @@ function SudokuCellInner({
   isConflict,
   isOpponentRecent,
   borderMask,
+  regionIndex,
   onClick,
 }: SudokuCellProps) {
   const [row, col] = [Math.floor(index / 9), index % 9]
@@ -51,6 +53,7 @@ function SudokuCellInner({
   return (
     <div
       role="gridcell"
+      data-region={regionIndex}
       aria-label={`Hàng ${row + 1}, cột ${col + 1}${value ? `, giá trị ${value}` : ', trống'}${isGiven ? ', ô đề' : ''}${isConflict ? ', xung đột' : ''}`}
       aria-selected={isSelected}
       tabIndex={isSelected ? 0 : -1}

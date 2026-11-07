@@ -14,6 +14,7 @@ export type SudokuBoardProps = {
   regionMap?: string      // 81 chars, mặc định standard
   selected: number | null
   recentOpponentCell?: number | null  // duel
+  wrongCells?: Set<number>
   readOnly?: boolean
   onSelect: (index: number) => void
 }
@@ -25,6 +26,7 @@ export function SudokuBoard({
   regionMap = STANDARD_REGION_MAP,
   selected,
   recentOpponentCell = null,
+  wrongCells,
   readOnly = false,
   onSelect,
 }: SudokuBoardProps) {
@@ -68,13 +70,14 @@ export function SudokuBoard({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [selected, onSelect])
 
+  const isIrregular = regionMap !== STANDARD_REGION_MAP
   return (
-    <div
-      ref={boardRef}
-      className="sudoku-board"
-      role="grid"
-      aria-label="Bàn Sudoku 9x9"
-    >
+      <div
+        ref={boardRef}
+        className={`sudoku-board${isIrregular ? ' is-irregular' : ''}`}
+        role="grid"
+        aria-label="Bàn Sudoku 9x9"
+      >
       {Array.from({ length: 81 }, (_, i) => (
         <SudokuCell
           key={i}
@@ -85,9 +88,10 @@ export function SudokuBoard({
           isSelected={selected === i}
           isPeer={peers.has(i)}
           isSameDigit={selectedValue !== 0 && cells[i] === selectedValue}
-          isConflict={conflicts.has(i)}
+          isConflict={conflicts.has(i) || Boolean(wrongCells?.has(i))}
           isOpponentRecent={recentOpponentCell === i}
           borderMask={borderMasks[i]}
+          regionIndex={Number(regionMap[i])}
           onClick={handleSelect}
         />
       ))}

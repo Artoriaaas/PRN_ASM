@@ -539,14 +539,23 @@
   background: color-mix(in srgb, var(--primary) 10%, transparent);
 }
 
-.sudoku-cell.is-conflict .cell-value {
-  color: var(--danger);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.sudoku-cell.is-conflict {
+  background: rgba(239, 68, 68, 0.28) !important;
+  outline: 2px solid var(--danger) !important;
+  outline-offset: -2px;
+  animation: cell-shake 300ms ease-in-out;
 }
 
-.sudoku-cell.is-conflict {
-  background: var(--danger-soft);
+.sudoku-cell.is-conflict .cell-value {
+  color: var(--danger) !important;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@keyframes cell-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
 }
 
 .sudoku-cell.is-opponent-recent {
@@ -558,6 +567,27 @@
   50% { outline: 2px solid var(--opponent); }
 }
 
+
+/* Phân biệt màu các vùng trong layout Shuffle / Irregular */
+.sudoku-board.is-irregular .sudoku-cell[data-region="0"] { background: rgba(99, 102, 241, 0.12); }
+.sudoku-board.is-irregular .sudoku-cell[data-region="1"] { background: rgba(236, 72, 153, 0.12); }
+.sudoku-board.is-irregular .sudoku-cell[data-region="2"] { background: rgba(16, 185, 129, 0.12); }
+.sudoku-board.is-irregular .sudoku-cell[data-region="3"] { background: rgba(245, 158, 11, 0.12); }
+.sudoku-board.is-irregular .sudoku-cell[data-region="4"] { background: rgba(139, 92, 246, 0.12); }
+.sudoku-board.is-irregular .sudoku-cell[data-region="5"] { background: rgba(6, 182, 212, 0.12); }
+.sudoku-board.is-irregular .sudoku-cell[data-region="6"] { background: rgba(20, 184, 166, 0.12); }
+.sudoku-board.is-irregular .sudoku-cell[data-region="7"] { background: rgba(249, 115, 22, 0.12); }
+.sudoku-board.is-irregular .sudoku-cell[data-region="8"] { background: rgba(59, 130, 246, 0.12); }
+
+.sudoku-board.is-irregular .sudoku-cell.is-peer {
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+}
+.sudoku-board.is-irregular .sudoku-cell.is-same-digit {
+  background: color-mix(in srgb, var(--primary) 22%, transparent);
+}
+.sudoku-board.is-irregular .sudoku-cell.is-conflict {
+  background: rgba(239, 68, 68, 0.35) !important;
+}
 .cell-value {
   font-size: clamp(1rem, calc(var(--board-size) / 11), 1.6rem);
   line-height: 1;
