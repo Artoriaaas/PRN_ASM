@@ -29,9 +29,11 @@ export function GameTimer({
   paused = false,
   className = '',
 }: GameTimerProps) {
-  const [now, setNow] = useState(Date.now())
+  const [now, setNow] = useState(() => Date.now())
   const onExpiredRef = useRef(onExpired)
-  onExpiredRef.current = onExpired
+  useEffect(() => {
+    onExpiredRef.current = onExpired
+  }, [onExpired])
 
   useEffect(() => {
     if (startedAt === null || paused) return

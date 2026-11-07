@@ -17,7 +17,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     )
   }
 
-  if (!user) {
+  if (!user && !location.pathname.startsWith('/solo')) {
     return <Navigate to="/auth" state={{ from: location }} replace />
   }
 

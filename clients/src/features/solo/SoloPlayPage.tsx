@@ -1,64 +1,124 @@
-import { useReducer, useEffect, useRef } from 'react'
+import { useReducer, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { SudokuBoard } from '../../components/SudokuBoard'
 import { NumberPad } from '../../components/NumberPad'
 import { GameTimer } from '../../components/GameTimer'
 import { Modal } from '../../components/ui/Modal'
-import { STANDARD_REGION_MAP, toggleNote, isBoardFilled } from '../../lib/board'
+import {
+  STANDARD_REGION_MAP,
+  toggleNote,
+  isBoardFilled,
+  indexToRC,
+} from '../../lib/board'
+import {
+  makeGameMove,
+  requestGameHint,
+  abandonGameSession,
+  getGameSession,
+  SessionStatus,
+} from '../../api/gameClient'
+import {
+  evaluateOfflineMove,
+  getOfflineSolution,
+  createOfflineSession,
+} from '../../lib/offlineSudoku'
+import type { SessionState } from '../../gen/sudoku/game/v1/game_pb'
 
-// ─── Mock puzzle (thay bằng Game Service response) ───────────────────────────
-const MOCK_INITIAL = '530070000600195000098000060800060003400803001700020006060000280000419005000080079'
-const MOCK_REGION = STANDARD_REGION_MAP
-
-// ─── State & Reducer ─────────────────────────────────────────────────────────
 type SoloState = {
+  session: SessionState | null
+  initialBoard: string
+  regionMap: string
   cells: Uint8Array
   notes: Uint16Array
   selected: number | null
   notesMode: boolean
   mistakes: number
+  maxMistakes: number
   hints: number
+  maxHints: number
+  score: number
   paused: boolean
   startedAt: number | null
   finished: boolean
+  failed: boolean
+  isOffline: boolean
+  hintText: string | null
+  highlightCells: number[]
+}
+interface NavigationLocationState {
+  session?: SessionState
+  isOffline?: boolean
+  level?: string
+  layout?: string
+  logicOnly?: boolean
+  startedAt?: number
+  mistakes?: number
+  hints?: number
+  score?: number
 }
 
 type SoloAction =
+  | { type: 'INIT_SESSION'; session: SessionState; isOffline: boolean }
   | { type: 'SELECT'; index: number }
-  | { type: 'INPUT'; value: number }
-  | { type: 'DELETE' }
+  | { type: 'INPUT_OPTIMISTIC'; index: number; value: number }
+  | { type: 'INPUT_NOTE'; index: number; value: number }
+  | { type: 'MOVE_CORRECT'; index: number; value: number; score: number; isCompleted: boolean }
+  | { type: 'MOVE_WRONG'; index: number; mistakes: number; isFailed: boolean }
+  | { type: 'DELETE'; index: number }
   | { type: 'TOGGLE_NOTES' }
   | { type: 'TOGGLE_PAUSE' }
-  | { type: 'HINT'; index: number; value: number }
-  | { type: 'START'; startedAt: number }
+  | { type: 'HINT'; index: number; value: number; text: string; highlightCells?: number[] }
+  | { type: 'CLEAR_HINT_HIGHLIGHT' }
   | { type: 'FINISH' }
+  | { type: 'FAIL' }
+  | { type: 'SET_START_TIME'; startedAt: number }
 
-function initState(): SoloState {
-  const initial = MOCK_INITIAL
+function parseBoardString(boardStr: string): Uint8Array {
   const cells = new Uint8Array(81)
   for (let i = 0; i < 81; i++) {
-    if (initial[i] !== '0') cells[i] = Number(initial[i])
+    const ch = boardStr[i] ?? '0'
+    if (ch >= '1' && ch <= '9') {
+      cells[i] = Number(ch)
+    }
   }
-  return {
-    cells,
-    notes: new Uint16Array(81),
-    selected: null,
-    notesMode: false,
-    mistakes: 0,
-    hints: 0,
-    paused: false,
-    startedAt: null,
-    finished: false,
-  }
+  return cells
 }
 
 function soloReducer(state: SoloState, action: SoloAction): SoloState {
   switch (action.type) {
-    case 'SELECT':
-      return { ...state, selected: action.index }
+    case 'INIT_SESSION': {
+      const s = action.session
+      const initial = s.initialBoard || s.currentBoard
+      const cells = parseBoardString(s.currentBoard || initial)
+      const notes = new Uint16Array(81)
+      if (s.notes) {
+        for (const n of s.notes) {
+          if (n.cellIndex >= 0 && n.cellIndex < 81) {
+            notes[n.cellIndex] = n.candidatesMask
+          }
+        }
+      }
 
-    case 'START':
-      return { ...state, startedAt: action.startedAt }
+      return {
+        ...state,
+        session: s,
+        initialBoard: initial,
+        regionMap: s.regionMap || STANDARD_REGION_MAP,
+        cells,
+        notes,
+        mistakes: s.mistakesCount,
+        maxMistakes: s.maxMistakes || 3,
+        hints: s.hintsUsed,
+        maxHints: s.maxHints || 3,
+        score: s.score,
+        isOffline: action.isOffline,
+        finished: s.status === SessionStatus.COMPLETED,
+        failed: s.status === SessionStatus.FAILED,
+      }
+    }
+
+    case 'SELECT':
+      return { ...state, selected: action.index, hintText: null }
 
     case 'TOGGLE_PAUSE':
       return { ...state, paused: !state.paused }
@@ -66,85 +126,312 @@ function soloReducer(state: SoloState, action: SoloAction): SoloState {
     case 'TOGGLE_NOTES':
       return { ...state, notesMode: !state.notesMode }
 
-    case 'FINISH':
-      return { ...state, finished: true }
-
-    case 'INPUT': {
-      const { selected, notesMode } = state
-      if (selected === null) return state
-      if (MOCK_INITIAL[selected] !== '0') return state // ô đề, không sửa
-
-      if (notesMode) {
-        const nextNotes = new Uint16Array(state.notes)
-        nextNotes[selected] = toggleNote(nextNotes[selected], action.value)
-        return { ...state, notes: nextNotes }
-      }
-
-      const nextCells = new Uint8Array(state.cells)
-      nextCells[selected] = action.value
-      // Reset notes ô đó khi điền số
+    case 'INPUT_NOTE': {
       const nextNotes = new Uint16Array(state.notes)
-      nextNotes[selected] = 0
+      nextNotes[action.index] = toggleNote(nextNotes[action.index], action.value)
+      return { ...state, notes: nextNotes }
+    }
 
-      const finished = isBoardFilled(nextCells)
-      return { ...state, cells: nextCells, notes: nextNotes, finished }
+    case 'INPUT_OPTIMISTIC': {
+      const nextCells = new Uint8Array(state.cells)
+      nextCells[action.index] = action.value
+      const nextNotes = new Uint16Array(state.notes)
+      nextNotes[action.index] = 0
+      return { ...state, cells: nextCells, notes: nextNotes }
+    }
+
+    case 'MOVE_CORRECT': {
+      const nextCells = new Uint8Array(state.cells)
+      nextCells[action.index] = action.value
+      return {
+        ...state,
+        cells: nextCells,
+        score: action.score,
+        finished: action.isCompleted,
+      }
+    }
+
+    case 'MOVE_WRONG': {
+      const nextCells = new Uint8Array(state.cells)
+      nextCells[action.index] = 0 // Clear wrong cell
+      return {
+        ...state,
+        cells: nextCells,
+        mistakes: action.mistakes,
+        failed: action.isFailed,
+      }
     }
 
     case 'DELETE': {
-      const { selected } = state
-      if (selected === null) return state
-      if (MOCK_INITIAL[selected] !== '0') return state
-
       const nextCells = new Uint8Array(state.cells)
-      nextCells[selected] = 0
+      nextCells[action.index] = 0
       const nextNotes = new Uint16Array(state.notes)
-      nextNotes[selected] = 0
+      nextNotes[action.index] = 0
       return { ...state, cells: nextCells, notes: nextNotes }
     }
 
     case 'HINT': {
       const nextCells = new Uint8Array(state.cells)
       nextCells[action.index] = action.value
-      return { ...state, cells: nextCells, hints: state.hints + 1 }
+      const nextNotes = new Uint16Array(state.notes)
+      nextNotes[action.index] = 0
+      return {
+        ...state,
+        cells: nextCells,
+        notes: nextNotes,
+        hints: state.hints + 1,
+        hintText: action.text,
+        highlightCells: action.highlightCells ?? [action.index],
+      }
     }
+
+    case 'CLEAR_HINT_HIGHLIGHT':
+      return { ...state, hintText: null, highlightCells: [] }
+
+    case 'FINISH':
+      return { ...state, finished: true }
+
+    case 'FAIL':
+      return { ...state, failed: true }
+    case 'SET_START_TIME':
+      return { ...state, startedAt: action.startedAt }
 
     default:
       return state
   }
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
 export function SoloPlayPage() {
-  const { sessionId } = useParams()
+  const { sessionId } = useParams<{ sessionId: string }>()
   const location = useLocation()
   const navigate = useNavigate()
-  const [state, dispatch] = useReducer(soloReducer, undefined, initState)
-  const [showQuitModal, setShowQuitModal] = useToggle(false)
-  const startedRef = useRef(false)
 
-  // Bắt đầu timer khi mount
+  const [state, dispatch] = useReducer(soloReducer, {
+    session: null,
+    initialBoard: STANDARD_REGION_MAP,
+    regionMap: STANDARD_REGION_MAP,
+    cells: new Uint8Array(81),
+    notes: new Uint16Array(81),
+    selected: null,
+    notesMode: false,
+    mistakes: 0,
+    maxMistakes: 3,
+    hints: 0,
+    maxHints: 3,
+    score: 0,
+    paused: false,
+    startedAt: null,
+    finished: false,
+    failed: false,
+    isOffline: false,
+    hintText: null,
+    highlightCells: [],
+  })
+
+  const [showQuitModal, setShowQuitModal] = useState(false)
+  const isSubmittingMove = useRef(false)
+  const isRequestingHint = useRef(false)
+
+  // Khởi tạo session từ navigation state hoặc tải từ server
   useEffect(() => {
-    if (!startedRef.current) {
-      startedRef.current = true
-      dispatch({ type: 'START', startedAt: Date.now() })
+    const locState = location.state as NavigationLocationState | null
+
+    if (locState?.session) {
+      dispatch({
+        type: 'INIT_SESSION',
+        session: locState.session,
+        isOffline: Boolean(locState.isOffline),
+      })
+      return
     }
-  }, [])
 
-  // Khi bàn điền xong → chuyển sang kết quả
+    if (!sessionId) return
+
+    if (sessionId.startsWith('offline-')) {
+      const level = locState?.level ?? 'medium'
+      const offline = createOfflineSession(level)
+      dispatch({ type: 'INIT_SESSION', session: offline, isOffline: true })
+      return
+    }
+
+    // Tải từ backend
+    const controller = new AbortController()
+    getGameSession(sessionId, controller.signal)
+      .then((s) => {
+        dispatch({ type: 'INIT_SESSION', session: s, isOffline: false })
+      })
+      .catch((err) => {
+        console.warn('Failed to load session, falling back to offline:', err)
+        const offline = createOfflineSession('medium')
+        dispatch({ type: 'INIT_SESSION', session: offline, isOffline: true })
+      })
+
+    return () => controller.abort()
+  }, [sessionId, location.state])
+
+  // Timer started
   useEffect(() => {
-    if (state.finished) {
+    if (state.session && !state.startedAt) {
+      dispatch({ type: 'SET_START_TIME', startedAt: Date.now() })
+    }
+  }, [state.session, state.startedAt])
+
+  // Điều hướng khi thắng
+  useEffect(() => {
+    if (state.finished && sessionId) {
       navigate(`/solo/${sessionId}/result`, {
         state: {
           ...location.state,
           startedAt: state.startedAt,
           mistakes: state.mistakes,
           hints: state.hints,
+          score: state.score,
         },
       })
     }
-  }, [state.finished, navigate, sessionId, location.state, state.startedAt, state.mistakes, state.hints])
+  }, [state.finished, navigate, sessionId, location.state, state.startedAt, state.mistakes, state.hints, state.score])
 
-  // Phím tắt: N (ghi chú), H (gợi ý), Ctrl+Z (undo chưa có), 1-9, 0/Backspace/Delete
+  // Xử lý điền số
+  async function handleInput(value: number) {
+    const { selected, notesMode, initialBoard, isOffline, session } = state
+    if (selected === null || !session) return
+    if (initialBoard[selected] !== '0') return // ô đề gốc
+
+    if (notesMode) {
+      dispatch({ type: 'INPUT_NOTE', index: selected, value })
+      return
+    }
+
+    if (isSubmittingMove.current) return
+    isSubmittingMove.current = true
+
+    // Optimistic UI: hiển thị số ngay tức thì
+    dispatch({ type: 'INPUT_OPTIMISTIC', index: selected, value })
+
+    const [row, col] = indexToRC(selected)
+
+    try {
+      if (isOffline) {
+        const evalRes = evaluateOfflineMove(session, row, col, value)
+        if (evalRes.isCorrect) {
+          const nextCells = new Uint8Array(state.cells)
+          nextCells[selected] = value
+          const completed = isBoardFilled(nextCells)
+          dispatch({
+            type: 'MOVE_CORRECT',
+            index: selected,
+            value,
+            score: state.score + evalRes.pointsDelta,
+            isCompleted: completed,
+          })
+        } else {
+          const nextMistakes = state.mistakes + 1
+          dispatch({
+            type: 'MOVE_WRONG',
+            index: selected,
+            mistakes: nextMistakes,
+            isFailed: nextMistakes >= state.maxMistakes,
+          })
+        }
+      } else {
+        const res = await makeGameMove(session.sessionId, row, col, value)
+        if (res.isCorrect) {
+          const isCompleted = res.session?.status === SessionStatus.COMPLETED || isBoardFilled(state.cells)
+          dispatch({
+            type: 'MOVE_CORRECT',
+            index: selected,
+            value,
+            score: res.session?.score ?? state.score + res.pointsDelta,
+            isCompleted,
+          })
+        } else {
+          const mistakesCount = res.session?.mistakesCount ?? state.mistakes + 1
+          const isFailed = res.session?.status === SessionStatus.FAILED || mistakesCount >= state.maxMistakes
+          dispatch({
+            type: 'MOVE_WRONG',
+            index: selected,
+            mistakes: mistakesCount,
+            isFailed,
+          })
+        }
+      }
+    } catch (err) {
+      console.error('MakeMove error:', err)
+    } finally {
+      isSubmittingMove.current = false
+    }
+  }
+
+  // Xóa ô
+  function handleDelete() {
+    const { selected, initialBoard } = state
+    if (selected === null) return
+    if (initialBoard[selected] !== '0') return
+    dispatch({ type: 'DELETE', index: selected })
+  }
+
+  // Yêu cầu gợi ý
+  async function handleHint() {
+    const { session, isOffline, selected, hints, maxHints } = state
+    if (!session || hints >= maxHints || isRequestingHint.current) return
+    isRequestingHint.current = true
+
+    try {
+      if (isOffline) {
+        const solution = getOfflineSolution(session.sessionId)
+        if (!solution) return
+
+        let targetIdx = selected
+        if (targetIdx === null || state.initialBoard[targetIdx] !== '0' || state.cells[targetIdx] !== 0) {
+          const emptyIndices: number[] = []
+          for (let i = 0; i < 81; i++) {
+            if (state.initialBoard[i] === '0' && state.cells[i] === 0) {
+              emptyIndices.push(i)
+            }
+          }
+          if (emptyIndices.length === 0) return
+          targetIdx = emptyIndices[Math.floor(Math.random() * emptyIndices.length)]
+        }
+
+        const hintVal = Number(solution[targetIdx])
+        dispatch({
+          type: 'HINT',
+          index: targetIdx,
+          value: hintVal,
+          text: `Gợi ý: Ô (${Math.floor(targetIdx / 9) + 1}, ${(targetIdx % 9) + 1}) là số ${hintVal}`,
+        })
+      } else {
+        const [targetRow, targetCol] = selected !== null ? indexToRC(selected) : [undefined, undefined]
+        const res = await requestGameHint(session.sessionId, targetRow, targetCol)
+        const cellIdx = res.row * 9 + res.col
+        dispatch({
+          type: 'HINT',
+          index: cellIdx,
+          value: res.value,
+          text: `Gợi ý [${res.technique}]: Ô (${res.row + 1}, ${res.col + 1}) là số ${res.value}`,
+          highlightCells: res.highlightCells,
+        })
+      }
+    } catch (err) {
+      console.warn('Hint request failed:', err)
+    } finally {
+      isRequestingHint.current = false
+    }
+  }
+
+  // Thoát ván
+  async function handleQuit() {
+    if (state.session && !state.isOffline) {
+      try {
+        await abandonGameSession(state.session.sessionId)
+      } catch {
+        // bỏ qua lỗi abandon
+      }
+    }
+    navigate('/home')
+  }
+
+  // Phím tắt
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (state.paused) return
@@ -154,20 +441,40 @@ export function SoloPlayPage() {
         dispatch({ type: 'TOGGLE_NOTES' })
         return
       }
+      if (key === 'h' || key === 'H') {
+        void handleHint()
+        return
+      }
       if (!ctrlKey && key >= '1' && key <= '9') {
-        dispatch({ type: 'INPUT', value: Number(key) })
+        void handleInput(Number(key))
         return
       }
       if (key === '0' || key === 'Backspace' || key === 'Delete') {
-        dispatch({ type: 'DELETE' })
+        handleDelete()
+        return
+      }
+
+      // Mũi tên điều hướng
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+        e.preventDefault()
+        const cur = state.selected ?? 0
+        const r = Math.floor(cur / 9)
+        const c = cur % 9
+        let next = cur
+        if (key === 'ArrowUp') next = Math.max(0, r - 1) * 9 + c
+        if (key === 'ArrowDown') next = Math.min(8, r + 1) * 9 + c
+        if (key === 'ArrowLeft') next = r * 9 + Math.max(0, c - 1)
+        if (key === 'ArrowRight') next = r * 9 + Math.min(8, c + 1)
+        dispatch({ type: 'SELECT', index: next })
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [state.paused])
+  }, [state.paused, state.selected, state.notesMode, state.initialBoard, state.cells])
 
-  const layout = (location.state as { layout?: string })?.layout ?? 'standard'
-  const level = (location.state as { level?: string })?.level ?? 'medium'
+  const locState = location.state as NavigationLocationState | null
+  const layout = locState?.layout ?? 'standard'
+  const level = locState?.level ?? 'medium'
 
   return (
     <div className={`solo-play-page${state.paused ? ' is-paused' : ''}`}>
@@ -183,8 +490,19 @@ export function SoloPlayPage() {
         </button>
 
         <div className="game-meta" aria-label="Thông tin ván">
-          <span className="meta-badge">{level === 'easy' ? 'Dễ' : level === 'medium' ? 'Trung bình' : level === 'hard' ? 'Khó' : 'Chuyên gia'}</span>
-          <span className="meta-badge">{layout === 'standard' ? 'Standard' : 'Shuffle'}</span>
+          <span className="meta-badge">
+            {level === 'easy'
+              ? 'Dễ'
+              : level === 'medium'
+              ? 'Trung bình'
+              : level === 'hard'
+              ? 'Khó'
+              : 'Chuyên gia'}
+          </span>
+          <span className="meta-badge">
+            {layout === 'standard' ? 'Standard' : 'Shuffle'}
+          </span>
+          {state.isOffline && <span className="meta-badge badge-offline">Offline</span>}
         </div>
 
         <button
@@ -196,6 +514,19 @@ export function SoloPlayPage() {
           {state.paused ? '▶' : '⏸'}
         </button>
       </div>
+
+      {state.hintText && (
+        <div className="hint-banner" role="status">
+          <span>💡 {state.hintText}</span>
+          <button
+            type="button"
+            className="hint-close-btn"
+            onClick={() => dispatch({ type: 'CLEAR_HINT_HIGHLIGHT' })}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Layout chính */}
       <div className="game-layout">
@@ -214,10 +545,10 @@ export function SoloPlayPage() {
             </div>
           )}
           <SudokuBoard
-            initial={MOCK_INITIAL}
+            initial={state.initialBoard}
             cells={state.cells}
             notes={state.notes}
-            regionMap={MOCK_REGION}
+            regionMap={state.regionMap}
             selected={state.paused ? null : state.selected}
             onSelect={(i) => dispatch({ type: 'SELECT', index: i })}
             readOnly={state.paused}
@@ -226,7 +557,6 @@ export function SoloPlayPage() {
 
         {/* Sidebar thông tin + NumberPad */}
         <aside className="game-sidebar">
-          {/* Timer tách riêng — không ép board re-render */}
           <GameTimer
             startedAt={state.startedAt}
             paused={state.paused}
@@ -236,11 +566,19 @@ export function SoloPlayPage() {
           <div className="sidebar-stats">
             <div className="stat-row">
               <span>Lỗi</span>
-              <strong>{state.mistakes}</strong>
+              <strong className={state.mistakes > 0 ? 'text-danger' : ''}>
+                {state.mistakes} / {state.maxMistakes}
+              </strong>
             </div>
             <div className="stat-row">
               <span>Gợi ý</span>
-              <strong>{state.hints}</strong>
+              <strong>
+                {state.hints} / {state.maxHints}
+              </strong>
+            </div>
+            <div className="stat-row">
+              <span>Điểm</span>
+              <strong>{state.score}</strong>
             </div>
           </div>
 
@@ -248,13 +586,42 @@ export function SoloPlayPage() {
             cells={state.cells}
             notesMode={state.notesMode}
             showHint={true}
-            onNumber={(n) => dispatch({ type: 'INPUT', value: n })}
-            onDelete={() => dispatch({ type: 'DELETE' })}
+            onNumber={(n) => void handleInput(n)}
+            onDelete={handleDelete}
             onToggleNotes={() => dispatch({ type: 'TOGGLE_NOTES' })}
+            onHint={() => void handleHint()}
             disabled={state.paused}
           />
         </aside>
       </div>
+
+      {/* Modal thất bại / Hết mạng */}
+      <Modal
+        open={state.failed}
+        title="Thua cuộc!"
+        onClose={() => navigate('/home')}
+        footer={
+          <div className="modal-footer-btns">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => navigate('/solo/new', { state: { layout, level } })}
+            >
+              Chơi lại
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => navigate('/home')}
+            >
+              Về trang chủ
+            </button>
+          </div>
+        }
+      >
+        <p>Bạn đã mắc {state.mistakes} lỗi (vượt quá giới hạn {state.maxMistakes} lỗi).</p>
+        <p>Đừng nản lòng, hãy thử lại ván mới nhé!</p>
+      </Modal>
 
       {/* Modal thoát */}
       <Modal
@@ -263,23 +630,25 @@ export function SoloPlayPage() {
         onClose={() => setShowQuitModal(false)}
         footer={
           <div className="modal-footer-btns">
-            <button type="button" className="btn btn-ghost" onClick={() => setShowQuitModal(false)}>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => setShowQuitModal(false)}
+            >
               Chơi tiếp
             </button>
-            <button type="button" className="btn btn-danger" onClick={() => navigate('/home')}>
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={() => void handleQuit()}
+            >
               Thoát
             </button>
           </div>
         }
       >
-        <p>Tiến độ ván chơi sẽ không được lưu. Bạn có chắc muốn thoát?</p>
+        <p>Tiến độ ván chơi hiện tại sẽ bị hủy. Bạn có chắc muốn thoát?</p>
       </Modal>
     </div>
   )
-}
-
-// Hook nhỏ
-function useToggle(initial: boolean): [boolean, (v: boolean) => void] {
-  const [value, setValue] = useReducer((_: boolean, next: boolean) => next, initial)
-  return [value, setValue]
 }

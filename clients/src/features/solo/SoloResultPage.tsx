@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 type ResultState = {
@@ -20,8 +21,8 @@ export function SoloResultPage() {
   const navigate = useNavigate()
   const state = (location.state ?? {}) as ResultState
 
-  const endedAt = useRef(Date.now())
-  const duration = state.startedAt ? endedAt.current - state.startedAt : 0
+  const [endedAt] = useState(() => Date.now())
+  const duration = state.startedAt ? endedAt - state.startedAt : 0
   const accuracy = state.mistakes != null
     ? Math.max(0, Math.round(((81 - state.mistakes) / 81) * 100))
     : 100

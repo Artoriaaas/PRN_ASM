@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { startGameSession, fetchLevels, LayoutType } from '../../api/gameClient'
+import { createOfflineSession } from '../../lib/offlineSudoku'
 
 type Layout = 'standard' | 'irregular'
 type Level = 'easy' | 'medium' | 'hard' | 'expert'
@@ -23,17 +25,29 @@ export function SoloSetupPage() {
   const [logicOnly, setLogicOnly] = useState(false)
   const [isStarting, setIsStarting] = useState(false)
 
+  useEffect(() => {
+    const controller = new AbortController()
+    fetchLevels(controller.signal).catch(() => {})
+    return () => controller.abort()
+  }, [])
+
   async function handleStart() {
     if (isStarting) return
     setIsStarting(true)
+    const layoutType = layout === 'standard' ? LayoutType.STANDARD : LayoutType.IRREGULAR
+
     try {
-      // TODO: gọi Game.StartGame khi proto có RPC nước đi
-      // Tạm thời navigate với mock sessionId
-      const mockSessionId = `mock-${Date.now()}`
-      navigate(`/solo/${mockSessionId}`, {
-        state: { layout, level, logicOnly },
+      const session = await startGameSession(level, layoutType)
+      navigate(`/solo/${session.sessionId}`, {
+        state: { session, layout, level, logicOnly, isOffline: false },
       })
-    } catch {
+    } catch (err) {
+      console.warn('GameService connection failed, starting offline session:', err)
+      const offlineSession = createOfflineSession(level, layoutType)
+      navigate(`/solo/${offlineSession.sessionId}`, {
+        state: { session: offlineSession, layout, level, logicOnly, isOffline: true },
+      })
+    } finally {
       setIsStarting(false)
     }
   }
