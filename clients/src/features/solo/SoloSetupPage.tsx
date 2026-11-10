@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { startGameSession, fetchLevels, LayoutType } from '../../api/gameClient'
 import { createOfflineSession } from '../../lib/offlineSudoku'
+import { TutorialWelcomeModal } from '../tutorial/TutorialWelcomeModal'
+import {
+  useTutorialPrompt,
+} from '../tutorial/useTutorial'
 
 type Layout = 'standard' | 'irregular'
 type Level = 'easy' | 'medium' | 'hard' | 'expert'
@@ -25,13 +29,29 @@ export function SoloSetupPage() {
   const [logicOnly, setLogicOnly] = useState(false)
   const [isStarting, setIsStarting] = useState(false)
 
+  const {
+    showClassicPrompt,
+    showShufflePrompt,
+    checkShufflePrompt,
+    dismissClassicPrompt,
+    dismissShufflePrompt,
+  } = useTutorialPrompt()
+
   useEffect(() => {
     const controller = new AbortController()
     fetchLevels(controller.signal).catch(() => {})
     return () => controller.abort()
   }, [])
 
-  async function handleStart() {
+  // Khi người dùng chuyển sang layout irregular lần đầu → hỏi shuffle tutorial
+  function handleLayoutChange(value: Layout) {
+    setLayout(value)
+    if (value === 'irregular') {
+      checkShufflePrompt()
+    }
+  }
+
+  async function startGame(withTutorial: boolean, tutorialMode?: 'classic' | 'shuffle') {
     if (isStarting) return
     setIsStarting(true)
     const layoutType = layout === 'standard' ? LayoutType.STANDARD : LayoutType.IRREGULAR
@@ -39,17 +59,60 @@ export function SoloSetupPage() {
     try {
       const session = await startGameSession(level, layoutType)
       navigate(`/solo/${session.sessionId}`, {
-        state: { session, layout, level, logicOnly, isOffline: false },
+        state: {
+          session,
+          layout,
+          level,
+          logicOnly,
+          isOffline: false,
+          tutorial: withTutorial ? tutorialMode ?? 'classic' : null,
+        },
       })
     } catch (err) {
       console.warn('GameService connection failed, starting offline session:', err)
       const offlineSession = createOfflineSession(level, layoutType)
       navigate(`/solo/${offlineSession.sessionId}`, {
-        state: { session: offlineSession, layout, level, logicOnly, isOffline: true },
+        state: {
+          session: offlineSession,
+          layout,
+          level,
+          logicOnly,
+          isOffline: true,
+          tutorial: withTutorial ? tutorialMode ?? 'classic' : null,
+        },
       })
     } finally {
       setIsStarting(false)
     }
+  }
+
+  // Handler từ classic tutorial prompt
+  function handleClassicAccept() {
+    dismissClassicPrompt(true)
+    void startGame(true, 'classic')
+  }
+
+  function handleClassicSkip() {
+    dismissClassicPrompt(false)
+    // Vẫn start game bình thường, không tutorial
+    void startGame(false)
+  }
+
+  // Handler từ shuffle tutorial prompt
+  function handleShuffleAccept() {
+    dismissShufflePrompt(true)
+    void startGame(true, 'shuffle')
+  }
+
+  function handleShuffleSkip() {
+    dismissShufflePrompt(false)
+    // Không tutorial, start bình thường
+  }
+
+  async function handleStart() {
+    // Classic tutorial đã được hỏi khi mount — nếu prompt đang hiện thì không start trùng
+    if (showClassicPrompt || showShufflePrompt) return
+    await startGame(false)
   }
 
   return (
@@ -70,7 +133,7 @@ export function SoloSetupPage() {
                 key={opt.value}
                 type="button"
                 className={`picker-card${layout === opt.value ? ' selected' : ''}`}
-                onClick={() => setLayout(opt.value)}
+                onClick={() => handleLayoutChange(opt.value)}
                 aria-pressed={layout === opt.value}
               >
                 <span className="picker-icon" aria-hidden="true">{opt.icon}</span>
@@ -120,12 +183,26 @@ export function SoloSetupPage() {
           type="button"
           className="btn btn-primary btn-lg start-btn"
           onClick={handleStart}
-          disabled={isStarting}
+          disabled={isStarting || showClassicPrompt || showShufflePrompt}
         >
           {isStarting ? 'Đang tạo ván…' : 'Bắt đầu chơi →'}
         </button>
       </div>
+
+      {/* Tutorial welcome modals */}
+      <TutorialWelcomeModal
+        open={showClassicPrompt}
+        mode="classic"
+        onAccept={handleClassicAccept}
+        onSkip={handleClassicSkip}
+      />
+
+      <TutorialWelcomeModal
+        open={showShufflePrompt}
+        mode="shuffle"
+        onAccept={handleShuffleAccept}
+        onSkip={handleShuffleSkip}
+      />
     </div>
   )
 }
-

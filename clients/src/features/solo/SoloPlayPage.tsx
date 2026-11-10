@@ -1,9 +1,12 @@
-import { useReducer, useEffect, useRef, useState } from 'react'
+import { useReducer, useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { SudokuBoard } from '../../components/SudokuBoard'
 import { NumberPad } from '../../components/NumberPad'
 import { GameTimer } from '../../components/GameTimer'
 import { Modal } from '../../components/ui/Modal'
+import { TutorialOverlay } from '../tutorial/TutorialOverlay'
+import { CLASSIC_STEPS, SHUFFLE_STEPS } from '../tutorial/tutorialData'
+import { useTutorialSteps, markTutorialDone } from '../tutorial/useTutorial'
 import {
   STANDARD_REGION_MAP,
   toggleNote,
@@ -57,6 +60,8 @@ interface NavigationLocationState {
   mistakes?: number
   hints?: number
   score?: number
+  /** 'classic' | 'shuffle' | null — tutorial mode được yêu cầu từ SoloSetupPage */
+  tutorial?: 'classic' | 'shuffle' | null
 }
 
 type SoloAction =
@@ -248,6 +253,57 @@ export function SoloPlayPage() {
   const [showQuitModal, setShowQuitModal] = useState(false)
   const isSubmittingMove = useRef(false)
   const isRequestingHint = useRef(false)
+
+  // ── Tutorial state ──────────────────────────────────────────────────────────
+  const locState = location.state as NavigationLocationState | null
+  const tutorialMode = locState?.tutorial ?? null
+
+  // Chọn bộ bước tutorial theo mode
+  const tutorialSteps = tutorialMode === 'shuffle' ? SHUFFLE_STEPS : CLASSIC_STEPS
+  const {
+    step: tutStep,
+    completed: tutCompleted,
+    goNext: tutNext,
+    goPrev: tutPrev,
+  } = useTutorialSteps(tutorialSteps.length)
+
+  const [tutorialActive, setTutorialActive] = useState(Boolean(tutorialMode))
+  const [tutorialDismissed, setTutorialDismissed] = useState(false)
+
+  // Khi tutorial hoàn thành (bước cuối) hoặc bị skip
+  const handleTutorialComplete = useCallback(() => {
+    if (tutorialMode === 'classic' || tutorialMode === 'shuffle') {
+      markTutorialDone(tutorialMode)
+    }
+    setTutorialActive(false)
+    setTutorialDismissed(true)
+  }, [tutorialMode])
+
+  const handleTutorialSkip = useCallback(() => {
+    if (tutorialMode === 'classic' || tutorialMode === 'shuffle') {
+      markTutorialDone(tutorialMode)
+    }
+    setTutorialActive(false)
+    setTutorialDismissed(true)
+  }, [tutorialMode])
+
+  // Khi tutorial hoàn thành tự động từ hook
+  useEffect(() => {
+    if (tutCompleted && tutorialActive) {
+      handleTutorialComplete()
+    }
+  }, [tutCompleted, tutorialActive, handleTutorialComplete])
+
+  // Tutorial: chọn ô trên bàn cờ theo step
+  const handleTutorialSelectCell = useCallback((index: number | null) => {
+    if (index !== null) {
+      dispatch({ type: 'SELECT', index })
+    }
+  }, [])
+
+  // Tutorial pause: tutorial active → ẩn quit, block keyboard (ngoài tutorial)
+  const isTutorialShowing = tutorialActive && !tutorialDismissed
+  // ── End Tutorial state ──────────────────────────────────────────────────────
 
   // Khởi tạo session từ navigation state hoặc tải từ server
   useEffect(() => {
@@ -457,6 +513,10 @@ export function SoloPlayPage() {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (state.paused) return
+      // Khi tutorial đang hiện → chỉ cho phép mũi tên điều hướng ô
+      if (isTutorialShowing) {
+        if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return
+      }
       const { key, ctrlKey } = e
 
       if (key === 'n' || key === 'N') {
@@ -492,14 +552,13 @@ export function SoloPlayPage() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [state.paused, state.selected, state.notesMode, state.initialBoard, state.cells])
+  }, [state.paused, state.selected, state.notesMode, state.initialBoard, state.cells, isTutorialShowing])
 
-  const locState = location.state as NavigationLocationState | null
   const layout = locState?.layout ?? 'standard'
   const level = locState?.level ?? 'medium'
 
   return (
-    <div className={`solo-play-page${state.paused ? ' is-paused' : ''}`}>
+    <div className={`solo-play-page${state.paused ? ' is-paused' : ''}${isTutorialShowing ? ' tutorial-mode' : ''}`}>
       {/* Topbar */}
       <div className="game-topbar">
         <button
@@ -671,6 +730,22 @@ export function SoloPlayPage() {
       >
         <p>Tiến độ ván chơi hiện tại sẽ bị hủy. Bạn có chắc muốn thoát?</p>
       </Modal>
+
+      {/* Tutorial Overlay — hiển thị khi tutorial active */}
+      {isTutorialShowing && state.session && (
+        <TutorialOverlay
+          steps={tutorialSteps}
+          currentStep={tutStep}
+          totalSteps={tutorialSteps.length}
+          onNext={tutNext}
+          onPrev={tutPrev}
+          onSkip={handleTutorialSkip}
+          onComplete={handleTutorialComplete}
+          onSelectCell={handleTutorialSelectCell}
+          onToggleNotes={() => dispatch({ type: 'TOGGLE_NOTES' })}
+          onRequestHint={() => void handleHint()}
+        />
+      )}
     </div>
   )
 }

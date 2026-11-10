@@ -112,7 +112,7 @@ export function ProfilePage({
     <main className="app-shell">
       <header className="topbar">
         <button className="brand-button" type="button" onClick={() => onNavigate('/profile')}>
-          <span className="brand-mark small" aria-hidden="true">9</span>
+          <img className="brand-mark small" src="/logo.png" alt="" aria-hidden="true" />
           <span>Sudoku Online</span>
         </button>
         <nav aria-label="Tài khoản">

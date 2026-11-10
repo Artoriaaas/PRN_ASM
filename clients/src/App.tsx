@@ -51,10 +51,12 @@ function AppRoutes() {
 
   const handleProfileUpdated = useCallback((p: UserProfile) => setProfile(p), [])
 
-  if (authLoading) {
+  if (authLoading && window.location.pathname !== '/preview') {
     return (
       <div className="splash-screen" aria-live="polite">
-        <div className="brand-logo-splash" aria-hidden="true">9</div>
+        <div className="brand-logo-splash" aria-hidden="true">
+          <img src="/logo.png" alt="Sudoku Online" />
+        </div>
         <div className="loader" />
         <p>Đang kiểm tra phiên đăng nhập…</p>
       </div>
@@ -67,6 +69,43 @@ function AppRoutes() {
         {/* Public */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/auth" element={user ? <Navigate to="/home" replace /> : <AuthPage />} />
+        {import.meta.env.DEV && (
+          <Route
+            path="/preview"
+            element={
+              <AppShell
+                profile={
+                  {
+                    displayName: 'Khoa Nguyen',
+                    email: 'khoanguyen@example.com',
+                    avatarUrl: '',
+                    totalGames: 42,
+                    wins: 35,
+                    totalExp: 3850,
+                    playerLevel: 4,
+                    trophies: 12,
+                  } as unknown as UserProfile
+                }
+              >
+                <HomePage
+                  profile={
+                    {
+                      displayName: 'Khoa Nguyen',
+                      email: 'khoanguyen@example.com',
+                      avatarUrl: '',
+                      totalGames: 42,
+                      wins: 35,
+                      totalExp: 3850,
+                      playerLevel: 4,
+                      trophies: 12,
+                    } as unknown as UserProfile
+                  }
+                  loading={false}
+                />
+              </AppShell>
+            }
+          />
+        )}
 
         {/* Private — bọc AppShell */}
         <Route
