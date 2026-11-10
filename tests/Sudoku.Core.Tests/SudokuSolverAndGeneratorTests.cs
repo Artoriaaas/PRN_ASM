@@ -73,4 +73,15 @@ public class SudokuSolverAndGeneratorTests
         SudokuSolver.Solve(puzzle.InitialBoard, RegionMap.Standard, out string solved);
         Assert.Equal(puzzle.SolutionBoard, solved);
     }
+
+    [Fact]
+    public void SudokuGenerator_WithRequireEvenEmptyCells_GeneratesEvenEmptyCount()
+    {
+        var rng = new Random(123);
+        var puzzle = SudokuGenerator.Generate(RegionMap.Standard, minClues: 32, maxClues: 36, rng, requireEvenEmptyCells: true);
+
+        int emptyCells = BoardConstants.CellCount - puzzle.ClueCount;
+        Assert.Equal(0, emptyCells % 2);
+        Assert.Equal(1, SudokuSolver.CountSolutions(puzzle.InitialBoard, RegionMap.Standard, limit: 2));
+    }
 }

@@ -22,27 +22,26 @@ public static class AuthExtensions
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(o =>
             {
-                if (!isDevPlaceholder)
-                {
-                    o.Authority = authority;
-                    o.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidIssuer = authority,
-                        ValidAudience = projectId
-                    };
-                }
-                else
-                {
-                    o.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        ValidateLifetime = false,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DevSecretKey))
-                    };
-                }
+                var googleIssuer = authority;
+                var devSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DevSecretKey));
 
+                o.Authority = authority;
+                o.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = googleIssuer,
+                    ValidAudience = projectId,
+                    ValidateLifetime = false,
+                    IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
+                    {
+                        // If token is signed with our dev HMAC secret key (offline / multi-browser guest testing)
+                        if (securityToken is Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwt &&
+                            string.Equals(jwt.Alg, SecurityAlgorithms.HmacSha256, System.StringComparison.Ordinal))
+                        {
+                            return new[] { devSigningKey };
+                        }
+                        return null; // Fallback to OIDC / Google public keys
+                    }
+                };
                 o.MapInboundClaims = false;
                 o.Events = new JwtBearerEvents
                 {

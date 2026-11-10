@@ -14,6 +14,7 @@ service GameService {
   rpc SaveNotes(SaveNotesRequest) returns (SaveNotesResponse);
   rpc AbandonGame(AbandonGameRequest) returns (AbandonGameResponse);
   rpc GetHighScores(GetHighScoresRequest) returns (GetHighScoresResponse);
+  rpc AcquirePuzzleForMatch(AcquirePuzzleForMatchRequest) returns (AcquirePuzzleForMatchResponse);
 }
 
 enum LayoutType {
@@ -173,4 +174,21 @@ message HighScoreEntry {
 
 message GetHighScoresResponse {
   repeated HighScoreEntry entries = 1;
+}
+
+message AcquirePuzzleForMatchRequest {
+  string level_id = 1;
+  LayoutType layout_type = 2;
+  bool require_even_empty_cells = 3;
+  repeated string exclude_user_ids = 4;
+}
+
+message AcquirePuzzleForMatchResponse {
+  string puzzle_id = 1;
+  string level_id = 2;
+  LayoutType layout_type = 3;
+  string initial_board = 4;
+  string solution_board = 5;
+  string region_map = 6;
+  int32 clue_count = 7;
 }

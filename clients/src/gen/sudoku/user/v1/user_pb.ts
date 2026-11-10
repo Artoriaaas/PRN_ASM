@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file sudoku/user/v1/user.proto.
  */
 export const file_sudoku_user_v1_user: GenFile = /*@__PURE__*/
-  fileDesc("ChlzdWRva3UvdXNlci92MS91c2VyLnByb3RvEg5zdWRva3UudXNlci52MSLBAQoLVXNlclByb2ZpbGUSCgoCaWQYASABKAkSFAoMZGlzcGxheV9uYW1lGAIgASgJEg0KBWVtYWlsGAMgASgJEhIKCmF2YXRhcl91cmwYBCABKAkSEwoLdG90YWxfZ2FtZXMYBSABKAUSDAoEd2lucxgGIAEoBRIPCgdjb3VudHJ5GAcgASgJEhEKCXRvdGFsX2V4cBgIIAEoBRIUCgxwbGF5ZXJfbGV2ZWwYCSABKAUSEAoIdHJvcGhpZXMYCiABKAUiVAoZR2V0T3JDcmVhdGVQcm9maWxlUmVxdWVzdBIUCgxkaXNwbGF5X25hbWUYASABKAkSDQoFZW1haWwYAiABKAkSEgoKYXZhdGFyX3VybBgDIAEoCSJfChpHZXRPckNyZWF0ZVByb2ZpbGVSZXNwb25zZRIsCgdwcm9maWxlGAEgASgLMhsuc3Vkb2t1LnVzZXIudjEuVXNlclByb2ZpbGUSEwoLaXNfbmV3X3VzZXIYAiABKAgiEwoRR2V0UHJvZmlsZVJlcXVlc3QiQgoSR2V0UHJvZmlsZVJlc3BvbnNlEiwKB3Byb2ZpbGUYASABKAsyGy5zdWRva3UudXNlci52MS5Vc2VyUHJvZmlsZSJRChRVcGRhdGVQcm9maWxlUmVxdWVzdBIUCgxkaXNwbGF5X25hbWUYASABKAkSEgoKYXZhdGFyX3VybBgCIAEoCRIPCgdjb3VudHJ5GAMgASgJIkUKFVVwZGF0ZVByb2ZpbGVSZXNwb25zZRIsCgdwcm9maWxlGAEgASgLMhsuc3Vkb2t1LnVzZXIudjEuVXNlclByb2ZpbGUyrQIKC1VzZXJTZXJ2aWNlEmsKEkdldE9yQ3JlYXRlUHJvZmlsZRIpLnN1ZG9rdS51c2VyLnYxLkdldE9yQ3JlYXRlUHJvZmlsZVJlcXVlc3QaKi5zdWRva3UudXNlci52MS5HZXRPckNyZWF0ZVByb2ZpbGVSZXNwb25zZRJTCgpHZXRQcm9maWxlEiEuc3Vkb2t1LnVzZXIudjEuR2V0UHJvZmlsZVJlcXVlc3QaIi5zdWRva3UudXNlci52MS5HZXRQcm9maWxlUmVzcG9uc2USXAoNVXBkYXRlUHJvZmlsZRIkLnN1ZG9rdS51c2VyLnYxLlVwZGF0ZVByb2ZpbGVSZXF1ZXN0GiUuc3Vkb2t1LnVzZXIudjEuVXBkYXRlUHJvZmlsZVJlc3BvbnNlQhGqAg5TdWRva3UuVXNlci5WMWIGcHJvdG8z");
+  fileDesc("ChlzdWRva3UvdXNlci92MS91c2VyLnByb3RvEg5zdWRva3UudXNlci52MSLBAQoLVXNlclByb2ZpbGUSCgoCaWQYASABKAkSFAoMZGlzcGxheV9uYW1lGAIgASgJEg0KBWVtYWlsGAMgASgJEhIKCmF2YXRhcl91cmwYBCABKAkSEwoLdG90YWxfZ2FtZXMYBSABKAUSDAoEd2lucxgGIAEoBRIPCgdjb3VudHJ5GAcgASgJEhEKCXRvdGFsX2V4cBgIIAEoBRIUCgxwbGF5ZXJfbGV2ZWwYCSABKAUSEAoIdHJvcGhpZXMYCiABKAUiVAoZR2V0T3JDcmVhdGVQcm9maWxlUmVxdWVzdBIUCgxkaXNwbGF5X25hbWUYASABKAkSDQoFZW1haWwYAiABKAkSEgoKYXZhdGFyX3VybBgDIAEoCSJfChpHZXRPckNyZWF0ZVByb2ZpbGVSZXNwb25zZRIsCgdwcm9maWxlGAEgASgLMhsuc3Vkb2t1LnVzZXIudjEuVXNlclByb2ZpbGUSEwoLaXNfbmV3X3VzZXIYAiABKAgiEwoRR2V0UHJvZmlsZVJlcXVlc3QiQgoSR2V0UHJvZmlsZVJlc3BvbnNlEiwKB3Byb2ZpbGUYASABKAsyGy5zdWRva3UudXNlci52MS5Vc2VyUHJvZmlsZSJRChRVcGRhdGVQcm9maWxlUmVxdWVzdBIUCgxkaXNwbGF5X25hbWUYASABKAkSEgoKYXZhdGFyX3VybBgCIAEoCRIPCgdjb3VudHJ5GAMgASgJIkUKFVVwZGF0ZVByb2ZpbGVSZXNwb25zZRIsCgdwcm9maWxlGAEgASgLMhsuc3Vkb2t1LnVzZXIudjEuVXNlclByb2ZpbGUiKwoSR2V0UHJvZmlsZXNSZXF1ZXN0EhUKDWZpcmViYXNlX3VpZHMYASADKAkingEKElVzZXJQcm9maWxlU3VtbWFyeRIUCgxmaXJlYmFzZV91aWQYASABKAkSDwoHdXNlcl9pZBgCIAEoCRIUCgxkaXNwbGF5X25hbWUYAyABKAkSEgoKYXZhdGFyX3VybBgEIAEoCRIPCgdjb3VudHJ5GAUgASgJEhQKDHBsYXllcl9sZXZlbBgGIAEoBRIQCgh0cm9waGllcxgHIAEoBSJLChNHZXRQcm9maWxlc1Jlc3BvbnNlEjQKCHByb2ZpbGVzGAEgAygLMiIuc3Vkb2t1LnVzZXIudjEuVXNlclByb2ZpbGVTdW1tYXJ5MoUDCgtVc2VyU2VydmljZRJrChJHZXRPckNyZWF0ZVByb2ZpbGUSKS5zdWRva3UudXNlci52MS5HZXRPckNyZWF0ZVByb2ZpbGVSZXF1ZXN0Giouc3Vkb2t1LnVzZXIudjEuR2V0T3JDcmVhdGVQcm9maWxlUmVzcG9uc2USUwoKR2V0UHJvZmlsZRIhLnN1ZG9rdS51c2VyLnYxLkdldFByb2ZpbGVSZXF1ZXN0GiIuc3Vkb2t1LnVzZXIudjEuR2V0UHJvZmlsZVJlc3BvbnNlElwKDVVwZGF0ZVByb2ZpbGUSJC5zdWRva3UudXNlci52MS5VcGRhdGVQcm9maWxlUmVxdWVzdBolLnN1ZG9rdS51c2VyLnYxLlVwZGF0ZVByb2ZpbGVSZXNwb25zZRJWCgtHZXRQcm9maWxlcxIiLnN1ZG9rdS51c2VyLnYxLkdldFByb2ZpbGVzUmVxdWVzdBojLnN1ZG9rdS51c2VyLnYxLkdldFByb2ZpbGVzUmVzcG9uc2VCEaoCDlN1ZG9rdS5Vc2VyLlYxYgZwcm90bzM");
 
 /**
  * @generated from message sudoku.user.v1.UserProfile
@@ -198,6 +198,87 @@ export const UpdateProfileResponseSchema: GenMessage<UpdateProfileResponse> = /*
   messageDesc(file_sudoku_user_v1_user, 6);
 
 /**
+ * @generated from message sudoku.user.v1.GetProfilesRequest
+ */
+export type GetProfilesRequest = Message<"sudoku.user.v1.GetProfilesRequest"> & {
+  /**
+   * @generated from field: repeated string firebase_uids = 1;
+   */
+  firebaseUids: string[];
+};
+
+/**
+ * Describes the message sudoku.user.v1.GetProfilesRequest.
+ * Use `create(GetProfilesRequestSchema)` to create a new message.
+ */
+export const GetProfilesRequestSchema: GenMessage<GetProfilesRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 7);
+
+/**
+ * @generated from message sudoku.user.v1.UserProfileSummary
+ */
+export type UserProfileSummary = Message<"sudoku.user.v1.UserProfileSummary"> & {
+  /**
+   * @generated from field: string firebase_uid = 1;
+   */
+  firebaseUid: string;
+
+  /**
+   * @generated from field: string user_id = 2;
+   */
+  userId: string;
+
+  /**
+   * @generated from field: string display_name = 3;
+   */
+  displayName: string;
+
+  /**
+   * @generated from field: string avatar_url = 4;
+   */
+  avatarUrl: string;
+
+  /**
+   * @generated from field: string country = 5;
+   */
+  country: string;
+
+  /**
+   * @generated from field: int32 player_level = 6;
+   */
+  playerLevel: number;
+
+  /**
+   * @generated from field: int32 trophies = 7;
+   */
+  trophies: number;
+};
+
+/**
+ * Describes the message sudoku.user.v1.UserProfileSummary.
+ * Use `create(UserProfileSummarySchema)` to create a new message.
+ */
+export const UserProfileSummarySchema: GenMessage<UserProfileSummary> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 8);
+
+/**
+ * @generated from message sudoku.user.v1.GetProfilesResponse
+ */
+export type GetProfilesResponse = Message<"sudoku.user.v1.GetProfilesResponse"> & {
+  /**
+   * @generated from field: repeated sudoku.user.v1.UserProfileSummary profiles = 1;
+   */
+  profiles: UserProfileSummary[];
+};
+
+/**
+ * Describes the message sudoku.user.v1.GetProfilesResponse.
+ * Use `create(GetProfilesResponseSchema)` to create a new message.
+ */
+export const GetProfilesResponseSchema: GenMessage<GetProfilesResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 9);
+
+/**
  * @generated from service sudoku.user.v1.UserService
  */
 export const UserService: GenService<{
@@ -224,6 +305,14 @@ export const UserService: GenService<{
     methodKind: "unary";
     input: typeof UpdateProfileRequestSchema;
     output: typeof UpdateProfileResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.user.v1.UserService.GetProfiles
+   */
+  getProfiles: {
+    methodKind: "unary";
+    input: typeof GetProfilesRequestSchema;
+    output: typeof GetProfilesResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_sudoku_user_v1_user, 0);

@@ -12,6 +12,8 @@ import {
   toggleNote,
   isBoardFilled,
   indexToRC,
+  findLogicalHint,
+  type LogicalHintResult,
 } from '../../lib/board'
 import {
   makeGameMove,
@@ -79,6 +81,7 @@ type SoloAction =
   | { type: 'FINISH' }
   | { type: 'FAIL' }
   | { type: 'SET_START_TIME'; startedAt: number }
+  | { type: 'INCREMENT_HINT_COUNT' }
 
 function parseBoardString(boardStr: string): Uint8Array {
   const cells = new Uint8Array(81)
@@ -214,6 +217,8 @@ function soloReducer(state: SoloState, action: SoloAction): SoloState {
 
     case 'FAIL':
       return { ...state, failed: true }
+    case 'INCREMENT_HINT_COUNT':
+      return { ...state, hints: state.hints + 1 }
     case 'SET_START_TIME':
       return { ...state, startedAt: action.startedAt }
 
@@ -252,7 +257,36 @@ export function SoloPlayPage() {
 
   const [showQuitModal, setShowQuitModal] = useState(false)
   const isSubmittingMove = useRef(false)
-  const isRequestingHint = useRef(false)
+  const [hintWalkthrough, setHintWalkthrough] = useState<{
+    step: number
+    hint: LogicalHintResult
+  } | null>(null)
+
+  const hintCellModes = useMemo(() => {
+    if (!hintWalkthrough) return undefined
+    const modes = new Map<number, 'clue' | 'beam' | 'house' | 'target' | 'dimmed'>()
+    const { step, hint } = hintWalkthrough
+
+    if (step === 1) {
+      for (let i = 0; i < 81; i++) modes.set(i, 'dimmed')
+      for (const b of hint.beamCells) modes.set(b, 'beam')
+      for (const c of hint.clueCells) modes.set(c, 'clue')
+    } else {
+      for (let i = 0; i < 81; i++) modes.set(i, 'dimmed')
+      for (const h of hint.houseCells) modes.set(h, 'house')
+      modes.set(hint.targetIdx, 'target')
+    }
+
+    return modes
+  }, [hintWalkthrough])
+
+  const ghostCell = useMemo(() => {
+    if (!hintWalkthrough || hintWalkthrough.step !== 3) return null
+    return {
+      index: hintWalkthrough.hint.targetIdx,
+      value: hintWalkthrough.hint.value,
+    }
+  }, [hintWalkthrough])
 
   // ── Tutorial state ──────────────────────────────────────────────────────────
   const locState = location.state as NavigationLocationState | null
@@ -451,49 +485,51 @@ export function SoloPlayPage() {
   // Yêu cầu gợi ý
   async function handleHint() {
     const { session, isOffline, selected, hints, maxHints } = state
-    if (!session || hints >= maxHints || isRequestingHint.current) return
-    isRequestingHint.current = true
+    if (!session || hints >= maxHints) return
 
+    const solution = isOffline ? getOfflineSolution(session.sessionId) : undefined
+    const logicalHint = findLogicalHint(state.cells, state.regionMap, selected, solution)
+
+    if (!logicalHint) return
+
+    setHintWalkthrough({
+      step: 1,
+      hint: logicalHint,
+    })
+  }
+
+  async function handleApplyHint() {
+    if (!hintWalkthrough || !state.session) return
+    const { targetIdx, value } = hintWalkthrough.hint
+    setHintWalkthrough(null)
+
+    const [row, col] = indexToRC(targetIdx)
     try {
-      if (isOffline) {
-        const solution = getOfflineSolution(session.sessionId)
-        if (!solution) return
-
-        let targetIdx = selected
-        if (targetIdx === null || state.initialBoard[targetIdx] !== '0' || state.cells[targetIdx] !== 0) {
-          const emptyIndices: number[] = []
-          for (let i = 0; i < 81; i++) {
-            if (state.initialBoard[i] === '0' && state.cells[i] === 0) {
-              emptyIndices.push(i)
-            }
-          }
-          if (emptyIndices.length === 0) return
-          targetIdx = emptyIndices[Math.floor(Math.random() * emptyIndices.length)]
-        }
-
-        const hintVal = Number(solution[targetIdx])
+      if (state.isOffline) {
         dispatch({
-          type: 'HINT',
+          type: 'MOVE_CORRECT',
           index: targetIdx,
-          value: hintVal,
-          text: `Gợi ý: Ô (${Math.floor(targetIdx / 9) + 1}, ${(targetIdx % 9) + 1}) là số ${hintVal}`,
+          value,
+          score: state.score + 50,
+          isCompleted: false,
         })
       } else {
-        const [targetRow, targetCol] = selected !== null ? indexToRC(selected) : [undefined, undefined]
-        const res = await requestGameHint(session.sessionId, targetRow, targetCol)
-        const cellIdx = res.row * 9 + res.col
+        try {
+          await requestGameHint(state.session.sessionId, row, col)
+        } catch {
+          // ignore if server applied
+        }
         dispatch({
-          type: 'HINT',
-          index: cellIdx,
-          value: res.value,
-          text: `Gợi ý [${res.technique}]: Ô (${res.row + 1}, ${res.col + 1}) là số ${res.value}`,
-          highlightCells: res.highlightCells,
+          type: 'MOVE_CORRECT',
+          index: targetIdx,
+          value,
+          score: state.score + 50,
+          isCompleted: false,
         })
       }
+      dispatch({ type: 'INCREMENT_HINT_COUNT' })
     } catch (err) {
-      console.warn('Hint request failed:', err)
-    } finally {
-      isRequestingHint.current = false
+      console.warn('Failed to apply hint:', err)
     }
   }
 
@@ -632,10 +668,55 @@ export function SoloPlayPage() {
             regionMap={state.regionMap}
             selected={state.paused ? null : state.selected}
             wrongCells={state.wrongCells}
+            hintCellModes={hintCellModes}
+            ghostCell={ghostCell}
             onSelect={(i) => dispatch({ type: 'SELECT', index: i })}
+            readOnly={state.paused}
           />
+          {hintWalkthrough && (
+            <HintWalkthroughCard
+              step={hintWalkthrough.step}
+              totalSteps={3}
+              title={hintWalkthrough.hint.techniqueTitle}
+              value={hintWalkthrough.hint.value}
+              techniqueTag={hintWalkthrough.hint.technique}
+              description={
+                hintWalkthrough.step === 1 ? (
+                  <>
+                    Pay attention to <strong className="highlight-green">these cells</strong> and the{' '}
+                    <strong className="highlight-blue">highlighted areas</strong>
+                    {hintWalkthrough.hint.selectedHasNoEvidence && (
+                      <p className="hint-sub-notice">
+                        (Ô bạn vừa chọn chưa đủ chứng cứ logic để giải trực tiếp. Hệ thống hướng dẫn ô này có lập luận chắc chắn nhất!)
+                      </p>
+                    )}
+                  </>
+                ) : hintWalkthrough.step === 2 ? (
+                  <>
+                    In <strong className="highlight-blue">this block</strong>, there is only one cell remaining that can contain{' '}
+                    <strong>{hintWalkthrough.hint.value}</strong>
+                  </>
+                ) : (
+                  <>
+                    Since it is the only possible option, <strong>this cell must be {hintWalkthrough.hint.value}</strong>
+                  </>
+                )
+              }
+              onNext={() =>
+                setHintWalkthrough((prev) =>
+                  prev ? { ...prev, step: Math.min(3, prev.step + 1) } : null,
+                )
+              }
+              onPrev={() =>
+                setHintWalkthrough((prev) =>
+                  prev ? { ...prev, step: Math.max(1, prev.step - 1) } : null,
+                )
+              }
+              onApply={() => void handleApplyHint()}
+              onClose={() => setHintWalkthrough(null)}
+            />
+          )}
         </div>
-
         {/* Sidebar thông tin + NumberPad */}
         <aside className="game-sidebar">
           <GameTimer

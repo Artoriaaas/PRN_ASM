@@ -13,6 +13,8 @@ export type SudokuCellProps = {
   isOpponentRecent: boolean // duel: đối thủ vừa điền
   borderMask: number  // top=8, right=4, bottom=2, left=1 (1=viền đậm)
   regionIndex?: number
+  hintMode?: 'clue' | 'beam' | 'house' | 'target' | 'dimmed' | null
+  ghostValue?: number | null
   onClick: (index: number) => void
 }
 
@@ -28,6 +30,8 @@ function SudokuCellInner({
   isOpponentRecent,
   borderMask,
   regionIndex,
+  hintMode = null,
+  ghostValue = null,
   onClick,
 }: SudokuCellProps) {
   const [row, col] = [Math.floor(index / 9), index % 9]
@@ -44,6 +48,11 @@ function SudokuCellInner({
     borderMask & 4 && 'border-right',
     borderMask & 2 && 'border-bottom',
     borderMask & 1 && 'border-left',
+    hintMode === 'clue' && 'is-hint-clue',
+    hintMode === 'beam' && 'is-hint-beam',
+    hintMode === 'house' && 'is-hint-house',
+    hintMode === 'target' && 'is-hint-target',
+    hintMode === 'dimmed' && 'is-hint-dimmed',
   ]
     .filter(Boolean)
     .join(' ')
@@ -73,6 +82,8 @@ function SudokuCellInner({
         </div>
       ) : value !== 0 ? (
         <span className="cell-value">{value}</span>
+      ) : ghostValue ? (
+        <span className="cell-value is-ghost-value">{ghostValue}</span>
       ) : null}
     </div>
   )

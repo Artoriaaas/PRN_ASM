@@ -24,6 +24,7 @@ public static class MoveEvaluator
 {
     public const int NakedSinglePoints = 5;
     public const int HiddenSinglePoints = 10;
+    public const int AdvancedPointsPerCandidate = 8;
     public const int WrongMovePenalty = -5;
 
     public static MoveEvaluationResult Evaluate(
@@ -95,7 +96,7 @@ public static class MoveEvaluator
         else
         {
             tier = EvaluatedDifficultyTier.Advanced;
-            points = 8 * Math.Max(1, candidateCount);
+            points = AdvancedPointsPerCandidate * Math.Max(1, candidateCount);
         }
 
         return new MoveEvaluationResult(

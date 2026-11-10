@@ -15,6 +15,8 @@ export type SudokuBoardProps = {
   selected: number | null
   recentOpponentCell?: number | null  // duel
   wrongCells?: Set<number>
+  hintCellModes?: Map<number, 'clue' | 'beam' | 'house' | 'target' | 'dimmed'>
+  ghostCell?: { index: number; value: number } | null
   readOnly?: boolean
   onSelect: (index: number) => void
 }
@@ -27,6 +29,8 @@ export function SudokuBoard({
   selected,
   recentOpponentCell = null,
   wrongCells,
+  hintCellModes,
+  ghostCell = null,
   readOnly = false,
   onSelect,
 }: SudokuBoardProps) {
@@ -92,6 +96,8 @@ export function SudokuBoard({
           isOpponentRecent={recentOpponentCell === i}
           borderMask={borderMasks[i]}
           regionIndex={Number(regionMap[i])}
+          hintMode={hintCellModes?.get(i) ?? null}
+          ghostValue={ghostCell?.index === i ? ghostCell.value : null}
           onClick={handleSelect}
         />
       ))}

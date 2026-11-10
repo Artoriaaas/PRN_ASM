@@ -1,5 +1,6 @@
 namespace Game.Api.Data.Repositories;
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +24,33 @@ public class PuzzleRepository : IPuzzleRepository
                         p.LayoutType == layoutType &&
                         p.IsActive &&
                         !_context.GameSessions.Any(s => s.UserId == userId && s.PuzzleId == p.Id))
+            .OrderBy(p => p.PlayCount)
+            .FirstOrDefaultAsync(ct);
+    }
+
+    public Task<Puzzle?> GetPuzzleForMatchAsync(
+        string levelId,
+        int layoutType,
+        bool requireEvenEmptyCells,
+        IReadOnlyList<string> excludeUserIds,
+        CancellationToken ct = default)
+    {
+        var query = _context.Puzzles
+            .Where(p => p.LevelId == levelId &&
+                        p.LayoutType == layoutType &&
+                        p.IsActive);
+
+        if (requireEvenEmptyCells)
+        {
+            query = query.Where(p => p.ClueCount % 2 == 1);
+        }
+
+        if (excludeUserIds.Count > 0)
+        {
+            query = query.Where(p => !_context.GameSessions.Any(s => excludeUserIds.Contains(s.UserId) && s.PuzzleId == p.Id));
+        }
+
+        return query
             .OrderBy(p => p.PlayCount)
             .FirstOrDefaultAsync(ct);
     }

@@ -5,7 +5,7 @@ services:
     build:
       context: ../gateway
     ports:
-      - '8080:8080'
+      - '${GATEWAY_PORT:-18080}:8080'
     depends_on:
       - game-service
       - user-service
@@ -17,8 +17,10 @@ services:
       context: ..
       dockerfile: services/Game/Game.Api/Dockerfile
     depends_on:
-      - postgres
-      - kafka
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
 
   user-service:
     build:
@@ -35,17 +37,22 @@ services:
       context: ..
       dockerfile: services/Support/Support.Api/Dockerfile
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   multiplayer-service:
     build:
       context: ..
       dockerfile: services/Multiplayer/Multiplayer.Api/Dockerfile
     depends_on:
-      - postgres
-      - kafka
-
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_started
   postgres:
     image: postgres:16
     environment:

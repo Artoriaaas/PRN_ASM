@@ -20,6 +20,26 @@ const SoloSetupPage = lazy(() => import('./features/solo/SoloSetupPage').then((m
 const SoloPlayPage = lazy(() => import('./features/solo/SoloPlayPage').then((m) => ({ default: m.SoloPlayPage })))
 const SoloResultPage = lazy(() => import('./features/solo/SoloResultPage').then((m) => ({ default: m.SoloResultPage })))
 const ProfilePage = lazy(() => import('./features/profile/ProfilePage').then((m) => ({ default: m.ProfilePage })))
+const MultiplayerLobbyPage = lazy(() =>
+  import('./features/multiplayer/MultiplayerLobbyPage').then((m) => ({
+    default: m.MultiplayerLobbyPage,
+  })),
+)
+const MultiplayerQueuePage = lazy(() =>
+  import('./features/multiplayer/MultiplayerQueuePage').then((m) => ({
+    default: m.MultiplayerQueuePage,
+  })),
+)
+const MultiplayerMatchPage = lazy(() =>
+  import('./features/multiplayer/MultiplayerMatchPage').then((m) => ({
+    default: m.MultiplayerMatchPage,
+  })),
+)
+const MultiplayerResultPage = lazy(() =>
+  import('./features/multiplayer/MultiplayerResultPage').then((m) => ({
+    default: m.MultiplayerResultPage,
+  })),
+)
 
 function PageLoader() {
   return (
@@ -152,11 +172,11 @@ function AppRoutes() {
                       ) : null
                     }
                   />
-                  {/* Placeholder screens — Giai đoạn 2+ */}
-                  <Route path="/play" element={<ComingSoon title="Sảnh Multiplayer" />} />
-                  <Route path="/play/queue" element={<ComingSoon title="Hàng chờ" />} />
-                  <Route path="/match/:matchId" element={<ComingSoon title="Trận đấu" />} />
-                  <Route path="/match/:matchId/result" element={<ComingSoon title="Kết quả trận" />} />
+                  {/* Multiplayer Screens */}
+                  <Route path="/play" element={<MultiplayerLobbyPage profile={profile} />} />
+                  <Route path="/play/queue" element={<MultiplayerQueuePage profile={profile} />} />
+                  <Route path="/match/:matchId" element={<MultiplayerMatchPage profile={profile} />} />
+                  <Route path="/match/:matchId/result" element={<MultiplayerResultPage profile={profile} />} />
                   <Route path="/leaderboard" element={<ComingSoon title="Bảng xếp hạng" />} />
                   <Route path="/history" element={<ComingSoon title="Lịch sử đấu" />} />
                   <Route path="/quests" element={<ComingSoon title="Nhiệm vụ" />} />

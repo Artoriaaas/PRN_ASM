@@ -27,10 +27,13 @@ static_resources:
                         envoy.filters.http.cors:
                           '@type': type.googleapis.com/envoy.extensions.filters.http.cors.v3.CorsPolicy
                           allow_origin_string_match:
-                            - exact: 'http://localhost:5173'
-                          allow_methods: 'GET, POST, OPTIONS'
-                          allow_headers: 'authorization,content-type,x-grpc-web,x-user-agent,grpc-timeout'
-                          expose_headers: 'grpc-status,grpc-message'
+                            - safe_regex:
+                                regex: ".*"
+                          allow_methods: 'GET, POST, PUT, DELETE, OPTIONS'
+                          allow_headers: 'authorization,content-type,x-grpc-web,x-user-agent,grpc-timeout,x-requested-with,x-signalr-user-agent'
+                          allow_credentials: true
+                          expose_headers: 'grpc-status,grpc-message,grpc-encoding,grpc-accept-encoding'
+                          max_age: '86400'
                       routes:
                         - match:
                             prefix: '/sudoku.game.v1.'
@@ -60,47 +63,12 @@ static_resources:
                             upgrade_configs:
                               - upgrade_type: websocket
                 http_filters:
-                  - name: envoy.filters.http.grpc_web
-                    typed_config:
-                      '@type': type.googleapis.com/envoy.extensions.filters.http.grpc_web.v3.GrpcWeb
                   - name: envoy.filters.http.cors
                     typed_config:
                       '@type': type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors
-                  - name: envoy.filters.http.jwt_authn
+                  - name: envoy.filters.http.grpc_web
                     typed_config:
-                      '@type': type.googleapis.com/envoy.extensions.filters.http.jwt_authn.v3.JwtAuthentication
-                      providers:
-                        firebase:
-                          issuer: 'https://securetoken.google.com/prn222-469cc'
-                          audiences:
-                            - 'prn222-469cc'
-                          from_headers:
-                            - name: authorization
-                              value_prefix: 'Bearer '
-                          from_params:
-                            - 'access_token'
-                          forward: true
-                          remote_jwks:
-                            http_uri:
-                              uri: 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com'
-                              cluster: jwks
-                              timeout: 5s
-                            cache_duration: 3600s
-                            async_fetch:
-                              fast_listener: true
-                      rules:
-                        - match:
-                            prefix: '/sudoku.support.v1.SupportService/GetRules'
-                        - match:
-                            prefix: '/sudoku.support.v1.SupportService/ListTutorials'
-                        - match:
-                            prefix: '/sudoku.support.v1.SupportService/ListNotices'
-                        - match:
-                            prefix: '/sudoku.game.v1.GameService/ListLevels'
-                        - match:
-                            prefix: '/'
-                          requires:
-                            provider_name: firebase
+                      '@type': type.googleapis.com/envoy.extensions.filters.http.grpc_web.v3.GrpcWeb
                   - name: envoy.filters.http.router
                     typed_config:
                       '@type': type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
@@ -187,7 +155,8 @@ static_resources:
                       port_value: 8081
     - name: jwks
       type: LOGICAL_DNS
-      connect_timeout: 3s
+      dns_lookup_family: V4_ONLY
+      connect_timeout: 5s
       load_assignment:
         cluster_name: jwks
         endpoints:

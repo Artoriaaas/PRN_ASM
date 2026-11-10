@@ -23,6 +23,7 @@ public interface ILevelRepository
 public interface IPuzzleRepository
 {
     Task<Puzzle?> GetUnplayedPuzzleAsync(string levelId, int layoutType, string userId, CancellationToken ct = default);
+    Task<Puzzle?> GetPuzzleForMatchAsync(string levelId, int layoutType, bool requireEvenEmptyCells, IReadOnlyList<string> excludeUserIds, CancellationToken ct = default);
     Task<int> CountUnplayedPuzzlesAsync(string levelId, int layoutType, CancellationToken ct = default);
     Task<bool> ExistsHashAsync(string puzzleHash, CancellationToken ct = default);
     void Add(Puzzle puzzle);

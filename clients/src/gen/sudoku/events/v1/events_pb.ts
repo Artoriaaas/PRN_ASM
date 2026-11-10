@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file sudoku/events/v1/events.proto.
  */
 export const file_sudoku_events_v1_events: GenFile = /*@__PURE__*/
-  fileDesc("Ch1zdWRva3UvZXZlbnRzL3YxL2V2ZW50cy5wcm90bxIQc3Vkb2t1LmV2ZW50cy52MSJmCg1FdmVudEVudmVsb3BlEhAKCGV2ZW50X2lkGAEgASgJEgwKBHR5cGUYAiABKAkSEwoLb2NjdXJyZWRfYXQYAyABKAkSDwoHdXNlcl9pZBgEIAEoCRIPCgdwYXlsb2FkGAUgASgMIusBCgxHYW1lRmluaXNoZWQSEgoKc2Vzc2lvbl9pZBgBIAEoCRIPCgd1c2VyX2lkGAIgASgJEhIKCmRpZmZpY3VsdHkYAyABKAkSDgoGaXNfd2luGAQgASgIEhgKEGR1cmF0aW9uX3NlY29uZHMYBSABKAUSFAoMcmV3YXJkX2NvaW5zGAYgASgFEg0KBXNjb3JlGAcgASgFEhIKCmVsYXBzZWRfbXMYCCABKAMSEwoLbGF5b3V0X3R5cGUYCSABKAUSFgoObWlzdGFrZXNfY291bnQYCiABKAUSEgoKaGludHNfdXNlZBgLIAEoBSKEAQoOTWF0Y2hDb21wbGV0ZWQSEAoIbWF0Y2hfaWQYASABKAkSFgoOd2lubmVyX3VzZXJfaWQYAiABKAkSFQoNbG9zZXJfdXNlcl9pZBgDIAEoCRIbChN3aW5uZXJfcmV3YXJkX2NvaW5zGAQgASgFEhQKDHJhdGluZ19kZWx0YRgFIAEoBUITqgIQU3Vkb2t1LkV2ZW50cy5WMWIGcHJvdG8z");
+  fileDesc("Ch1zdWRva3UvZXZlbnRzL3YxL2V2ZW50cy5wcm90bxIQc3Vkb2t1LmV2ZW50cy52MSJmCg1FdmVudEVudmVsb3BlEhAKCGV2ZW50X2lkGAEgASgJEgwKBHR5cGUYAiABKAkSEwoLb2NjdXJyZWRfYXQYAyABKAkSDwoHdXNlcl9pZBgEIAEoCRIPCgdwYXlsb2FkGAUgASgMIusBCgxHYW1lRmluaXNoZWQSEgoKc2Vzc2lvbl9pZBgBIAEoCRIPCgd1c2VyX2lkGAIgASgJEhIKCmRpZmZpY3VsdHkYAyABKAkSDgoGaXNfd2luGAQgASgIEhgKEGR1cmF0aW9uX3NlY29uZHMYBSABKAUSFAoMcmV3YXJkX2NvaW5zGAYgASgFEg0KBXNjb3JlGAcgASgFEhIKCmVsYXBzZWRfbXMYCCABKAMSEwoLbGF5b3V0X3R5cGUYCSABKAUSFgoObWlzdGFrZXNfY291bnQYCiABKAUSEgoKaGludHNfdXNlZBgLIAEoBSL+AQoOTWF0Y2hDb21wbGV0ZWQSEAoIbWF0Y2hfaWQYASABKAkSFgoOd2lubmVyX3VzZXJfaWQYAiABKAkSFQoNbG9zZXJfdXNlcl9pZBgDIAEoCRIbChN3aW5uZXJfcmV3YXJkX2NvaW5zGAQgASgFEhQKDHJhdGluZ19kZWx0YRgFIAEoBRITCgtwbGF5X2Zvcm1hdBgGIAEoBRIUCgxib2FyZF9sYXlvdXQYByABKAUSEAoIbGV2ZWxfaWQYCCABKAkSDwoHaXNfZHJhdxgJIAEoCBITCgtkdXJhdGlvbl9tcxgKIAEoAxIVCg10b3VybmFtZW50X2lkGAsgASgJQhOqAhBTdWRva3UuRXZlbnRzLlYxYgZwcm90bzM");
 
 /**
  * @generated from message sudoku.events.v1.EventEnvelope
@@ -144,6 +144,36 @@ export type MatchCompleted = Message<"sudoku.events.v1.MatchCompleted"> & {
    * @generated from field: int32 rating_delta = 5;
    */
   ratingDelta: number;
+
+  /**
+   * @generated from field: int32 play_format = 6;
+   */
+  playFormat: number;
+
+  /**
+   * @generated from field: int32 board_layout = 7;
+   */
+  boardLayout: number;
+
+  /**
+   * @generated from field: string level_id = 8;
+   */
+  levelId: string;
+
+  /**
+   * @generated from field: bool is_draw = 9;
+   */
+  isDraw: boolean;
+
+  /**
+   * @generated from field: int64 duration_ms = 10;
+   */
+  durationMs: bigint;
+
+  /**
+   * @generated from field: string tournament_id = 11;
+   */
+  tournamentId: string;
 };
 
 /**

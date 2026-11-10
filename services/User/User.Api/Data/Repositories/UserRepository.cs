@@ -35,6 +35,42 @@ public sealed class UserRepository(UserDbContext dbContext) : IUserRepository
             .SingleOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<UserAccount>> GetByFirebaseUidsAsync(
+        IReadOnlyList<string> firebaseUids,
+        int limit,
+        CancellationToken cancellationToken)
+    {
+        if (firebaseUids.Count == 0)
+        {
+            return Array.Empty<UserAccount>();
+        }
+
+        int safeLimit = Math.Clamp(limit, 1, 100);
+        return await dbContext.Users
+            .AsNoTracking()
+            .Where(user => firebaseUids.Contains(user.FirebaseUid))
+            .Take(safeLimit)
+            .Select(user => new UserAccount
+            {
+                Id = user.Id,
+                FirebaseUid = user.FirebaseUid,
+                Email = user.Email,
+                DisplayName = user.DisplayName,
+                AvatarUrl = user.AvatarUrl,
+                Country = user.Country,
+                Role = user.Role,
+                Status = user.Status,
+                TotalGames = user.TotalGames,
+                Wins = user.Wins,
+                TotalExp = user.TotalExp,
+                PlayerLevel = user.PlayerLevel,
+                Trophies = user.Trophies,
+                CreatedAt = user.CreatedAt,
+                UpdatedAt = user.UpdatedAt,
+            })
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<UserAccount?> GetByFirebaseUidForUpdateAsync(
         string firebaseUid,
         CancellationToken cancellationToken)
