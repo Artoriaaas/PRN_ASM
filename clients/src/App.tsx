@@ -71,7 +71,7 @@ function AppRoutes() {
 
   const handleProfileUpdated = useCallback((p: UserProfile) => setProfile(p), [])
 
-  if (authLoading && window.location.pathname !== '/preview') {
+  if (authLoading && !window.location.pathname.startsWith('/preview')) {
     return (
       <div className="splash-screen" aria-live="polite">
         <div className="brand-logo-splash" aria-hidden="true">
@@ -90,24 +90,11 @@ function AppRoutes() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/auth" element={user ? <Navigate to="/home" replace /> : <AuthPage />} />
         {import.meta.env.DEV && (
-          <Route
-            path="/preview"
-            element={
-              <AppShell
-                profile={
-                  {
-                    displayName: 'Khoa Nguyen',
-                    email: 'khoanguyen@example.com',
-                    avatarUrl: '',
-                    totalGames: 42,
-                    wins: 35,
-                    totalExp: 3850,
-                    playerLevel: 4,
-                    trophies: 12,
-                  } as unknown as UserProfile
-                }
-              >
-                <HomePage
+          <>
+            <Route
+              path="/preview"
+              element={
+                <AppShell
                   profile={
                     {
                       displayName: 'Khoa Nguyen',
@@ -120,11 +107,60 @@ function AppRoutes() {
                       trophies: 12,
                     } as unknown as UserProfile
                   }
-                  loading={false}
-                />
-              </AppShell>
-            }
-          />
+                >
+                  <HomePage
+                    profile={
+                      {
+                        displayName: 'Khoa Nguyen',
+                        email: 'khoanguyen@example.com',
+                        avatarUrl: '',
+                        totalGames: 42,
+                        wins: 35,
+                        totalExp: 3850,
+                        playerLevel: 4,
+                        trophies: 12,
+                      } as unknown as UserProfile
+                    }
+                    loading={false}
+                  />
+                </AppShell>
+              }
+            />
+            <Route
+              path="/preview/play"
+              element={
+                <AppShell
+                  profile={
+                    {
+                      displayName: 'Khoa Nguyen',
+                      email: 'khoanguyen@example.com',
+                      avatarUrl: '',
+                      totalGames: 42,
+                      wins: 35,
+                      totalExp: 3850,
+                      playerLevel: 4,
+                      trophies: 12,
+                    } as unknown as UserProfile
+                  }
+                >
+                  <MultiplayerLobbyPage
+                    profile={
+                      {
+                        displayName: 'Khoa Nguyen',
+                        email: 'khoanguyen@example.com',
+                        avatarUrl: '',
+                        totalGames: 42,
+                        wins: 35,
+                        totalExp: 3850,
+                        playerLevel: 4,
+                        trophies: 12,
+                      } as unknown as UserProfile
+                    }
+                  />
+                </AppShell>
+              }
+            />
+          </>
         )}
 
         {/* Private — bọc AppShell */}

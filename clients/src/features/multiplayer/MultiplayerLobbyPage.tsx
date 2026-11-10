@@ -104,11 +104,9 @@ export function MultiplayerLobbyPage({ profile }: MultiplayerLobbyPageProps) {
       <header className="multi-lobby-header">
         <div className="multi-lobby-title-group">
           <p className="eyebrow">ĐẤU TRƯỜNG TRỰC TUYẾN 1V1</p>
-          <h1>Sảnh Multiplayer</h1>
+          <h1 className="multi-lobby-title">Đấu trận</h1>
           <p className="multi-lobby-subtitle">
-            Chọn một trong 4 chế độ bên dưới. Với <strong>Race</strong> và{' '}
-            <strong>Duel</strong>, độ khó bàn cờ được tự động cân bằng theo điểm{' '}
-            <strong>Elo</strong> của bạn.
+            Chọn chế độ thi đấu trực tiếp. Điểm <strong>Elo</strong> và độ khó bàn cờ được cân bằng theo từng thể thức.
           </p>
         </div>
 

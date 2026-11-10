@@ -334,7 +334,7 @@
   background: var(--primary);
   color: #fff !important;
   font-size: 1.3rem !important;
-  box-shadow: 0 4px 16px rgba(79,70,229,0.4);
+  box-shadow: 0 4px 16px rgba(21, 128, 61, 0.4);
 }
 
 @media (max-width: 767px) {
@@ -847,16 +847,10 @@
   padding: 20px clamp(20px, 6vw, 80px);
   position: sticky;
   top: 0;
-  background: rgba(247,247,251,0.9);
+  background: rgba(248, 250, 246, 0.92);
   backdrop-filter: blur(14px);
   z-index: 100;
   border-bottom: 1px solid var(--border);
-}
-
-@media (prefers-color-scheme: dark) {
-  .landing-nav {
-    background: rgba(15,17,23,0.9);
-  }
 }
 
 .brand {
@@ -1385,22 +1379,22 @@
 
 .ql-icon-gold {
   background: #FEF3C7;
-  color: #D97706;
+  color: #B45309;
 }
 
 .ql-icon-indigo {
-  background: #EEF2FF;
-  color: #4F46E5;
+  background: #E0F2FE;
+  color: #0284C7;
 }
 
 .ql-icon-purple {
-  background: #F3E8FF;
-  color: #7C3AED;
+  background: #DCFCE7;
+  color: #15803D;
 }
 
 .ql-icon-rose {
-  background: #FFE4E6;
-  color: #E11D48;
+  background: #FEF9C3;
+  color: #A16207;
 }
 
 @media (max-width: 900px) {
@@ -1983,7 +1977,7 @@
   background: var(--surface);
   border: 1.5px solid var(--primary);
   border-radius: var(--radius-modal);
-  box-shadow: 0 16px 48px rgba(79, 70, 229, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 16px 48px rgba(21, 128, 61, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   animation: tutSlideUp 250ms ease-out;
 }
@@ -2292,4 +2286,1551 @@
   color: var(--primary);
   font-weight: 700;
 }
+
+/* ============================================================
+   Multiplayer Lobby (4 nút: Race, Duel, Tournament, Custom Room)
+   ============================================================ */
+
+.multi-lobby-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 36px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.multi-lobby-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.multi-lobby-title-group h1.multi-lobby-title {
+  margin: 0 0 8px;
+  font-size: 2.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  line-height: 1.15;
+}
+
+.multi-lobby-subtitle {
+  margin: 0;
+  max-width: 620px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.multi-layout-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 6px 8px 6px 14px;
+  border-radius: var(--radius-btn);
+  box-shadow: var(--shadow-sm);
+}
+
+.multi-layout-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.multi-layout-pills {
+  display: flex;
+  gap: 6px;
+}
+
+.multi-layout-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 7px 14px;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.multi-layout-pill:hover {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.multi-layout-pill.active {
+  background: var(--primary);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(21, 128, 61, 0.28);
+}
+
+/* 4 nút lớn ở Sảnh Multiplayer (Grid 2x2) */
+.multi-four-modes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+}
+
+@media (max-width: 720px) {
+  .multi-four-modes {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.multi-mode-btn {
+  /* Reset button styles */
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 18px;
+  padding: 28px 26px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-card);
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  cursor: pointer;
+  transition: transform var(--t-normal), border-color var(--t-normal), box-shadow var(--t-normal);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.multi-mode-btn:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.multi-mode-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Accent dải màu viền trái tinh tế */
+.multi-mode-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 5px;
+  border-radius: 4px 0 0 4px;
+  transition: width var(--t-fast);
+}
+
+.multi-mode-btn:hover::before {
+  width: 7px;
+}
+
+/* 1. Race: Cam / Hổ phách */
+.multi-mode-btn.mode-race::before {
+  background: linear-gradient(180deg, #F59E0B, #EA580C);
+}
+.multi-mode-btn.mode-race:hover {
+  border-color: #F59E0B;
+}
+
+/* 2. Duel: Đỏ hồng / Crimson */
+.multi-mode-btn.mode-duel::before {
+  background: linear-gradient(180deg, #E11D48, #BE123C);
+}
+.multi-mode-btn.mode-duel:hover {
+  border-color: #E11D48;
+}
+
+/* 3. Tournament: Tím hoàng gia */
+.multi-mode-btn.mode-tournament::before {
+  background: linear-gradient(180deg, #8B5CF6, #6D28D9);
+}
+.multi-mode-btn.mode-tournament:hover {
+  border-color: #8B5CF6;
+}
+
+/* 4. Custom Room: Xanh ngọc lục bảo / Emerald */
+.multi-mode-btn.mode-custom::before {
+  background: linear-gradient(180deg, #10B981, #059669);
+}
+.multi-mode-btn.mode-custom:hover {
+  border-color: #10B981;
+}
+
+/* Top bar của từng thẻ */
+.multi-mode-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.multi-mode-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  background: #FEF3C7;
+  color: #B45309;
+}
+
+.mode-race .multi-mode-icon {
+  background: #FEF3C7;
+}
+
+.mode-duel .multi-mode-icon {
+  background: #FFE4E6;
+}
+
+.mode-tournament .multi-mode-icon {
+  background: #F3E8FF;
+}
+
+.mode-custom .multi-mode-icon {
+  background: #DCFCE7;
+}
+
+.multi-mode-elo-badge {
+  font-family: var(--font-num);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #FEF3C7;
+  color: #B45309;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.multi-mode-elo-badge.duel {
+  background: #FFE4E6;
+  color: #BE123C;
+  border-color: rgba(225, 29, 72, 0.25);
+}
+
+.multi-mode-tag-pill {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #F3E8FF;
+  color: #7C3AED;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+.multi-mode-tag-pill.custom {
+  background: #DCFCE7;
+  color: #15803D;
+  border-color: rgba(22, 163, 74, 0.25);
+}
+
+/* Body thẻ */
+.multi-mode-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.multi-mode-body h2 {
+  margin: 0 0 6px;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.multi-mode-tagline {
+  margin: 0 0 10px;
+  font-weight: 700;
+  font-size: 0.94rem;
+  color: var(--text);
+}
+
+.multi-mode-desc {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+/* Chân thẻ: flex space-between, margin-top: auto để luôn thẳng hàng đáy */
+.multi-mode-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+  width: 100%;
+}
+
+.multi-difficulty-chip {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-hover);
+  white-space: nowrap;
+}
+
+.multi-difficulty-chip.neutral {
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+
+.multi-mode-cta {
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: #D97706;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: transform var(--t-fast);
+}
+
+.multi-mode-btn:hover .multi-mode-cta {
+  transform: translateX(3px);
+}
+
+.mode-race .multi-mode-cta {
+  color: #D97706;
+}
+
+.mode-duel .multi-mode-cta {
+  color: #E11D48;
+}
+
+.mode-tournament .multi-mode-cta {
+  color: #7C3AED;
+}
+
+.mode-custom .multi-mode-cta {
+  color: #15803D;
+}
+
+/* Strip thông tin dưới đáy */
+.multi-lobby-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 18px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.multi-player-strip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.multi-player-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 1.1rem;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 8px rgba(21, 128, 61, 0.25);
+}
+
+.multi-player-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.multi-player-meta strong {
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.multi-player-meta b {
+  color: var(--text);
+}
+
+.multi-lobby-links {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.multi-lobby-links .btn {
+  font-size: 0.88rem;
+  padding: 0 16px;
+  min-height: 40px;
+  border-radius: 10px;
+}
+
+/* Custom Room Modal */
+.custom-room-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.custom-room-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: var(--bg);
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.custom-tab-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.custom-tab-btn.active {
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.custom-room-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.custom-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.custom-field-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.custom-choice-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.custom-choice-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.custom-choice-card span {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.custom-choice-card.selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.custom-level-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.custom-level-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.custom-level-btn div {
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-level-btn small {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.custom-level-btn.selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.custom-room-join-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.custom-join-hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.custom-code-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-family: var(--font-num);
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-align: center;
+  text-transform: uppercase;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.custom-code-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* ============================================================
+   Multiplayer Queue & VS Screen (/play/queue)
+   ============================================================ */
+
+.multi-queue-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+  min-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+}
+
+.queue-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.queue-mode-pill {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background: var(--primary);
+  color: #fff;
+}
+
+.queue-mode-pill.duel {
+  background: var(--opponent);
+}
+
+.queue-meta-pill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.queue-searching-stage {
+  width: 100%;
+  max-width: 520px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+}
+
+.custom-room-banner {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--primary-soft);
+  border: 1px dashed var(--primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-room-banner-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--primary);
+}
+
+.custom-room-code-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.custom-room-code-text {
+  font-family: var(--font-num);
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  color: var(--text);
+}
+
+.custom-room-banner-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.queue-center-player-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.queue-radar-wrapper {
+  position: relative;
+  width: 116px;
+  height: 116px;
+  display: grid;
+  place-items: center;
+}
+
+.queue-radar-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  opacity: 0;
+  animation: radarPulse 2.4s ease-out infinite;
+}
+
+.queue-radar-ring.ring-2 {
+  animation-delay: 1.2s;
+}
+
+@keyframes radarPulse {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+.queue-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--primary);
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.28);
+}
+
+.queue-avatar.large {
+  width: 88px;
+  height: 88px;
+  font-size: 2.2rem;
+}
+
+.queue-avatar.opponent {
+  background: var(--opponent);
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.28);
+}
+
+.queue-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.queue-player-name {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text);
+}
+
+.queue-player-elo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  font-family: var(--font-num);
+  font-size: 0.95rem;
+}
+
+.queue-auto-difficulty-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.queue-status-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.queue-spinner-dots {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.queue-spinner-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: dotBounce 1.2s infinite ease-in-out;
+}
+
+.queue-spinner-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.queue-spinner-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.queue-status-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.queue-wait-clock {
+  font-family: var(--font-num);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.queue-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* VS Stage: Bản thân bên trái, Đối thủ bên phải, 5s countdown ở giữa */
+.queue-vs-stage {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  animation: vsFadeIn 260ms ease-out;
+}
+
+@keyframes vsFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.vs-found-banner {
+  text-align: center;
+}
+
+.vs-found-banner h2 {
+  margin: 0;
+  font-size: 1.85rem;
+}
+
+.vs-arena-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+}
+
+@media (max-width: 720px) {
+  .vs-arena-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vs-fighter-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  position: relative;
+}
+
+.vs-fighter-card.self-side {
+  border-color: var(--primary);
+}
+
+.vs-fighter-card.opponent-side {
+  border-color: var(--opponent);
+}
+
+.vs-side-tag {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+.vs-side-tag.self {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.vs-side-tag.opponent {
+  background: rgba(249, 115, 22, 0.15);
+  color: var(--opponent);
+}
+
+.vs-fighter-name {
+  margin: 0;
+  font-size: 1.45rem;
+  color: var(--text);
+}
+
+.vs-fighter-elo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  background: var(--bg);
+  width: 100%;
+}
+
+.vs-fighter-elo span {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.vs-fighter-elo strong {
+  font-family: var(--font-num);
+  font-size: 1.35rem;
+  color: var(--primary);
+}
+
+.vs-fighter-elo.opponent strong {
+  color: var(--opponent);
+}
+
+.vs-center-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.vs-emblem {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+
+.vs-countdown-ring {
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  border: 4px solid var(--primary);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 28px rgba(79, 70, 229, 0.22);
+}
+
+.vs-countdown-number {
+  font-family: var(--font-num);
+  font-size: 2.6rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--primary);
+}
+
+.vs-countdown-unit {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.vs-match-summary {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+/* ============================================================
+   Multiplayer Match Screen (/match/:matchId) — Race & Duel
+   ============================================================ */
+
+.multi-match-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 16px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.multi-match-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.multi-match-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.match-mode-badge {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--primary);
+}
+
+.match-mode-badge.duel {
+  background: var(--opponent);
+}
+
+.match-meta-badge {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+/* Duel Scoreboard & Turn Clock */
+.duel-HUD {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 18px;
+}
+
+@media (max-width: 768px) {
+  .duel-HUD {
+    grid-template-columns: 1fr;
+  }
+}
+
+.duel-player-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: var(--bg);
+  transition: border-color 150ms ease;
+}
+
+.duel-player-panel.self.active-turn {
+  border-color: var(--primary);
+}
+
+.duel-player-panel.opponent {
+  justify-content: space-between;
+}
+
+.duel-player-panel.opponent.active-turn {
+  border-color: var(--opponent);
+}
+
+.duel-player-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: #fff;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+.duel-player-avatar.opponent {
+  background: var(--opponent);
+}
+
+.duel-player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.duel-player-info.align-right {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.duel-player-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.duel-elo-tag {
+  font-family: var(--font-num);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.duel-player-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  min-width: 68px;
+}
+
+.duel-player-score .score-number {
+  font-family: var(--font-num);
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.duel-player-score .score-unit {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.duel-turn-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 14px;
+  min-width: 148px;
+  border: 2px solid var(--primary);
+  background: var(--primary-soft);
+}
+
+.duel-turn-clock.opp-turn {
+  border-color: var(--opponent);
+  background: rgba(249, 115, 22, 0.12);
+}
+
+.duel-turn-clock.urgent {
+  border-color: var(--danger);
+  animation: pulseUrgent 600ms infinite alternate;
+}
+
+@keyframes pulseUrgent {
+  from { transform: scale(1); }
+  to { transform: scale(1.04); }
+}
+
+.turn-clock-sec {
+  font-family: var(--font-num);
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.turn-clock-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+/* Race Progress HUD */
+.race-HUD {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .race-HUD {
+    grid-template-columns: 1fr;
+  }
+}
+
+.race-lane {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.race-lane.self {
+  border-left: 4px solid var(--primary);
+}
+
+.race-lane.opponent {
+  border-left: 4px solid var(--opponent);
+}
+
+.race-lane-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.race-Competitor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.race-Competitor div {
+  display: flex;
+  flex-direction: column;
+}
+
+.race-Competitor small {
+  font-family: var(--font-num);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.race-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: #fff;
+  background: var(--primary);
+}
+
+.race-avatar.opponent {
+  background: var(--opponent);
+}
+
+.race-metrics {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.race-penalty-chip {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--font-num);
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: rgba(220, 38, 38, 0.14);
+  color: var(--danger);
+}
+
+.race-percent {
+  font-family: var(--font-num);
+  font-size: 1.05rem;
+  color: var(--primary);
+}
+
+.race-percent.opponent {
+  color: var(--opponent);
+}
+
+.race-progress-bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.race-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 240ms ease;
+}
+
+.race-progress-fill.self {
+  background: var(--primary);
+}
+
+.race-progress-fill.opponent {
+  background: var(--opponent);
+}
+
+.duel-revealed-wrong-banner {
+  width: 100%;
+  max-width: 500px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.multi-side-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.multi-side-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.multi-side-card-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.multi-side-card-head span {
+  font-family: var(--font-num);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.duel-scoring-rule-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.duel-move-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.duel-feed-empty {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.duel-feed-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--bg);
+  font-size: 0.8rem;
+}
+
+.duel-feed-item.ok strong {
+  color: var(--success);
+  font-family: var(--font-num);
+}
+
+.duel-feed-item.err strong {
+  color: var(--danger);
+  font-family: var(--font-num);
+}
+
+.play-layout {
+  display: grid;
+  grid-template-columns: 1fr 310px;
+  align-items: start;
+  gap: 24px;
+  width: 100%;
+}
+
+@media (max-width: 860px) {
+  .play-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.play-board-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-controls-area {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ============================================================
+   Multiplayer Result Screen (/match/:matchId/result)
+   ============================================================ */
+
+.multi-result-page {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 36px 20px 64px;
+}
+
+.multi-result-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 26px;
+}
+
+.multi-result-card.win {
+  border-color: var(--success);
+}
+
+.multi-result-card.loss {
+  border-color: var(--danger);
+}
+
+.result-outcome-banner h1 {
+  margin: 4px 0 8px;
+  font-size: 2.2rem;
+}
+
+.result-outcome-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.result-reason-text {
+  margin: 0;
+  color: var(--muted);
+}
+
+.result-vs-comparison {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+}
+
+@media (max-width: 680px) {
+  .result-vs-comparison {
+    grid-template-columns: 1fr;
+  }
+}
+
+.result-player-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.result-player-box h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.result-elo-change {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-num);
+}
+
+.elo-new {
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.elo-delta-pill {
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.elo-delta-pill.pos {
+  background: rgba(22, 163, 74, 0.15);
+  color: var(--success);
+}
+
+.elo-delta-pill.neg {
+  background: rgba(220, 38, 38, 0.15);
+  color: var(--danger);
+}
+
+.result-stat-list {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.result-stat-list div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.result-stat-list span {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.result-stat-list strong {
+  font-family: var(--font-num);
+  font-size: 0.98rem;
+}
+
+.result-vs-divider {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--muted);
+}
+
+.result-next-difficulty-note {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.result-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 

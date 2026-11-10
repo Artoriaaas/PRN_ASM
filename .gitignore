@@ -490,6 +490,8 @@ web/src/gen/
 !**/.env.example
 appsettings.Local.json
 appsettings.*.Local.json
+appsettings.Development.json
+**/appsettings.Development.json
 
 # Firebase / Google Cloud credentials and local emulator state
 **/serviceAccount*.json
