@@ -89,4 +89,14 @@ public class GameSessionRepository : IGameSessionRepository
     {
         _context.OutboxMessages.Add(outboxMessage);
     }
+
+    public Task<List<OutboxMessage>> GetUnprocessedOutboxMessagesAsync(int limit, CancellationToken ct = default)
+    {
+        int safeLimit = Math.Clamp(limit <= 0 ? 50 : limit, 1, 100);
+        return _context.OutboxMessages
+            .Where(m => m.ProcessedAt == null)
+            .OrderBy(m => m.CreatedAt)
+            .Take(safeLimit)
+            .ToListAsync(ct);
+    }
 }

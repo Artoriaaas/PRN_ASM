@@ -41,4 +41,5 @@ public interface IGameSessionRepository
     Task<bool> HasFailedMoveAsync(Guid sessionId, int row, int col, int value, CancellationToken ct = default);
     void Add(GameSession session);
     void AddOutboxMessage(OutboxMessage outboxMessage);
+    Task<List<OutboxMessage>> GetUnprocessedOutboxMessagesAsync(int limit, CancellationToken ct = default);
 }

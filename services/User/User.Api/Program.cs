@@ -18,6 +18,7 @@ builder.Services.AddDbContext<UserDbContext>(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserUnitOfWork, UserUnitOfWork>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+builder.Services.AddHostedService<User.Api.Messaging.GameEventsConsumerWorker>();
 
 var app = builder.Build();
 

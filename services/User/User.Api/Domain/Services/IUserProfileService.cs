@@ -23,4 +23,16 @@ public interface IUserProfileService
         string avatarUrl,
         string country,
         CancellationToken cancellationToken);
+
+    Task HandleGameFinishedEventAsync(
+        string eventId,
+        string handlerName,
+        Sudoku.Events.V1.GameFinished gameFinished,
+        CancellationToken cancellationToken);
+
+    Task HandleMatchCompletedEventAsync(
+        string eventId,
+        string handlerName,
+        Sudoku.Events.V1.MatchCompleted matchCompleted,
+        CancellationToken cancellationToken);
 }

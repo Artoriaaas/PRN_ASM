@@ -23,6 +23,31 @@ namespace User.Api.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Sudoku.Messaging.InboxMessage", b =>
+                {
+                    b.Property<string>("EventId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("event_id");
+
+                    b.Property<string>("HandlerName")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("handler_name");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("received_at");
+
+                    b.HasKey("EventId", "HandlerName");
+
+                    b.ToTable("inbox_messages", "user");
+                });
+
             modelBuilder.Entity("User.Api.Domain.Entities.UserAccount", b =>
                 {
                     b.Property<Guid>("Id")

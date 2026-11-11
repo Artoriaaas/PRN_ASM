@@ -5,6 +5,7 @@ using Game.Api.Grpc;
 using Game.Api.Messaging;
 using Microsoft.EntityFrameworkCore;
 using Sudoku.Auth;
+using Sudoku.Messaging;
 using Sudoku.Observability;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,8 +29,11 @@ builder.Services.AddScoped<IPuzzleBankService, PuzzleBankService>();
 builder.Services.AddScoped<IGamePlayService, GamePlayService>();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 
+builder.Services.AddSudokuKafkaPublisher();
+
 builder.Services.AddHostedService<GameDataSeeder>();
 builder.Services.AddHostedService<PuzzleReplenishWorker>();
+builder.Services.AddHostedService<OutboxProcessorWorker>();
 
 builder.Services.AddGrpc(options =>
 {

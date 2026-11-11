@@ -85,4 +85,16 @@ public sealed class UserRepository(UserDbContext dbContext) : IUserRepository
     {
         return dbContext.Users.AddAsync(user, cancellationToken).AsTask();
     }
+
+    public Task<bool> HasProcessedInboxAsync(string eventId, string handlerName, CancellationToken cancellationToken)
+    {
+        return dbContext.InboxMessages
+            .AsNoTracking()
+            .AnyAsync(x => x.EventId == eventId && x.HandlerName == handlerName, cancellationToken);
+    }
+
+    public Task AddInboxMessageAsync(Sudoku.Messaging.InboxMessage message, CancellationToken cancellationToken)
+    {
+        return dbContext.InboxMessages.AddAsync(message, cancellationToken).AsTask();
+    }
 }
