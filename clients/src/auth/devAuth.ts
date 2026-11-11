@@ -22,7 +22,10 @@ export async function getDevToken(sub = 'guest-solo-user'): Promise<string> {
     sub,
     email: 'guest@sudoku.local',
     name: 'Guest Solo',
+    iss: 'sudoku-dev-auth',
+    aud: 'sudoku-platform',
     iat: Math.floor(now / 1000),
+    exp: Math.floor(now / 1000) + 3600,
   }
 
   const h64 = toBase64Url(new TextEncoder().encode(JSON.stringify(header)))

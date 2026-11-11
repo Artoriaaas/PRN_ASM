@@ -49,27 +49,69 @@ function PageLoader() {
   )
 }
 
+function getProfileSyncError(error: unknown) {
+  if (!(error instanceof Error)) {
+    return 'Không thể đồng bộ hồ sơ. Vui lòng thử lại.'
+  }
+
+  if (/unauthenticated|401/i.test(error.message)) {
+    return 'Không thể xác thực với User Service. Vui lòng đăng nhập lại hoặc thử lại.'
+  }
+
+  return error.message || 'Không thể đồng bộ hồ sơ. Vui lòng thử lại.'
+}
+
 function AppRoutes() {
   const { user, loading: authLoading } = useAuth()
   const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [profileLoadError, setProfileLoadError] = useState('')
+  const [profileSyncAttempt, setProfileSyncAttempt] = useState(0)
 
   // Hydrate profile từ cache + sync
   useEffect(() => {
     if (!user) {
       setProfile(null)
+      setProfileLoading(false)
+      setProfileLoadError('')
       return
     }
+
     const cached = getCachedProfile(user.uid)
-    if (cached) setProfile(cached)
+    setProfile(cached)
+    setProfileLoading(!cached)
+    setProfileLoadError('')
 
     const controller = new AbortController()
     syncUserProfile(user, controller.signal)
-      .then(setProfile)
-      .catch(() => { /* lỗi đã có trong RequireAuth */ })
-    return () => controller.abort()
-  }, [user])
+      .then((syncedProfile) => {
+        if (!controller.signal.aborted) {
+          setProfile(syncedProfile)
+        }
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setProfileLoadError(getProfileSyncError(error))
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setProfileLoading(false)
+        }
+      })
 
-  const handleProfileUpdated = useCallback((p: UserProfile) => setProfile(p), [])
+    return () => controller.abort()
+  }, [user, profileSyncAttempt])
+
+  const handleProfileRetry = useCallback(() => {
+    setProfileSyncAttempt((attempt) => attempt + 1)
+  }, [])
+
+  const handleProfileUpdated = useCallback((p: UserProfile) => {
+    setProfile(p)
+    setProfileLoadError('')
+    setProfileLoading(false)
+  }, [])
 
   if (authLoading && !window.location.pathname.startsWith('/preview')) {
     return (
@@ -170,7 +212,7 @@ function AppRoutes() {
             <RequireAuth>
               <AppShell profile={profile}>
                 <Routes>
-                  <Route path="/home" element={<HomePage profile={profile} loading={!profile} />} />
+                  <Route path="/home" element={<HomePage profile={profile} loading={profileLoading} />} />
                   <Route path="/solo/new" element={<SoloSetupPage />} />
                   <Route path="/solo/:sessionId" element={<SoloPlayPage />} />
                   <Route path="/solo/:sessionId/result" element={<SoloResultPage />} />
@@ -181,11 +223,11 @@ function AppRoutes() {
                         <ProfilePage
                           user={user}
                           profile={profile}
-                          loading={!profile}
-                          loadError=""
+                          loading={profileLoading}
+                          loadError={profileLoadError}
                           view="profile"
                           onNavigate={() => {}}
-                          onRetry={() => {}}
+                          onRetry={handleProfileRetry}
                           onUpdated={handleProfileUpdated}
                         />
                       ) : null
@@ -198,11 +240,11 @@ function AppRoutes() {
                         <ProfilePage
                           user={user}
                           profile={profile}
-                          loading={!profile}
-                          loadError=""
+                          loading={profileLoading}
+                          loadError={profileLoadError}
                           view="settings"
                           onNavigate={() => {}}
-                          onRetry={() => {}}
+                          onRetry={handleProfileRetry}
                           onUpdated={handleProfileUpdated}
                         />
                       ) : null

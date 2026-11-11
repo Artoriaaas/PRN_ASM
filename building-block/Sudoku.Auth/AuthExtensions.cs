@@ -28,18 +28,20 @@ public static class AuthExtensions
                 o.Authority = authority;
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidIssuer = googleIssuer,
-                    ValidAudience = projectId,
-                    ValidateLifetime = false,
-                    IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
+                    ValidIssuers = [googleIssuer, DevIssuer],
+                    ValidAudiences = [projectId, DevAudience],
+                    ValidateLifetime = true,
+                    IssuerSigningKeyResolverUsingConfiguration = (token, securityToken, kid, parameters, configuration) =>
                     {
-                        // If token is signed with our dev HMAC secret key (offline / multi-browser guest testing)
+                        // Dev tokens use a local HMAC key; Firebase tokens keep the signing keys
+                        // supplied by the OpenID Connect configuration manager.
                         if (securityToken is Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwt &&
                             string.Equals(jwt.Alg, SecurityAlgorithms.HmacSha256, System.StringComparison.Ordinal))
                         {
                             return new[] { devSigningKey };
                         }
-                        return null; // Fallback to OIDC / Google public keys
+
+                        return configuration.SigningKeys;
                     }
                 };
                 o.MapInboundClaims = false;
