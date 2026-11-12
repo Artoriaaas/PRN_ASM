@@ -11,6 +11,8 @@ static_resources:
               typed_config:
                 '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                 stat_prefix: edge
+                scheme_header_transformation:
+                  scheme_to_overwrite: http
                 access_log:
                   - name: envoy.access_loggers.stdout
                     typed_config:
