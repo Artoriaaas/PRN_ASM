@@ -7,27 +7,25 @@
 }
 
 .brand-mark {
-  display: grid;
+  display: block;
   width: 58px;
   height: 58px;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.45);
   border-radius: 17px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent),
-    var(--green);
-  box-shadow: 0 12px 30px rgba(11, 55, 42, 0.2);
-  color: white;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 2rem;
-  font-weight: 700;
+  object-fit: contain;
+  overflow: hidden;
+}
+
+/* Khi là <div> bọc <img> (AuthPage) */
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .brand-mark.small {
   width: 38px;
   height: 38px;
   border-radius: 11px;
-  font-size: 1.3rem;
 }
 
 .auth-layout {
@@ -342,64 +340,48 @@
   to { transform: rotate(360deg); }
 }
 
-.app-shell {
+/* Legacy profile topbar overrides moved/scoped */
+.profile-page-shell {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 5% 10%, rgba(31, 107, 85, 0.06), transparent 28%),
-    var(--canvas);
-}
-
-.topbar {
-  display: flex;
-  min-height: 76px;
-  padding: 0 clamp(20px, 6vw, 80px);
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--line);
-  background: rgba(255, 254, 250, 0.88);
-  backdrop-filter: blur(14px);
-}
-
-.brand-button {
-  display: flex;
-  padding: 0;
-  align-items: center;
-  gap: 12px;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.08rem;
-  font-weight: 700;
-}
-
-.topbar nav {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.topbar nav button {
-  padding: 10px 14px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-
-.topbar nav button:hover,
-.topbar nav button.active {
-  background: var(--green-soft);
-  color: var(--green-dark);
+  background: var(--bg);
 }
 
 .profile-container {
   width: min(1160px, calc(100% - 40px));
   margin: 0 auto;
   padding: 34px 0 80px;
+}
+
+.profile-tabs {
+  display: inline-flex;
+  gap: 6px;
+  background: var(--surface, #edeae2);
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+}
+
+.profile-tab {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--muted, #666);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all var(--t-fast, 0.15s ease);
+}
+
+.profile-tab:hover {
+  color: var(--text, #1b1b2f);
+}
+
+.profile-tab.active {
+  background: var(--paper, #fff);
+  color: var(--primary, #1f6b55);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .verification-banner {
@@ -482,10 +464,10 @@
 
 .profile-heading h1 {
   margin-bottom: 8px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.1rem, 4vw, 3.5rem);
-  font-weight: 500;
-  letter-spacing: -0.04em;
+  font-family: var(--font-ui, 'Be Vietnam Pro', Inter, sans-serif);
+  font-size: clamp(2.1rem, 4vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .profile-heading > p:not(.eyebrow) {
@@ -634,9 +616,10 @@
 .load-state h2 {
   margin-bottom: 0;
   color: var(--ink);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 2rem;
-  font-weight: 500;
+  font-family: var(--font-ui, 'Be Vietnam Pro', Inter, sans-serif);
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .error-state p {
@@ -680,23 +663,6 @@
 }
 
 @media (max-width: 680px) {
-  .topbar {
-    min-height: auto;
-    padding: 14px 16px;
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .topbar nav {
-    width: 100%;
-  }
-
-  .topbar nav button {
-    flex: 1;
-    padding-inline: 8px;
-  }
-
   .profile-container {
     width: min(100% - 24px, 1160px);
     padding-top: 18px;

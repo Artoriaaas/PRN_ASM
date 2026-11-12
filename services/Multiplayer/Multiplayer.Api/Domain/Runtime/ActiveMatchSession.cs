@@ -85,6 +85,10 @@ public sealed class ActiveMatchSession
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime StartedAtUtc { get; set; }
     public DateTime MatchDeadlineUtc { get; set; }
+    public bool IsPreparationPhase { get; set; }
+    public DateTime PreparationDeadlineUtc { get; set; }
+    public bool Player1Ready { get; set; }
+    public bool Player2Ready { get; set; }
     public bool IsFinished { get; set; }
     public Dictionary<int, List<int>> RevealedWrongDigits { get; set; } = new();
     public ActivePlayerRuntime Player1 { get; set; } = new();

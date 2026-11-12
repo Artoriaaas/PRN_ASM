@@ -28,7 +28,7 @@ export function LandingPage() {
     <div className="landing">
       <header className="landing-nav">
         <div className="brand">
-          <span className="brand-logo" aria-hidden="true">9</span>
+          <img className="brand-logo" src="/logo.png" alt="Sudoku Online logo" />
           <span className="brand-name">Sudoku Online</span>
         </div>
         <Link to="/auth" className="btn btn-primary">

@@ -313,6 +313,40 @@ public sealed class MatchHub : Hub
         await Clients.Group(groupName).SendAsync("MatchEnded", BuildMatchEndedPayload(summary), ct);
     }
 
+    public async Task SetPlayerReady(MatchActionDto request)
+    {
+        string userId = GetCallerUserId();
+        Guid matchId = ParseMatchId(request.MatchId);
+        var ct = Context.ConnectionAborted;
+
+        var prepOutcome = await _matchEngine.SetPlayerReadyAsync(matchId, userId, ct);
+        string groupName = GetMatchGroupName(matchId);
+
+        var session = await _runtimeStore.GetAsync(matchId, ct);
+        if (session != null)
+        {
+            await Clients.Group(groupName).SendAsync("PlayerReadyChanged", new
+            {
+                matchId = matchId.ToString(),
+                userId,
+                player1Ready = session.Player1Ready,
+                player2Ready = session.Player2Ready
+            }, ct);
+        }
+
+        if (prepOutcome != null)
+        {
+            await Clients.Group(groupName).SendAsync("PreparationEnded", new
+            {
+                matchId = prepOutcome.MatchId.ToString(),
+                startedAt = prepOutcome.StartedAtUtc.ToString("O"),
+                currentTurnUserId = prepOutcome.CurrentTurnUserId,
+                turn = prepOutcome.TurnNumber,
+                turnDeadline = prepOutcome.TurnDeadlineUtc.ToString("O")
+            }, ct);
+        }
+    }
+
     public async Task SyncRoomState(MatchActionDto request)
     {
         string userId = GetCallerUserId();
@@ -373,7 +407,11 @@ public sealed class MatchHub : Hub
                 turnDeadline = session.TurnDeadlineUtc.ToString("O"),
                 startedAt = session.StartedAtUtc.ToString("O"),
                 matchDeadline = session.MatchDeadlineUtc.ToString("O"),
-                revealedWrongDigits = session.RevealedWrongDigits
+                revealedWrongDigits = session.RevealedWrongDigits,
+                isPreparationPhase = session.IsPreparationPhase,
+                preparationDeadline = session.PreparationDeadlineUtc.ToString("O"),
+                player1Ready = session.Player1Ready,
+                player2Ready = session.Player2Ready
             }, ct);
         }
         finally
@@ -450,8 +488,14 @@ public sealed class MatchHub : Hub
                 wrongTimePenaltySeconds = session.Rules.WrongTimePenaltySeconds,
                 matchTimeLimitSeconds = session.Rules.MatchTimeLimitSeconds,
                 reconnectGraceSeconds = session.Rules.ReconnectGraceSeconds,
-                countdownSeconds = session.Rules.CountdownSeconds
+                countdownSeconds = session.Rules.CountdownSeconds,
+                preparationSeconds = session.Rules.PreparationSeconds
             },
+            isPreparationPhase = session.IsPreparationPhase,
+            preparationDeadline = session.PreparationDeadlineUtc.ToString("O"),
+            preparationSeconds = session.Rules.PreparationSeconds,
+            player1Ready = session.Player1Ready,
+            player2Ready = session.Player2Ready,
             startedAt = session.StartedAtUtc.ToString("O"),
             currentTurnUserId = session.CurrentTurnUserId,
             turn = session.TurnNumber,

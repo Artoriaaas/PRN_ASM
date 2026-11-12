@@ -10,7 +10,9 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   if (loading) {
     return (
       <main className="splash-screen" aria-live="polite">
-        <div className="brand-logo-splash" aria-hidden="true">9</div>
+        <div className="brand-logo-splash" aria-hidden="true">
+          <img src="/logo.png" alt="Sudoku Online" />
+        </div>
         <div className="loader" />
         <p>Đang kiểm tra phiên đăng nhập…</p>
       </main>

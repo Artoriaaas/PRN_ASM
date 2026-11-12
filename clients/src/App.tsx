@@ -1,8 +1,8 @@
 import { lazy, Suspense, useEffect, useState, useCallback } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import type { UserProfile } from './gen/sudoku/user/v1/user_pb'
 import { useAuth } from './auth/useAuth'
-import { getCachedProfile, syncUserProfile } from './api/userClient'
+import { getCachedProfile, syncUserProfile, clearCachedProfile } from './api/userClient'
 import { RequireAuth } from './auth/RequireAuth'
 import { AppShell } from './components/AppShell'
 import { ToastProvider } from './components/ui/Toast'
@@ -49,32 +49,80 @@ function PageLoader() {
   )
 }
 
+function getProfileSyncError(error: unknown) {
+  if (!(error instanceof Error)) {
+    return 'Không thể đồng bộ hồ sơ. Vui lòng thử lại.'
+  }
+
+  if (/unauthenticated|401/i.test(error.message)) {
+    return 'Không thể xác thực với User Service. Vui lòng đăng nhập lại hoặc thử lại.'
+  }
+
+  return error.message || 'Không thể đồng bộ hồ sơ. Vui lòng thử lại.'
+}
+
 function AppRoutes() {
   const { user, loading: authLoading } = useAuth()
+  const navigate = useNavigate()
   const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [profileLoadError, setProfileLoadError] = useState('')
+  const [profileSyncAttempt, setProfileSyncAttempt] = useState(0)
 
   // Hydrate profile từ cache + sync
   useEffect(() => {
     if (!user) {
       setProfile(null)
+      setProfileLoading(false)
+      setProfileLoadError('')
       return
     }
+
     const cached = getCachedProfile(user.uid)
-    if (cached) setProfile(cached)
+    setProfile(cached)
+    setProfileLoading(!cached)
+    setProfileLoadError('')
 
     const controller = new AbortController()
     syncUserProfile(user, controller.signal)
-      .then(setProfile)
-      .catch(() => { /* lỗi đã có trong RequireAuth */ })
+      .then((syncedProfile) => {
+        if (!controller.signal.aborted) {
+          setProfile(syncedProfile)
+        }
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setProfileLoadError(getProfileSyncError(error))
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setProfileLoading(false)
+        }
+      })
+
     return () => controller.abort()
+  }, [user, profileSyncAttempt])
+
+  const handleProfileRetry = useCallback(() => {
+    if (user) {
+      clearCachedProfile(user.uid)
+    }
+    setProfileSyncAttempt((attempt) => attempt + 1)
   }, [user])
 
-  const handleProfileUpdated = useCallback((p: UserProfile) => setProfile(p), [])
+  const handleProfileUpdated = useCallback((p: UserProfile) => {
+    setProfile(p)
+    setProfileLoadError('')
+    setProfileLoading(false)
+  }, [])
 
-  if (authLoading) {
+  if (authLoading && !window.location.pathname.startsWith('/preview')) {
     return (
       <div className="splash-screen" aria-live="polite">
-        <div className="brand-logo-splash" aria-hidden="true">9</div>
+        <div className="brand-logo-splash" aria-hidden="true">
+          <img src="/logo.png" alt="Sudoku Online" />
+        </div>
         <div className="loader" />
         <p>Đang kiểm tra phiên đăng nhập…</p>
       </div>
@@ -87,6 +135,79 @@ function AppRoutes() {
         {/* Public */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/auth" element={user ? <Navigate to="/home" replace /> : <AuthPage />} />
+        {import.meta.env.DEV && (
+          <>
+            <Route
+              path="/preview"
+              element={
+                <AppShell
+                  profile={
+                    {
+                      displayName: 'Khoa Nguyen',
+                      email: 'khoanguyen@example.com',
+                      avatarUrl: '',
+                      totalGames: 42,
+                      wins: 35,
+                      totalExp: 3850,
+                      playerLevel: 4,
+                      trophies: 12,
+                    } as unknown as UserProfile
+                  }
+                >
+                  <HomePage
+                    profile={
+                      {
+                        displayName: 'Khoa Nguyen',
+                        email: 'khoanguyen@example.com',
+                        avatarUrl: '',
+                        totalGames: 42,
+                        wins: 35,
+                        totalExp: 3850,
+                        playerLevel: 4,
+                        trophies: 12,
+                      } as unknown as UserProfile
+                    }
+                    loading={false}
+                  />
+                </AppShell>
+              }
+            />
+            <Route
+              path="/preview/play"
+              element={
+                <AppShell
+                  profile={
+                    {
+                      displayName: 'Khoa Nguyen',
+                      email: 'khoanguyen@example.com',
+                      avatarUrl: '',
+                      totalGames: 42,
+                      wins: 35,
+                      totalExp: 3850,
+                      playerLevel: 4,
+                      trophies: 12,
+                    } as unknown as UserProfile
+                  }
+                >
+                  <MultiplayerLobbyPage
+                    profile={
+                      {
+                        displayName: 'Khoa Nguyen',
+                        email: 'khoanguyen@example.com',
+                        avatarUrl: '',
+                        totalGames: 42,
+                        wins: 35,
+                        totalExp: 3850,
+                        playerLevel: 4,
+                        trophies: 12,
+                      } as unknown as UserProfile
+                    }
+                  />
+                </AppShell>
+              }
+            />
+          </>
+        )}
 
         {/* Private — bọc AppShell */}
         <Route
@@ -95,7 +216,7 @@ function AppRoutes() {
             <RequireAuth>
               <AppShell profile={profile}>
                 <Routes>
-                  <Route path="/home" element={<HomePage profile={profile} loading={!profile} />} />
+                  <Route path="/home" element={<HomePage profile={profile} loading={profileLoading} />} />
                   <Route path="/solo/new" element={<SoloSetupPage />} />
                   <Route path="/solo/:sessionId" element={<SoloPlayPage />} />
                   <Route path="/solo/:sessionId/result" element={<SoloResultPage />} />
@@ -106,11 +227,11 @@ function AppRoutes() {
                         <ProfilePage
                           user={user}
                           profile={profile}
-                          loading={!profile}
-                          loadError=""
+                          loading={profileLoading}
+                          loadError={profileLoadError}
                           view="profile"
-                          onNavigate={() => {}}
-                          onRetry={() => {}}
+                          onNavigate={(path) => navigate(path)}
+                          onRetry={handleProfileRetry}
                           onUpdated={handleProfileUpdated}
                         />
                       ) : null
@@ -123,11 +244,11 @@ function AppRoutes() {
                         <ProfilePage
                           user={user}
                           profile={profile}
-                          loading={!profile}
-                          loadError=""
+                          loading={profileLoading}
+                          loadError={profileLoadError}
                           view="settings"
-                          onNavigate={() => {}}
-                          onRetry={() => {}}
+                          onNavigate={(path) => navigate(path)}
+                          onRetry={handleProfileRetry}
                           onUpdated={handleProfileUpdated}
                         />
                       ) : null

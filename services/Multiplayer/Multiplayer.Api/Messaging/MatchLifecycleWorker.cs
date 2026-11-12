@@ -51,8 +51,26 @@ public sealed class MatchLifecycleWorker : BackgroundService
                 {
                     string groupName = MatchHub.GetMatchGroupName(session.MatchId);
 
-                    // 1. Check 15s Duel turn timeout (only after countdown has completed)
-                    if (session.PlayFormat == (int)PlayFormat.Duel && now >= session.StartedAtUtc)
+                    // 0. Check Duel preparation phase expiration (e.g. 90s preview period)
+                    if (session.PlayFormat == (int)PlayFormat.Duel && session.IsPreparationPhase)
+                    {
+                        var prepOutcome = await _matchEngine.CheckAndExpirePreparationAsync(session, now, stoppingToken);
+                        if (prepOutcome != null)
+                        {
+                            await _hubContext.Clients.Group(groupName).SendAsync("PreparationEnded", new
+                            {
+                                matchId = prepOutcome.MatchId.ToString(),
+                                startedAt = prepOutcome.StartedAtUtc.ToString("O"),
+                                currentTurnUserId = prepOutcome.CurrentTurnUserId,
+                                turn = prepOutcome.TurnNumber,
+                                turnDeadline = prepOutcome.TurnDeadlineUtc.ToString("O")
+                            }, stoppingToken);
+                            continue;
+                        }
+                    }
+
+                    // 1. Check 15s Duel turn timeout (only after preparation phase and countdown have completed)
+                    if (session.PlayFormat == (int)PlayFormat.Duel && !session.IsPreparationPhase && now >= session.StartedAtUtc)
                     {
                         var turnTimeout = await _matchEngine.CheckAndApplyDuelTurnTimeoutAsync(session, now, stoppingToken);
                         if (turnTimeout != null)

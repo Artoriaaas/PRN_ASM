@@ -51,7 +51,7 @@ export function AppShell({ profile, children }: AppShellProps) {
       {/* Topbar desktop */}
       <header className="topbar">
         <Link to="/home" className="brand-link" aria-label="Sudoku Online — Trang chủ">
-          <span className="brand-logo-sm" aria-hidden="true">9</span>
+          <img className="brand-logo-sm" src="/logo.png" alt="" aria-hidden="true" />
           <span className="brand-name-sm">Sudoku Online</span>
         </Link>
 
@@ -84,7 +84,7 @@ export function AppShell({ profile, children }: AppShellProps) {
               )}
             </Link>
           </div>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={handleLogout}>
+          <button type="button" className="topbar-logout-btn" onClick={handleLogout}>
             Đăng xuất
           </button>
         </div>

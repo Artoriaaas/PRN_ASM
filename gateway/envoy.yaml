@@ -46,7 +46,12 @@ static_resources:
                             cluster: user
                             timeout: 15s
                         - match:
-                            prefix: '/sudoku.support.v1.'
+                            prefix: '/api/v1/'
+                          route:
+                            cluster: support
+                            timeout: 15s
+                        - match:
+                            prefix: '/swagger'
                           route:
                             cluster: support
                             timeout: 15s
@@ -110,11 +115,6 @@ static_resources:
     - name: support
       type: STRICT_DNS
       connect_timeout: 2s
-      typed_extension_protocol_options:
-        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
-          '@type': type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
-          explicit_http_config:
-            http2_protocol_options: {}
       load_assignment:
         cluster_name: support
         endpoints:

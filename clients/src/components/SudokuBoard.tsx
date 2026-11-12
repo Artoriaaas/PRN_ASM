@@ -44,6 +44,7 @@ export function SudokuBoard({
     [selected, regionMap],
   )
   const selectedValue = selected !== null ? cells[selected] : 0
+  const isHinting = Boolean(hintCellModes && hintCellModes.size > 0)
 
   const handleSelect = useCallback(
     (index: number) => {
@@ -89,9 +90,9 @@ export function SudokuBoard({
           value={cells[i]}
           notesMask={notes[i]}
           isGiven={initial[i] !== '0'}
-          isSelected={selected === i}
-          isPeer={peers.has(i)}
-          isSameDigit={selectedValue !== 0 && cells[i] === selectedValue}
+          isSelected={!isHinting && selected === i}
+          isPeer={!isHinting && peers.has(i)}
+          isSameDigit={!isHinting && selectedValue !== 0 && cells[i] === selectedValue}
           isConflict={conflicts.has(i) || Boolean(wrongCells?.has(i))}
           isOpponentRecent={recentOpponentCell === i}
           borderMask={borderMasks[i]}

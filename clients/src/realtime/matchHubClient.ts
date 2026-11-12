@@ -27,6 +27,7 @@ export type MatchRulesPayload = {
   matchTimeLimitSeconds: number
   reconnectGraceSeconds: number
   countdownSeconds: number
+  preparationSeconds?: number
 }
 
 export type MatchStartedPayload = {
@@ -45,6 +46,11 @@ export type MatchStartedPayload = {
   player1: MatchPlayerSummary
   player2: MatchPlayerSummary
   isSimulated?: boolean
+  isPreparationPhase?: boolean
+  preparationDeadline?: string
+  preparationSeconds?: number
+  player1Ready?: boolean
+  player2Ready?: boolean
 }
 
 export type CustomRoomCreatedPayload = {
@@ -103,6 +109,21 @@ export type MatchEndedPlayerStats = {
   mistakes: number
 }
 
+export type PlayerReadyChangedPayload = {
+  matchId: string
+  userId: string
+  player1Ready: boolean
+  player2Ready: boolean
+}
+
+export type PreparationEndedPayload = {
+  matchId: string
+  startedAt: string
+  currentTurnUserId: string
+  turn: number
+  turnDeadline: string
+}
+
 export type MatchEndedPayload = {
   matchId: string
   playFormat: number
@@ -146,6 +167,10 @@ export type RoomStateSyncedPayload = {
   startedAt: string
   matchDeadline: string
   revealedWrongDigits: Record<number, number[]>
+  isPreparationPhase?: boolean
+  preparationDeadline?: string
+  player1Ready?: boolean
+  player2Ready?: boolean
 }
 
 type Listener<T> = (payload: T) => void
@@ -187,6 +212,8 @@ class MatchHubClientManager {
     Listener<{ matchId: string; userId: string; graceSeconds: number; deadline: string }>
   >()
   private opponentReconnectedListeners = new Set<Listener<{ matchId: string; userId: string }>>()
+  private playerReadyListeners = new Set<Listener<PlayerReadyChangedPayload>>()
+  private preparationEndedListeners = new Set<Listener<PreparationEndedPayload>>()
 
   // Simulation / Fallback runtime state
   private queueTimer: number | undefined = undefined
@@ -362,6 +389,8 @@ class MatchHubClientManager {
     conn.off('RoomStateSynced')
     conn.off('OpponentDisconnected')
     conn.off('OpponentReconnected')
+    conn.off('PlayerReadyChanged')
+    conn.off('PreparationEnded')
 
     let lastMatchIdEmitted = ''
     const handleMatchStart = (payload: MatchStartedPayload) => {
@@ -405,6 +434,13 @@ class MatchHubClientManager {
 
     conn.on('OpponentReconnected', (payload) => {
       this.opponentReconnectedListeners.forEach((cb) => cb(payload))
+    })
+    conn.on('PlayerReadyChanged', (payload: PlayerReadyChangedPayload) => {
+      this.playerReadyListeners.forEach((cb) => cb(payload))
+    })
+
+    conn.on('PreparationEnded', (payload: PreparationEndedPayload) => {
+      this.preparationEndedListeners.forEach((cb) => cb(payload))
     })
 
     conn.onreconnected(() => {
@@ -1370,6 +1406,62 @@ class MatchHubClientManager {
   ): () => void {
     this.opponentReconnectedListeners.add(cb)
     return () => this.opponentReconnectedListeners.delete(cb)
+  }
+
+  public onPlayerReadyChanged(cb: Listener<PlayerReadyChangedPayload>): () => void {
+    this.playerReadyListeners.add(cb)
+    return () => this.playerReadyListeners.delete(cb)
+  }
+
+  public onPreparationEnded(cb: Listener<PreparationEndedPayload>): () => void {
+    this.preparationEndedListeners.add(cb)
+    return () => this.preparationEndedListeners.delete(cb)
+  }
+
+  public async setPlayerReady(matchId: string): Promise<void> {
+    const sim = this.simStateMap.get(matchId)
+    if (sim) {
+      sim.payload.player1Ready = true
+      this.playerReadyListeners.forEach((cb) =>
+        cb({
+          matchId,
+          userId: sim.payload.player1.userId,
+          player1Ready: true,
+          player2Ready: Boolean(sim.payload.player2Ready),
+        }),
+      )
+      // Bot đối thủ tự động sẵn sàng sau 1.2s
+      setTimeout(() => {
+        if (!sim || sim.finished) return
+        sim.payload.player2Ready = true
+        sim.payload.isPreparationPhase = false
+        this.playerReadyListeners.forEach((cb) =>
+          cb({
+            matchId,
+            userId: sim.payload.player2.userId,
+            player1Ready: true,
+            player2Ready: true,
+          }),
+        )
+        const startedAt = new Date().toISOString()
+        const turnDeadline = new Date(Date.now() + 15000).toISOString()
+        this.preparationEndedListeners.forEach((cb) =>
+          cb({
+            matchId,
+            startedAt,
+            currentTurnUserId: sim.currentTurnUserId,
+            turn: sim.turn,
+            turnDeadline,
+          }),
+        )
+      }, 1200)
+      return
+    }
+
+    const online = await this.ensureConnected()
+    if (online && this.connection) {
+      await this.connection.invoke('SetPlayerReady', { matchId })
+    }
   }
 }
 

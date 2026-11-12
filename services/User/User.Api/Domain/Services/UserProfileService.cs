@@ -85,6 +85,118 @@ public sealed class UserProfileService(
         return user;
     }
 
+    public async Task HandleGameFinishedEventAsync(
+        string eventId,
+        string handlerName,
+        Sudoku.Events.V1.GameFinished gameFinished,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(gameFinished.UserId))
+        {
+            return;
+        }
+
+        if (await repository.HasProcessedInboxAsync(eventId, handlerName, cancellationToken))
+        {
+            return;
+        }
+
+        var user = await repository.GetByFirebaseUidForUpdateAsync(gameFinished.UserId, cancellationToken);
+        if (user is null)
+        {
+            var now = DateTimeOffset.UtcNow;
+            user = new UserAccount
+            {
+                Id = Guid.NewGuid(),
+                FirebaseUid = gameFinished.UserId,
+                Email = $"{gameFinished.UserId}@player.local",
+                DisplayName = "Player",
+                AvatarUrl = string.Empty,
+                Role = "user",
+                Status = "active",
+                PlayerLevel = 1,
+                CreatedAt = now,
+                UpdatedAt = now,
+            };
+            await repository.AddAsync(user, cancellationToken);
+        }
+
+        user.TotalGames += 1;
+        if (gameFinished.IsWin)
+        {
+            user.Wins += 1;
+            user.Trophies += Math.Max(0, gameFinished.RewardCoins);
+            int expGain = Math.Max(10, gameFinished.Score / 5);
+            user.TotalExp += expGain;
+            user.PlayerLevel = Math.Max(1, 1 + (user.TotalExp / 500));
+        }
+
+        user.UpdatedAt = DateTimeOffset.UtcNow;
+
+        await repository.AddInboxMessageAsync(new Sudoku.Messaging.InboxMessage
+        {
+            EventId = eventId,
+            HandlerName = handlerName,
+            ReceivedAt = DateTime.UtcNow,
+            ProcessedAt = DateTime.UtcNow
+        }, cancellationToken);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task HandleMatchCompletedEventAsync(
+        string eventId,
+        string handlerName,
+        Sudoku.Events.V1.MatchCompleted matchCompleted,
+        CancellationToken cancellationToken)
+    {
+        if (await repository.HasProcessedInboxAsync(eventId, handlerName, cancellationToken))
+        {
+            return;
+        }
+
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        if (!string.IsNullOrWhiteSpace(matchCompleted.WinnerUserId))
+        {
+            var winner = await repository.GetByFirebaseUidForUpdateAsync(matchCompleted.WinnerUserId, cancellationToken);
+            if (winner != null)
+            {
+                winner.TotalGames += 1;
+                if (!matchCompleted.IsDraw)
+                {
+                    winner.Wins += 1;
+                    winner.Trophies += Math.Max(0, matchCompleted.WinnerRewardCoins);
+                    winner.TotalExp += 50;
+                    winner.PlayerLevel = Math.Max(1, 1 + (winner.TotalExp / 500));
+                }
+                winner.UpdatedAt = now;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(matchCompleted.LoserUserId) && !string.Equals(matchCompleted.LoserUserId, matchCompleted.WinnerUserId, StringComparison.Ordinal))
+        {
+            var loser = await repository.GetByFirebaseUidForUpdateAsync(matchCompleted.LoserUserId, cancellationToken);
+            if (loser != null)
+            {
+                loser.TotalGames += 1;
+                loser.TotalExp += 15;
+                loser.PlayerLevel = Math.Max(1, 1 + (loser.TotalExp / 500));
+                loser.UpdatedAt = now;
+            }
+        }
+
+        await repository.AddInboxMessageAsync(new Sudoku.Messaging.InboxMessage
+        {
+            EventId = eventId,
+            HandlerName = handlerName,
+            ReceivedAt = DateTime.UtcNow,
+            ProcessedAt = DateTime.UtcNow
+        }, cancellationToken);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
     private static void ValidateFirebaseUid(string firebaseUid)
     {
         if (string.IsNullOrWhiteSpace(firebaseUid) || firebaseUid.Length > 128)

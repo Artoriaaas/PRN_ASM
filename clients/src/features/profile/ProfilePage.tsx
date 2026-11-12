@@ -3,10 +3,7 @@ import { updateProfile as updateFirebaseProfile, type User } from 'firebase/auth
 import type { UserProfile } from '../../gen/sudoku/user/v1/user_pb'
 import { useAuth } from '../../auth/useAuth'
 import { getAuthErrorMessage } from '../../auth/firebaseErrors'
-import {
-  clearCachedProfile,
-  updateUserProfile,
-} from '../../api/userClient'
+import { updateUserProfile } from '../../api/userClient'
 
 type ProfilePageProps = {
   user: User
@@ -29,7 +26,7 @@ export function ProfilePage({
   onRetry,
   onUpdated,
 }: ProfilePageProps) {
-  const { logout, resendVerification } = useAuth()
+  const { resendVerification } = useAuth()
   const [displayName, setDisplayName] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [country, setCountry] = useState('')
@@ -46,6 +43,11 @@ export function ProfilePage({
       setCountry(profile.country)
     }
   }, [profile])
+  // Làm mới hồ sơ mới nhất từ server khi mở trang
+  useEffect(() => {
+    onRetry()
+  }, [onRetry])
+
 
   async function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -96,10 +98,6 @@ export function ProfilePage({
     }
   }
 
-  async function handleLogout() {
-    clearCachedProfile(user.uid)
-    await logout()
-  }
 
   const initials = (profile?.displayName || user.displayName || user.email || 'U')
     .split(' ')
@@ -109,32 +107,28 @@ export function ProfilePage({
     .join('')
 
   return (
-    <main className="app-shell">
-      <header className="topbar">
-        <button className="brand-button" type="button" onClick={() => onNavigate('/profile')}>
-          <span className="brand-mark small" aria-hidden="true">9</span>
-          <span>Sudoku Online</span>
-        </button>
-        <nav aria-label="Tài khoản">
+    <div className="profile-page">
+      <section className="profile-container">
+        <div className="profile-tabs" role="tablist" aria-label="Tùy chọn tài khoản">
           <button
-            className={view === 'profile' ? 'active' : ''}
+            role="tab"
+            aria-selected={view === 'profile'}
+            className={`profile-tab ${view === 'profile' ? 'active' : ''}`}
             type="button"
             onClick={() => onNavigate('/profile')}
           >
             Hồ sơ
           </button>
           <button
-            className={view === 'settings' ? 'active' : ''}
+            role="tab"
+            aria-selected={view === 'settings'}
+            className={`profile-tab ${view === 'settings' ? 'active' : ''}`}
             type="button"
             onClick={() => onNavigate('/settings')}
           >
             Cài đặt
           </button>
-          <button type="button" onClick={handleLogout}>Đăng xuất</button>
-        </nav>
-      </header>
-
-      <section className="profile-container">
+        </div>
         {!user.emailVerified && (
           <div className="verification-banner">
             <div>
@@ -304,6 +298,6 @@ export function ProfilePage({
           </>
         )}
       </section>
-    </main>
+    </div>
   )
 }

@@ -7,5 +7,6 @@ public sealed record MatchRules(
     int WrongTimePenaltySeconds = 10,
     int MatchTimeLimitSeconds = 900,
     int ReconnectGraceSeconds = 30,
-    int CountdownSeconds = 5
+    int CountdownSeconds = 5,
+    int PreparationSeconds = 90
 );

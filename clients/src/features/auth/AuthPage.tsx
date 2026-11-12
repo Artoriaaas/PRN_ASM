@@ -82,7 +82,7 @@ export function AuthPage() {
     <main className="auth-layout">
       <section className="auth-intro" aria-labelledby="auth-heading">
         <div className="brand-mark" aria-hidden="true">
-          9
+          <img src="/logo.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 'inherit' }} />
         </div>
         <p className="eyebrow">SUDOKU ONLINE</p>
         <h1 id="auth-heading">Một nơi yên tĩnh để rèn luyện tư duy.</h1>

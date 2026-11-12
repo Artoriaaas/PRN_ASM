@@ -84,6 +84,13 @@ PRN_ASM/
    var userId = Context.User?.FindFirst("sub")?.Value;
    ```
 
+5. **Token development cục bộ**:
+   * Token HS256 dùng cho chế độ phát triển phải có `iss = sudoku-dev-auth`,
+     `aud = sudoku-platform`, `sub`, `iat` và `exp`.
+   * `IssuerSigningKeyResolverUsingConfiguration` chọn khóa HMAC cục bộ cho HS256;
+     token Firebase RS256 tiếp tục dùng signing keys từ OpenID Connect/JWKS của Google.
+   * Luôn bật kiểm tra thời hạn token (`ValidateLifetime = true`).
+
 ### 2.3. Hướng dẫn mở rộng tính năng mới trong `Sudoku.Auth`
 
 #### Kịch bản A: Thêm Helper trích xuất User Claim nhanh gọn

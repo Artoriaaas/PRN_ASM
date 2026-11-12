@@ -1,10 +1,13 @@
-import { useReducer, useEffect, useRef, useState, useMemo } from 'react'
+import { useReducer, useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { SudokuBoard } from '../../components/SudokuBoard'
 import { NumberPad } from '../../components/NumberPad'
 import { GameTimer } from '../../components/GameTimer'
 import { Modal } from '../../components/ui/Modal'
 import { HintWalkthroughCard } from '../../components/HintWalkthroughCard'
+import { TutorialOverlay } from '../tutorial/TutorialOverlay'
+import { CLASSIC_STEPS, SHUFFLE_STEPS } from '../tutorial/tutorialData'
+import { useTutorialSteps, markTutorialDone } from '../tutorial/useTutorial'
 import {
   STANDARD_REGION_MAP,
   toggleNote,
@@ -60,6 +63,8 @@ interface NavigationLocationState {
   mistakes?: number
   hints?: number
   score?: number
+  /** 'classic' | 'shuffle' | null — tutorial mode được yêu cầu từ SoloSetupPage */
+  tutorial?: 'classic' | 'shuffle' | null
 }
 
 type SoloAction =
@@ -95,14 +100,38 @@ function soloReducer(state: SoloState, action: SoloAction): SoloState {
     case 'INIT_SESSION': {
       const s = action.session
       const initial = s.initialBoard || s.currentBoard
-      const cells = parseBoardString(s.currentBoard || initial)
-      const notes = new Uint16Array(81)
+      let cells = parseBoardString(s.currentBoard || initial)
+      let notes = new Uint16Array(81)
       if (s.notes) {
         for (const n of s.notes) {
           if (n.cellIndex >= 0 && n.cellIndex < 81) {
             notes[n.cellIndex] = n.candidatesMask
           }
         }
+      }
+      let mistakes = s.mistakesCount
+      let hints = s.hintsUsed
+      let score = s.score
+      let startedAt = state.startedAt
+      let wrongCells = new Set<number>()
+
+      // Khôi phục từ sessionStorage nếu đã có tiến trình chơi trước đó
+      try {
+        const savedRaw = sessionStorage.getItem(`solo_save_${s.sessionId}`)
+        if (savedRaw) {
+          const saved = JSON.parse(savedRaw)
+          if (Array.isArray(saved.cells) && saved.cells.length === 81) {
+            cells = new Uint8Array(saved.cells)
+            if (Array.isArray(saved.notes)) notes = new Uint16Array(saved.notes)
+            if (typeof saved.mistakes === 'number') mistakes = saved.mistakes
+            if (typeof saved.hints === 'number') hints = saved.hints
+            if (typeof saved.score === 'number') score = saved.score
+            if (typeof saved.startedAt === 'number') startedAt = saved.startedAt
+            if (Array.isArray(saved.wrongCells)) wrongCells = new Set(saved.wrongCells)
+          }
+        }
+      } catch {
+        sessionStorage.removeItem(`solo_save_${s.sessionId}`)
       }
 
       return {
@@ -112,15 +141,16 @@ function soloReducer(state: SoloState, action: SoloAction): SoloState {
         regionMap: s.regionMap || STANDARD_REGION_MAP,
         cells,
         notes,
-        mistakes: s.mistakesCount,
+        mistakes,
         maxMistakes: s.maxMistakes || 3,
-        hints: s.hintsUsed,
+        hints,
         maxHints: s.maxHints || 3,
-        score: s.score,
+        score,
+        startedAt,
         isOffline: action.isOffline,
         finished: s.status === SessionStatus.COMPLETED,
         failed: s.status === SessionStatus.FAILED,
-        wrongCells: new Set<number>(),
+        wrongCells,
       }
     }
 
@@ -265,14 +295,19 @@ export function SoloPlayPage() {
 
     if (step === 1) {
       for (let i = 0; i < 81; i++) modes.set(i, 'dimmed')
+      for (const h of hint.houseCells) modes.set(h, 'house')
       for (const b of hint.beamCells) modes.set(b, 'beam')
       for (const c of hint.clueCells) modes.set(c, 'clue')
+    } else if (step === 2) {
+      for (let i = 0; i < 81; i++) modes.set(i, 'dimmed')
+      for (const h of hint.houseCells) modes.set(h, 'house')
+      for (const c of hint.clueCells) modes.set(c, 'clue')
+      modes.set(hint.targetIdx, 'target')
     } else {
       for (let i = 0; i < 81; i++) modes.set(i, 'dimmed')
       for (const h of hint.houseCells) modes.set(h, 'house')
       modes.set(hint.targetIdx, 'target')
     }
-
     return modes
   }, [hintWalkthrough])
 
@@ -284,11 +319,70 @@ export function SoloPlayPage() {
     }
   }, [hintWalkthrough])
 
-  // Khởi tạo session từ navigation state hoặc tải từ server
+  // ── Tutorial state ──────────────────────────────────────────────────────────
+  const locState = location.state as NavigationLocationState | null
+  const tutorialMode = locState?.tutorial ?? null
+
+  // Chọn bộ bước tutorial theo mode
+  const tutorialSteps = tutorialMode === 'shuffle' ? SHUFFLE_STEPS : CLASSIC_STEPS
+  const {
+    step: tutStep,
+    completed: tutCompleted,
+    goNext: tutNext,
+    goPrev: tutPrev,
+  } = useTutorialSteps(tutorialSteps.length)
+
+  const [tutorialActive, setTutorialActive] = useState(Boolean(tutorialMode))
+  const [tutorialDismissed, setTutorialDismissed] = useState(false)
+
+  // Khi tutorial hoàn thành (bước cuối) hoặc bị skip
+  const handleTutorialComplete = useCallback(() => {
+    if (tutorialMode === 'classic' || tutorialMode === 'shuffle') {
+      markTutorialDone(tutorialMode)
+    }
+    setTutorialActive(false)
+    setTutorialDismissed(true)
+  }, [tutorialMode])
+
+  const handleTutorialSkip = useCallback(() => {
+    if (tutorialMode === 'classic' || tutorialMode === 'shuffle') {
+      markTutorialDone(tutorialMode)
+    }
+    setTutorialActive(false)
+    setTutorialDismissed(true)
+  }, [tutorialMode])
+
+  // Khi tutorial hoàn thành tự động từ hook
   useEffect(() => {
+    if (tutCompleted && tutorialActive) {
+      handleTutorialComplete()
+    }
+  }, [tutCompleted, tutorialActive, handleTutorialComplete])
+
+  // Tutorial: chọn ô trên bàn cờ theo step
+  const handleTutorialSelectCell = useCallback((index: number | null) => {
+    if (index !== null) {
+      dispatch({ type: 'SELECT', index })
+    }
+  }, [])
+
+  // Tutorial pause: tutorial active → ẩn quit, block keyboard (ngoài tutorial)
+  const isTutorialShowing = tutorialActive && !tutorialDismissed
+  // ── End Tutorial state ──────────────────────────────────────────────────────
+  const initializedSessionRef = useRef<string | null>(null)
+
+
+  // Khởi tạo session từ navigation state hoặc tải từ server (tránh re-init làm mất nước đi)
+  useEffect(() => {
+    if (!sessionId) return
+    if (initializedSessionRef.current === sessionId && state.session?.sessionId === sessionId) {
+      return
+    }
+
     const locState = location.state as NavigationLocationState | null
 
-    if (locState?.session) {
+    if (locState?.session && locState.session.sessionId === sessionId) {
+      initializedSessionRef.current = sessionId
       dispatch({
         type: 'INIT_SESSION',
         session: locState.session,
@@ -297,13 +391,13 @@ export function SoloPlayPage() {
       return
     }
 
-    if (!sessionId) return
     const layoutType =
       locState?.layout === 'irregular' || locState?.session?.layoutType === LayoutType.IRREGULAR
         ? LayoutType.IRREGULAR
         : LayoutType.STANDARD
 
     if (sessionId.startsWith('offline-')) {
+      initializedSessionRef.current = sessionId
       const level = locState?.level ?? 'medium'
       const offline = createOfflineSession(level, layoutType)
       dispatch({ type: 'INIT_SESSION', session: offline, isOffline: true })
@@ -314,15 +408,44 @@ export function SoloPlayPage() {
     const controller = new AbortController()
     getGameSession(sessionId, controller.signal)
       .then((s) => {
+        initializedSessionRef.current = sessionId
         dispatch({ type: 'INIT_SESSION', session: s, isOffline: false })
       })
       .catch((err) => {
         console.warn('Failed to load session, falling back to offline:', err)
+        initializedSessionRef.current = sessionId
         const offline = createOfflineSession(locState?.level ?? 'medium', layoutType)
         dispatch({ type: 'INIT_SESSION', session: offline, isOffline: true })
       })
     return () => controller.abort()
-  }, [sessionId, location.state])
+  }, [sessionId, location.state, state.session])
+
+  // Lưu tiến trình vào sessionStorage để không bị mất khi F5 hoặc hot-reload
+  useEffect(() => {
+    if (!sessionId || !state.session || state.finished || state.failed) return
+    const saveObj = {
+      cells: Array.from(state.cells),
+      notes: Array.from(state.notes),
+      mistakes: state.mistakes,
+      hints: state.hints,
+      score: state.score,
+      startedAt: state.startedAt,
+      wrongCells: Array.from(state.wrongCells),
+    }
+    sessionStorage.setItem(`solo_save_${sessionId}`, JSON.stringify(saveObj))
+  }, [
+    sessionId,
+    state.session,
+    state.cells,
+    state.notes,
+    state.mistakes,
+    state.hints,
+    state.score,
+    state.startedAt,
+    state.wrongCells,
+    state.finished,
+    state.failed,
+  ])
 
   // Timer started
   useEffect(() => {
@@ -334,6 +457,7 @@ export function SoloPlayPage() {
   // Điều hướng khi thắng
   useEffect(() => {
     if (state.finished && sessionId) {
+      sessionStorage.removeItem(`solo_save_${sessionId}`)
       navigate(`/solo/${sessionId}/result`, {
         state: {
           ...location.state,
@@ -480,6 +604,9 @@ export function SoloPlayPage() {
 
   // Thoát ván
   async function handleQuit() {
+    if (sessionId) {
+      sessionStorage.removeItem(`solo_save_${sessionId}`)
+    }
     if (state.session && !state.isOffline) {
       try {
         await abandonGameSession(state.session.sessionId)
@@ -494,6 +621,10 @@ export function SoloPlayPage() {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (state.paused) return
+      // Khi tutorial đang hiện → chỉ cho phép mũi tên điều hướng ô
+      if (isTutorialShowing) {
+        if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return
+      }
       const { key, ctrlKey } = e
 
       if (key === 'n' || key === 'N') {
@@ -529,14 +660,13 @@ export function SoloPlayPage() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [state.paused, state.selected, state.notesMode, state.initialBoard, state.cells])
+  }, [state.paused, state.selected, state.notesMode, state.initialBoard, state.cells, isTutorialShowing])
 
-  const locState = location.state as NavigationLocationState | null
   const layout = locState?.layout ?? 'standard'
   const level = locState?.level ?? 'medium'
 
   return (
-    <div className={`solo-play-page${state.paused ? ' is-paused' : ''}`}>
+    <div className={`solo-play-page${state.paused ? ' is-paused' : ''}${isTutorialShowing ? ' tutorial-mode' : ''}`}>
       {/* Topbar */}
       <div className="game-topbar">
         <button
@@ -612,7 +742,10 @@ export function SoloPlayPage() {
             wrongCells={state.wrongCells}
             hintCellModes={hintCellModes}
             ghostCell={ghostCell}
-            onSelect={(i) => dispatch({ type: 'SELECT', index: i })}
+            onSelect={(i) => {
+              if (hintWalkthrough) setHintWalkthrough(null)
+              dispatch({ type: 'SELECT', index: i })
+            }}
             readOnly={state.paused}
           />
           {hintWalkthrough && (
@@ -625,8 +758,16 @@ export function SoloPlayPage() {
               description={
                 hintWalkthrough.step === 1 ? (
                   <>
-                    Pay attention to <strong className="highlight-green">these cells</strong> and the{' '}
-                    <strong className="highlight-blue">highlighted areas</strong>
+                    {hintWalkthrough.hint.technique === 'NakedSingle' ? (
+                      <>
+                        Quan sát các ô <strong className="highlight-green">màu xanh</strong> trong cùng hàng, cột và khối của ô mục tiêu.
+                      </>
+                    ) : (
+                      <>
+                        Quan sát các ô manh mối <strong className="highlight-green">màu xanh</strong> và các{' '}
+                        <strong className="highlight-blue">vùng loại trừ</strong>.
+                      </>
+                    )}
                     {hintWalkthrough.hint.selectedHasNoEvidence && (
                       <p className="hint-sub-notice">
                         (Ô bạn vừa chọn chưa đủ chứng cứ logic để giải trực tiếp. Hệ thống hướng dẫn ô này có lập luận chắc chắn nhất!)
@@ -634,13 +775,30 @@ export function SoloPlayPage() {
                     )}
                   </>
                 ) : hintWalkthrough.step === 2 ? (
-                  <>
-                    In <strong className="highlight-blue">this block</strong>, there is only one cell remaining that can contain{' '}
-                    <strong>{hintWalkthrough.hint.value}</strong>
-                  </>
+                  hintWalkthrough.hint.technique === 'NakedSingle' ? (
+                    <>
+                      Tất cả <strong className="highlight-blue">8 số khác (1–9 trừ số {hintWalkthrough.hint.value})</strong> đều đã xuất hiện ở hàng, cột hoặc khối giao cắt với ô này. Ô này không thể chứa số nào khác!
+                    </>
+                  ) : hintWalkthrough.hint.technique === 'HiddenSingleRow' ? (
+                    <>
+                      Trong <strong className="highlight-blue">hàng này</strong>, chỉ còn duy nhất một ô có thể chứa số{' '}
+                      <strong>{hintWalkthrough.hint.value}</strong>.
+                    </>
+                  ) : hintWalkthrough.hint.technique === 'HiddenSingleCol' ? (
+                    <>
+                      Trong <strong className="highlight-blue">cột này</strong>, chỉ còn duy nhất một ô có thể chứa số{' '}
+                      <strong>{hintWalkthrough.hint.value}</strong>.
+                    </>
+                  ) : (
+                    <>
+                      Trong <strong className="highlight-blue">khối này</strong>, chỉ còn duy nhất một ô có thể chứa số{' '}
+                      <strong>{hintWalkthrough.hint.value}</strong>.
+                    </>
+                  )
                 ) : (
                   <>
-                    Since it is the only possible option, <strong>this cell must be {hintWalkthrough.hint.value}</strong>
+                    Vì không còn lựa chọn nào khác, ô này bắt buộc phải là{' '}
+                    <strong className="highlight-green">{hintWalkthrough.hint.value}</strong>.
                   </>
                 )
               }
@@ -703,20 +861,29 @@ export function SoloPlayPage() {
       <Modal
         open={state.failed}
         title="Thua cuộc!"
-        onClose={() => navigate('/home')}
+        onClose={() => {
+          if (sessionId) sessionStorage.removeItem(`solo_save_${sessionId}`)
+          navigate('/home')
+        }}
         footer={
           <div className="modal-footer-btns">
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => navigate('/solo/new', { state: { layout, level } })}
+              onClick={() => {
+                if (sessionId) sessionStorage.removeItem(`solo_save_${sessionId}`)
+                navigate('/solo/new', { state: { layout, level } })
+              }}
             >
               Chơi lại
             </button>
             <button
               type="button"
               className="btn btn-ghost"
-              onClick={() => navigate('/home')}
+              onClick={() => {
+                if (sessionId) sessionStorage.removeItem(`solo_save_${sessionId}`)
+                navigate('/home')
+              }}
             >
               Về trang chủ
             </button>
@@ -753,6 +920,22 @@ export function SoloPlayPage() {
       >
         <p>Tiến độ ván chơi hiện tại sẽ bị hủy. Bạn có chắc muốn thoát?</p>
       </Modal>
+
+      {/* Tutorial Overlay — hiển thị khi tutorial active */}
+      {isTutorialShowing && state.session && (
+        <TutorialOverlay
+          steps={tutorialSteps}
+          currentStep={tutStep}
+          totalSteps={tutorialSteps.length}
+          onNext={tutNext}
+          onPrev={tutPrev}
+          onSkip={handleTutorialSkip}
+          onComplete={handleTutorialComplete}
+          onSelectCell={handleTutorialSelectCell}
+          onToggleNotes={() => dispatch({ type: 'TOGGLE_NOTES' })}
+          onRequestHint={() => void handleHint()}
+        />
+      )}
     </div>
   )
 }
