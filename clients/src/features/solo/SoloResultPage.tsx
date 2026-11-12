@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../auth/useAuth'
+import { clearCachedProfile } from '../../api/userClient'
 
 type ResultState = {
   layout?: string
@@ -7,6 +9,7 @@ type ResultState = {
   startedAt?: number
   mistakes?: number
   hints?: number
+  isOffline?: boolean
 }
 
 function formatDuration(ms: number): string {
@@ -20,6 +23,13 @@ export function SoloResultPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const state = (location.state ?? {}) as ResultState
+  const { user } = useAuth()
+
+  useEffect(() => {
+    if (user) {
+      clearCachedProfile(user.uid)
+    }
+  }, [user])
 
   const [endedAt] = useState(() => Date.now())
   const duration = state.startedAt ? endedAt - state.startedAt : 0
@@ -63,6 +73,11 @@ export function SoloResultPage() {
           <span className="xp-gained">+{xpEarned} XP</span>
           <p>Kinh nghiệm nhận được</p>
         </div>
+        {state.isOffline && (
+          <p className="offline-result-note" style={{ marginTop: 12, fontSize: '0.88rem', color: 'var(--muted)', textAlign: 'center' }}>
+            ℹ️ Ván này được chơi ở chế độ Ngoại tuyến (Offline). Để tích lũy số ván thắng và XP vào tài khoản, hãy đảm bảo hệ thống backend đang hoạt động khi bắt đầu ván.
+          </p>
+        )}
 
         <div className="result-actions">
           <button
