@@ -486,10 +486,12 @@ node_modules/
 web/src/gen/
 .env
 .env.*
+*.env
 !.env.example
 !**/.env.example
-appsettings.Local.json
-appsettings.*.Local.json
+appsettings*.json
+!appsettings*.example.json
+!appsettings*.json.example
 
 # Firebase / Google Cloud credentials and local emulator state
 **/serviceAccount*.json
