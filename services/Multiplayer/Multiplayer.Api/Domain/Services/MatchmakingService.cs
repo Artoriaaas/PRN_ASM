@@ -398,7 +398,8 @@ public sealed class MatchmakingService : IMatchmakingService
         var rules = new MatchRules();
         var now = DateTime.UtcNow;
         var startedAt = now.AddSeconds(rules.CountdownSeconds);
-
+        int prepSeconds = isDuel ? rules.PreparationSeconds : 0;
+        var prepDeadline = isDuel ? startedAt.AddSeconds(prepSeconds) : startedAt;
         // Randomly pick who goes first in Duel (CORE-LOGIC.md §1.7)
         bool p1First = Random.Shared.Next(2) == 0;
         var firstTicket = p1First ? p1Ticket : p2Ticket;
@@ -421,11 +422,15 @@ public sealed class MatchmakingService : IMatchmakingService
             SharedBoard = puzzleData.InitialBoard,
             CurrentTurnUserId = firstTicket.UserId,
             TurnNumber = 1,
-            TurnStartedAtUtc = startedAt,
-            TurnDeadlineUtc = turnDeadline,
+            TurnStartedAtUtc = isDuel ? prepDeadline : startedAt,
+            TurnDeadlineUtc = isDuel ? prepDeadline.AddSeconds(rules.TurnSeconds) : turnDeadline,
             CreatedAtUtc = now,
-            StartedAtUtc = startedAt,
-            MatchDeadlineUtc = startedAt.AddSeconds(rules.MatchTimeLimitSeconds),
+            StartedAtUtc = isDuel ? prepDeadline : startedAt,
+            MatchDeadlineUtc = (isDuel ? prepDeadline : startedAt).AddSeconds(rules.MatchTimeLimitSeconds),
+            IsPreparationPhase = isDuel,
+            PreparationDeadlineUtc = prepDeadline,
+            Player1Ready = false,
+            Player2Ready = false,
             IsFinished = false,
             Player1 = new ActivePlayerRuntime
             {

@@ -129,20 +129,34 @@ public class MultiplayerEngineAndQueryTests
         await matchmaking.JoinQueueAsync("duel-u1", "PlayerOne", "c1", (int)PlayFormat.Duel, (int)BoardLayoutType.Standard, "hard");
         var (_, session) = await matchmaking.JoinQueueAsync("duel-u2", "PlayerTwo", "c2", (int)PlayFormat.Duel, (int)BoardLayoutType.Standard, "hard");
         Assert.NotNull(session);
+        Assert.True(session!.IsPreparationPhase);
+        Assert.False(session.Player1Ready);
+        Assert.False(session.Player2Ready);
+
+        // Cannot move while in preparation phase
+        int firstEmptyIdx = session.SharedBoard.IndexOf(BoardConstants.EmptyCellChar);
+        int correctVal = session.SolutionBoard[firstEmptyIdx] - '0';
+        await Assert.ThrowsAsync<InvalidStateException>(() =>
+            engine.SubmitMoveAsync(session.MatchId, session.CurrentTurnUserId, firstEmptyIdx, correctVal, turnNumber: 1));
+
+        // Player 1 sets ready -> still in prep phase
+        var p1Ready = await engine.SetPlayerReadyAsync(session.MatchId, "duel-u1");
+        Assert.Null(p1Ready);
+
+        // Player 2 sets ready -> both ready -> prep phase ends!
+        var p2Ready = await engine.SetPlayerReadyAsync(session.MatchId, "duel-u2");
+        Assert.NotNull(p2Ready);
+        Assert.False(session.IsPreparationPhase);
 
         // Duel puzzle must have an even number of empty cells
-        int emptyCells = session!.InitialBoard.Count(c => c == BoardConstants.EmptyCellChar);
+        int emptyCells = session.InitialBoard.Count(c => c == BoardConstants.EmptyCellChar);
         Assert.Equal(0, emptyCells % 2);
-
         string activeUserId = session.CurrentTurnUserId;
         string waitingUserId = session.GetOpponent(activeUserId).UserId;
 
         // 1. Out-of-turn player cannot move
-        int firstEmptyIdx = session.SharedBoard.IndexOf(BoardConstants.EmptyCellChar);
-        int correctVal = session.SolutionBoard[firstEmptyIdx] - '0';
         await Assert.ThrowsAsync<InvalidStateException>(() =>
             engine.SubmitMoveAsync(session.MatchId, waitingUserId, firstEmptyIdx, correctVal, turnNumber: 1));
-
         // 2. Find an empty cell that evaluates to Advanced tier (if any) or verify points formula
         var regions = new RegionMap(session.RegionMap);
         var board = new SudokuBoard(session.SharedBoard, regions);

@@ -46,6 +46,14 @@ public sealed record TurnTimeoutOutcome(
     FinalizedMatchSummary? FinalSummary
 );
 
+public sealed record PreparationEndedOutcome(
+    Guid MatchId,
+    string CurrentTurnUserId,
+    int TurnNumber,
+    DateTime TurnDeadlineUtc,
+    DateTime StartedAtUtc
+);
+
 public interface IMatchEngineService
 {
     Task<MoveExecutionOutcome> SubmitMoveAsync(
@@ -68,6 +76,16 @@ public interface IMatchEngineService
         CancellationToken ct = default);
 
     Task<TurnTimeoutOutcome?> CheckAndApplyDuelTurnTimeoutAsync(
+        ActiveMatchSession session,
+        DateTime nowUtc,
+        CancellationToken ct = default);
+
+    Task<PreparationEndedOutcome?> SetPlayerReadyAsync(
+        Guid matchId,
+        string userId,
+        CancellationToken ct = default);
+
+    Task<PreparationEndedOutcome?> CheckAndExpirePreparationAsync(
         ActiveMatchSession session,
         DateTime nowUtc,
         CancellationToken ct = default);
@@ -119,6 +137,11 @@ public sealed class MatchEngineService : IMatchEngineService
             {
                 throw new InvalidStateException("Match has already ended.");
             }
+            if (session.IsPreparationPhase)
+            {
+                throw new InvalidStateException("Trận đấu đang trong giai đoạn chuẩn bị quan sát bàn cờ.");
+            }
+
 
             var player = session.GetPlayer(userId)
                 ?? throw new ValidationException("Caller is not a participant in this match.");
@@ -209,12 +232,116 @@ public sealed class MatchEngineService : IMatchEngineService
         }
     }
 
+    public async Task<PreparationEndedOutcome?> SetPlayerReadyAsync(
+        Guid matchId,
+        string userId,
+        CancellationToken ct = default)
+    {
+        var session = await _runtimeStore.GetAsync(matchId, ct)
+            ?? throw new NotFoundException($"Active match '{matchId}' was not found.");
+
+        await session.Gate.WaitAsync(ct);
+        try
+        {
+            if (session.IsFinished || !session.IsPreparationPhase)
+            {
+                return null;
+            }
+
+            if (string.Equals(session.Player1.UserId, userId, StringComparison.Ordinal))
+            {
+                session.Player1Ready = true;
+            }
+            else if (string.Equals(session.Player2.UserId, userId, StringComparison.Ordinal))
+            {
+                session.Player2Ready = true;
+            }
+            else
+            {
+                throw new ValidationException("Caller is not a participant in this match.");
+            }
+
+            bool bothReady = session.Player1Ready && session.Player2Ready;
+            if (bothReady)
+            {
+                var now = DateTime.UtcNow;
+                session.IsPreparationPhase = false;
+                session.StartedAtUtc = now;
+                session.TurnStartedAtUtc = now;
+                session.TurnDeadlineUtc = now.AddSeconds(session.Rules.TurnSeconds);
+                session.MatchDeadlineUtc = now.AddSeconds(session.Rules.MatchTimeLimitSeconds);
+
+                await _runtimeStore.SaveAsync(session);
+
+                return new PreparationEndedOutcome(
+                    session.MatchId,
+                    session.CurrentTurnUserId,
+                    session.TurnNumber,
+                    session.TurnDeadlineUtc,
+                    session.StartedAtUtc
+                );
+            }
+
+            await _runtimeStore.SaveAsync(session);
+            return null;
+        }
+        finally
+        {
+            session.Gate.Release();
+        }
+    }
+
+    public async Task<PreparationEndedOutcome?> CheckAndExpirePreparationAsync(
+        ActiveMatchSession session,
+        DateTime nowUtc,
+        CancellationToken ct = default)
+    {
+        if (!session.IsPreparationPhase || session.IsFinished)
+        {
+            return null;
+        }
+
+        if (nowUtc < session.PreparationDeadlineUtc)
+        {
+            return null;
+        }
+
+        await session.Gate.WaitAsync(ct);
+        try
+        {
+            if (!session.IsPreparationPhase || session.IsFinished)
+            {
+                return null;
+            }
+
+            session.IsPreparationPhase = false;
+            session.StartedAtUtc = nowUtc;
+            session.TurnStartedAtUtc = nowUtc;
+            session.TurnDeadlineUtc = nowUtc.AddSeconds(session.Rules.TurnSeconds);
+            session.MatchDeadlineUtc = nowUtc.AddSeconds(session.Rules.MatchTimeLimitSeconds);
+
+            await _runtimeStore.SaveAsync(session);
+
+            return new PreparationEndedOutcome(
+                session.MatchId,
+                session.CurrentTurnUserId,
+                session.TurnNumber,
+                session.TurnDeadlineUtc,
+                session.StartedAtUtc
+            );
+        }
+        finally
+        {
+            session.Gate.Release();
+        }
+    }
+
     public async Task<TurnTimeoutOutcome?> CheckAndApplyDuelTurnTimeoutAsync(
         ActiveMatchSession session,
         DateTime nowUtc,
         CancellationToken ct = default)
     {
-        if (session.PlayFormat != (int)PlayFormat.Duel || session.IsFinished)
+        if (session.PlayFormat != (int)PlayFormat.Duel || session.IsFinished || session.IsPreparationPhase)
         {
             return null;
         }
