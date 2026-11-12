@@ -3540,6 +3540,119 @@
   color: var(--text);
 }
 
+/* ── Duel Preparation Phase Banner ── */
+.duel-prep-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  animation: card-slide-up 0.25s ease-out;
+}
+
+.duel-prep-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.duel-prep-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.12);
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  letter-spacing: 0.04em;
+}
+
+.prep-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59e0b;
+  animation: prep-dot-pulse 1.4s infinite ease-in-out;
+}
+
+@keyframes prep-dot-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.4; }
+}
+
+.duel-prep-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--paper, #fff);
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-family: var(--font-num);
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--text);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.duel-prep-desc {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--muted);
+  margin: 0 0 14px;
+}
+
+.duel-prep-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.duel-ready-btn {
+  padding: 10px 22px;
+  font-size: 0.95rem;
+  font-weight: 750;
+  border-radius: 10px;
+  transition: all var(--t-fast);
+}
+
+.duel-ready-btn.btn-ready-confirmed {
+  background: rgba(16, 185, 129, 0.15);
+  color: #047857;
+  border: 1.5px solid #10b981;
+  cursor: default;
+}
+
+.ready-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.ready-chip.ready {
+  background: rgba(16, 185, 129, 0.14);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.ready-chip.waiting {
+  background: var(--paper, #fff);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
 /* Duel Scoreboard & Turn Clock */
 .duel-HUD {
   display: grid;

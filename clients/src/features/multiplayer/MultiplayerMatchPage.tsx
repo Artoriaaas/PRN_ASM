@@ -56,14 +56,20 @@ function DuelTurnClock({
   deadlineIso,
   isMyTurn,
   turnSeconds = 15,
+  isPaused = false,
 }: {
   deadlineIso: string
   isMyTurn: boolean
   turnSeconds?: number
+  isPaused?: boolean
 }) {
   const [remainingSec, setRemainingSec] = useState<number>(turnSeconds)
 
   useEffect(() => {
+    if (isPaused) {
+      setRemainingSec(turnSeconds)
+      return
+    }
     const deadlineMs = new Date(deadlineIso).getTime()
     const update = () => {
       const diff = Math.max(0, Math.ceil((deadlineMs - Date.now()) / 1000))
@@ -72,9 +78,10 @@ function DuelTurnClock({
     update()
     const id = window.setInterval(update, 250)
     return () => clearInterval(id)
-  }, [deadlineIso, turnSeconds])
+  }, [deadlineIso, turnSeconds, isPaused])
 
-  const urgent = remainingSec <= 5
+  const urgent = !isPaused && remainingSec <= 5
+
 
   return (
     <div
@@ -83,10 +90,16 @@ function DuelTurnClock({
     >
       <span className="turn-clock-sec">{remainingSec}s</span>
       <span className="turn-clock-label">
-        {isMyTurn ? '▲ LƯỢT CỦA BẠN' : '⏳ LƯỢT ĐỐI THỦ'}
+        {isPaused ? '⏳ CHỜ BẮT ĐẦU' : isMyTurn ? '▲ LƯỢT CỦA BẠN' : '⏳ LƯỢT ĐỐI THỦ'}
       </span>
     </div>
   )
+}
+
+function formatPrepTime(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
 type MoveFeedEntry = {
@@ -182,6 +195,36 @@ export function MultiplayerMatchPage({ profile }: MultiplayerMatchPageProps) {
   const opponentFlashTimerRef = useRef<number | undefined>(undefined)
 
   const isMyTurn = !isDuel || currentTurnUserId === meInfo.userId
+  // Duel preparation phase & ready states
+  const isP1 = meInfo.userId === matchPayload?.player1?.userId
+  const [isPrepPhase, setIsPrepPhase] = useState<boolean>(() => {
+    return Boolean(isDuel && (matchPayload?.isPreparationPhase ?? true))
+  })
+  const [prepDeadline, setPrepDeadline] = useState<string>(() => {
+    return matchPayload?.preparationDeadline || ''
+  })
+  const [player1Ready, setPlayer1Ready] = useState<boolean>(() => Boolean(matchPayload?.player1Ready))
+  const [player2Ready, setPlayer2Ready] = useState<boolean>(() => Boolean(matchPayload?.player2Ready))
+
+  const isMyReady = isP1 ? player1Ready : player2Ready
+  const isOpponentReady = isP1 ? player2Ready : player1Ready
+
+  const [prepSecondsLeft, setPrepSecondsLeft] = useState<number>(() => {
+    if (!matchPayload?.preparationDeadline) return matchPayload?.rules?.preparationSeconds || 90
+    return Math.max(0, Math.ceil((new Date(matchPayload.preparationDeadline).getTime() - Date.now()) / 1000))
+  })
+
+  useEffect(() => {
+    if (!isPrepPhase || !prepDeadline) return
+    const update = () => {
+      const diff = Math.max(0, Math.ceil((new Date(prepDeadline).getTime() - Date.now()) / 1000))
+      setPrepSecondsLeft(diff)
+    }
+    update()
+    const id = window.setInterval(update, 500)
+    return () => clearInterval(id)
+  }, [isPrepPhase, prepDeadline])
+
 
   // Subscribe to MatchHub realtime events
   useEffect(() => {
@@ -341,6 +384,21 @@ export function MultiplayerMatchPage({ profile }: MultiplayerMatchPageProps) {
       })
     })
 
+    const unsubReady = matchHub.onPlayerReadyChanged((evt) => {
+      if (evt.matchId !== matchPayload.matchId) return
+      setPlayer1Ready(evt.player1Ready)
+      setPlayer2Ready(evt.player2Ready)
+    })
+
+    const unsubPrepEnded = matchHub.onPreparationEnded((evt) => {
+      if (evt.matchId !== matchPayload.matchId) return
+      setIsPrepPhase(false)
+      setTurnDeadline(evt.turnDeadline)
+      setCurrentTurnUserId(evt.currentTurnUserId)
+      setTurnNumber(evt.turn)
+      showToast('Trận đấu chính thức bắt đầu!', 'success')
+    })
+
     const unsubSynced = matchHub.onRoomStateSynced((sync) => {
       if (sync.matchId !== matchPayload.matchId) return
       setCells(parseBoard(sync.myBoard))
@@ -358,6 +416,18 @@ export function MultiplayerMatchPage({ profile }: MultiplayerMatchPageProps) {
       setTurnNumber(sync.turn)
       setTurnDeadline(sync.turnDeadline)
       setRevealedWrongDigits(sync.revealedWrongDigits || {})
+      if (typeof sync.isPreparationPhase === 'boolean') {
+        setIsPrepPhase(sync.isPreparationPhase)
+      }
+      if (sync.preparationDeadline) {
+        setPrepDeadline(sync.preparationDeadline)
+      }
+      if (typeof sync.player1Ready === 'boolean') {
+        setPlayer1Ready(sync.player1Ready)
+      }
+      if (typeof sync.player2Ready === 'boolean') {
+        setPlayer2Ready(sync.player2Ready)
+      }
     })
 
     const unsubDisc = matchHub.onOpponentDisconnected((evt) => {
@@ -381,6 +451,8 @@ export function MultiplayerMatchPage({ profile }: MultiplayerMatchPageProps) {
       unsubSynced()
       unsubDisc()
       unsubReconn()
+      unsubReady()
+      unsubPrepEnded()
     }
   }, [matchPayload, meInfo.userId, oppInfo.displayName, isDuel, regionMap, navigate, showToast])
 
@@ -388,9 +460,25 @@ export function MultiplayerMatchPage({ profile }: MultiplayerMatchPageProps) {
     setSelected(index)
   }, [])
 
+  async function handleToggleReady() {
+    if (isMyReady || !matchPayload) return
+    try {
+      if (isP1) setPlayer1Ready(true)
+      else setPlayer2Ready(true)
+      await matchHub.setPlayerReady(matchPayload.matchId)
+      showToast('Bạn đã sẵn sàng! Đang chờ đối thủ...', 'info')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Không thể gửi trạng thái sẵn sàng.', 'error')
+    }
+  }
+
   const handleInputNumber = useCallback(
     (n: number) => {
       if (selected === null || !matchPayload) return
+      if (isDuel && isPrepPhase) {
+        showToast('Đang trong giai đoạn chuẩn bị quan sát bàn cờ. Bấm "Sẵn sàng" khi bạn đã nắm chiến thuật!', 'info')
+        return
+      }
       if (initialBoard[selected] !== '0' && initialBoard[selected] !== '.') return
       if (cells[selected] !== 0) return
 
@@ -436,11 +524,11 @@ export function MultiplayerMatchPage({ profile }: MultiplayerMatchPageProps) {
           )
         })
     },
-    [selected, matchPayload, initialBoard, cells, notesMode, isDuel, isMyTurn, turnNumber, showToast],
+    [selected, matchPayload, initialBoard, cells, notesMode, isDuel, isMyTurn, isPrepPhase, turnNumber, showToast],
   )
 
   const handleDelete = useCallback(() => {
-    if (selected === null) return
+    if (selected === null || (isDuel && isPrepPhase)) return
     if (notes[selected] !== 0) {
       setNotes((prev) => {
         const next = new Uint16Array(prev)
@@ -448,7 +536,7 @@ export function MultiplayerMatchPage({ profile }: MultiplayerMatchPageProps) {
         return next
       })
     }
-  }, [selected, notes])
+  }, [selected, notes, isDuel, isPrepPhase])
 
   const handleToggleNotes = useCallback(() => {
     setNotesMode((m) => !m)
@@ -527,6 +615,43 @@ export function MultiplayerMatchPage({ profile }: MultiplayerMatchPageProps) {
 
       {/* Thanh đối kháng: Race Progress hoặc Duel ScoreBoard */}
       {isDuel ? (
+        <>
+          {/* Giai đoạn chuẩn bị (Duel Preparation Banner) */}
+          {isPrepPhase && (
+        <section className="duel-prep-banner" aria-label="Giai đoạn chuẩn bị">
+          <div className="duel-prep-top">
+            <div className="duel-prep-badge">
+              <span className="prep-pulse-dot" aria-hidden="true" />
+              <span>GIAI ĐOẠN CHUẨN BỊ (QUAN SÁT THẾ CỜ)</span>
+            </div>
+            <div className="duel-prep-timer" aria-label={`Thời gian chuẩn bị còn lại: ${formatPrepTime(prepSecondsLeft)}`}>
+              <span className="prep-clock-icon" aria-hidden="true">⏱️</span>
+              <span className="prep-clock-val">{formatPrepTime(prepSecondsLeft)}</span>
+            </div>
+          </div>
+          <p className="duel-prep-desc">
+            Hai bên có <strong>1 phút 30 giây</strong> quan sát thế cờ trước khi bắt đầu. Trận đấu sẽ tự động tính giờ lượt khi hết thời gian chuẩn bị hoặc khi <strong>cả 2 người chơi đều bấm Sẵn sàng</strong>.
+          </p>
+          <div className="duel-prep-actions">
+            <button
+              type="button"
+              className={`btn duel-ready-btn ${isMyReady ? 'btn-ready-confirmed' : 'btn-primary'}`}
+              onClick={handleToggleReady}
+              disabled={isMyReady}
+            >
+              {isMyReady ? '✓ Bạn đã sẵn sàng (Đang chờ đối thủ...)' : '⚡ Tôi đã sẵn sàng!'}
+            </button>
+            <div className="duel-opp-status">
+              {isOpponentReady ? (
+                <span className="ready-chip ready">✓ Đối thủ đã sẵn sàng</span>
+              ) : (
+                <span className="ready-chip waiting">⏳ Đối thủ đang quan sát...</span>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
         <section className="duel-HUD" aria-label="Bảng điểm và lượt đấu Duel">
           {/* Bên trái: Bản thân */}
           <div className={`duel-player-panel self ${isMyTurn ? 'active-turn' : ''}`}>
@@ -551,6 +676,7 @@ export function MultiplayerMatchPage({ profile }: MultiplayerMatchPageProps) {
             deadlineIso={turnDeadline}
             isMyTurn={isMyTurn}
             turnSeconds={matchPayload.rules?.turnSeconds || 15}
+            isPaused={isPrepPhase}
           />
 
           {/* Bên phải: Đối thủ */}
@@ -570,7 +696,8 @@ export function MultiplayerMatchPage({ profile }: MultiplayerMatchPageProps) {
               {(oppInfo.displayName[0] || 'Đ').toUpperCase()}
             </div>
           </div>
-        </section>
+          </section>
+        </>
       ) : (
         <section className="race-HUD" aria-label="Tiến độ đua tốc độ Race">
           {/* Thanh tiến độ của Bạn */}
@@ -707,7 +834,7 @@ export function MultiplayerMatchPage({ profile }: MultiplayerMatchPageProps) {
             onNumber={handleInputNumber}
             onDelete={handleDelete}
             onToggleNotes={handleToggleNotes}
-            disabled={isDuel && !isMyTurn && !notesMode}
+            disabled={isDuel && (!isMyTurn || isPrepPhase) && !notesMode}
           />
         </aside>
       </div>
