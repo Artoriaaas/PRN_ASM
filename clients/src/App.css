@@ -352,6 +352,38 @@
   padding: 34px 0 80px;
 }
 
+.profile-tabs {
+  display: inline-flex;
+  gap: 6px;
+  background: var(--surface, #edeae2);
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+}
+
+.profile-tab {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--muted, #666);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all var(--t-fast, 0.15s ease);
+}
+
+.profile-tab:hover {
+  color: var(--text, #1b1b2f);
+}
+
+.profile-tab.active {
+  background: var(--paper, #fff);
+  color: var(--primary, #1f6b55);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
 .verification-banner {
   display: flex;
   margin-bottom: 20px;
@@ -432,10 +464,10 @@
 
 .profile-heading h1 {
   margin-bottom: 8px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.1rem, 4vw, 3.5rem);
-  font-weight: 500;
-  letter-spacing: -0.04em;
+  font-family: var(--font-ui, 'Be Vietnam Pro', Inter, sans-serif);
+  font-size: clamp(2.1rem, 4vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .profile-heading > p:not(.eyebrow) {
@@ -584,9 +616,10 @@
 .load-state h2 {
   margin-bottom: 0;
   color: var(--ink);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 2rem;
-  font-weight: 500;
+  font-family: var(--font-ui, 'Be Vietnam Pro', Inter, sans-serif);
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .error-state p {

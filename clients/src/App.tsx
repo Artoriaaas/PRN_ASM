@@ -1,8 +1,8 @@
 import { lazy, Suspense, useEffect, useState, useCallback } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import type { UserProfile } from './gen/sudoku/user/v1/user_pb'
 import { useAuth } from './auth/useAuth'
-import { getCachedProfile, syncUserProfile } from './api/userClient'
+import { getCachedProfile, syncUserProfile, clearCachedProfile } from './api/userClient'
 import { RequireAuth } from './auth/RequireAuth'
 import { AppShell } from './components/AppShell'
 import { ToastProvider } from './components/ui/Toast'
@@ -63,6 +63,7 @@ function getProfileSyncError(error: unknown) {
 
 function AppRoutes() {
   const { user, loading: authLoading } = useAuth()
+  const navigate = useNavigate()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileLoadError, setProfileLoadError] = useState('')
@@ -104,8 +105,11 @@ function AppRoutes() {
   }, [user, profileSyncAttempt])
 
   const handleProfileRetry = useCallback(() => {
+    if (user) {
+      clearCachedProfile(user.uid)
+    }
     setProfileSyncAttempt((attempt) => attempt + 1)
-  }, [])
+  }, [user])
 
   const handleProfileUpdated = useCallback((p: UserProfile) => {
     setProfile(p)
@@ -226,7 +230,7 @@ function AppRoutes() {
                           loading={profileLoading}
                           loadError={profileLoadError}
                           view="profile"
-                          onNavigate={() => {}}
+                          onNavigate={(path) => navigate(path)}
                           onRetry={handleProfileRetry}
                           onUpdated={handleProfileUpdated}
                         />
@@ -243,7 +247,7 @@ function AppRoutes() {
                           loading={profileLoading}
                           loadError={profileLoadError}
                           view="settings"
-                          onNavigate={() => {}}
+                          onNavigate={(path) => navigate(path)}
                           onRetry={handleProfileRetry}
                           onUpdated={handleProfileUpdated}
                         />
