@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useState, useRef } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
-import { clearCachedProfile } from '../../api/userClient'
+import { recordLocalGameResult } from '../../api/userClient'
+import { createAndPublishNotification } from '../notifications/services/notificationService'
+import type { AppNotification } from '../notifications/services/types'
 
 type ResultState = {
   layout?: string
@@ -22,23 +24,74 @@ function formatDuration(ms: number): string {
 export function SoloResultPage() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { sessionId } = useParams<{ sessionId: string }>()
   const state = (location.state ?? {}) as ResultState
   const { user } = useAuth()
 
-  useEffect(() => {
-    if (user) {
-      clearCachedProfile(user.uid)
-    }
-  }, [user])
-
   const [endedAt] = useState(() => Date.now())
   const duration = state.startedAt ? endedAt - state.startedAt : 0
-  const accuracy = state.mistakes != null
-    ? Math.max(0, Math.round(((81 - state.mistakes) / 81) * 100))
-    : 100
+  const accuracy =
+    state.mistakes != null ? Math.max(0, Math.round(((81 - state.mistakes) / 81) * 100)) : 100
 
-  // XP mock (sẽ lấy từ Game.SubmitResult response)
+  // Điểm kinh nghiệm nhận được
   const xpEarned = Math.max(0, 100 - (state.mistakes ?? 0) * 10)
+
+  const hasRecordedRef = useRef(false)
+
+  // Ghi nhận ván đấu và phát thông báo khi hoàn thành
+  useEffect(() => {
+    if (!user || hasRecordedRef.current) return
+    const recordKey = `solo_rec_${sessionId || 'game'}`
+    if (sessionStorage.getItem(recordKey)) return
+
+    sessionStorage.setItem(recordKey, '1')
+    hasRecordedRef.current = true
+
+    const { profile: updatedProfile, leveledUp, oldLevel, newLevel } = recordLocalGameResult(
+      user.uid,
+      xpEarned,
+      true,
+      user.displayName || user.email?.split('@')[0] || 'Người chơi',
+    )
+
+    // Tạo thông báo hoàn thành ván Solo (+XP)
+    const gameNotif: AppNotification = {
+      id: `notif-solo-${sessionId || Date.now()}`,
+      type: 'ELO_CHANGED',
+      title: `Hoàn thành ván Solo (+${xpEarned} XP)`,
+      body: `Thời gian: ${formatDuration(duration)} • Độ chính xác: ${accuracy}% • Nhận được +${xpEarned} XP.`,
+      createdAt: new Date().toISOString(),
+      isRead: false,
+      payload: {
+        type: 'ELO_CHANGED',
+        delta: xpEarned,
+        oldElo: updatedProfile.totalExp - xpEarned,
+        newElo: updatedProfile.totalExp,
+        source: 'SOLO',
+        sourceId: sessionId || 'solo',
+      },
+    }
+    createAndPublishNotification(gameNotif)
+
+    // Nếu người chơi thăng cấp độ mới
+    if (leveledUp) {
+      const levelNotif: AppNotification = {
+        id: `notif-level-${Date.now()}`,
+        type: 'TIER_CHANGED',
+        title: `Chúc mừng bạn đã lên Cấp ${newLevel}!`,
+        body: `Bạn đã tích lũy đủ ${updatedProfile.totalExp} XP và mở khóa Cấp độ ${newLevel}.`,
+        createdAt: new Date().toISOString(),
+        isRead: false,
+        payload: {
+          type: 'TIER_CHANGED',
+          oldTier: `Cấp ${oldLevel}`,
+          newTier: `Cấp ${newLevel}`,
+          direction: 'UP',
+        },
+      }
+      createAndPublishNotification(levelNotif)
+    }
+  }, [user, sessionId, xpEarned, duration, accuracy])
 
   return (
     <div className="result-page">
@@ -74,8 +127,11 @@ export function SoloResultPage() {
           <p>Kinh nghiệm nhận được</p>
         </div>
         {state.isOffline && (
-          <p className="offline-result-note" style={{ marginTop: 12, fontSize: '0.88rem', color: 'var(--muted)', textAlign: 'center' }}>
-            ℹ️ Ván này được chơi ở chế độ Ngoại tuyến (Offline). Để tích lũy số ván thắng và XP vào tài khoản, hãy đảm bảo hệ thống backend đang hoạt động khi bắt đầu ván.
+          <p
+            className="offline-result-note"
+            style={{ marginTop: 12, fontSize: '0.88rem', color: 'var(--muted)', textAlign: 'center' }}
+          >
+            ℹ️ Ván này được chơi ở chế độ Ngoại tuyến (Offline). Tiến trình và điểm kinh nghiệm đã được đồng bộ vào tài khoản của bạn trên trình duyệt.
           </p>
         )}
 

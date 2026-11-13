@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams, useLocation, Link } from 'react-router-dom'
 import type { UserProfile } from '../../gen/sudoku/user/v1/user_pb'
+import { recordLocalGameResult } from '../../api/userClient'
+import { createAndPublishNotification } from '../notifications/services/notificationService'
+import type { AppNotification } from '../notifications/services/types'
 import {
   PlayFormat,
   BoardLayoutType,
@@ -111,7 +114,72 @@ export function MultiplayerResultPage({ profile }: MultiplayerResultPageProps) {
     return () => controller.abort()
   }, [matchId, result])
 
-  if (!result) {
+  const callerIdentity = matchHub.getCallerIdentity(profile?.displayName)
+  const myUid = callerIdentity.userId
+  const isP1Me = matchInfo
+    ? matchInfo.player1.userId === myUid || matchInfo.player2.userId !== myUid
+    : true
+
+  const myStats = result ? (isP1Me ? result.player1 : result.player2) : null
+  const oppStats = result ? (isP1Me ? result.player2 : result.player1) : null
+
+  const myName =
+    (isP1Me ? matchInfo?.player1.displayName : matchInfo?.player2.displayName) ||
+    profile?.displayName ||
+    callerIdentity.displayName
+  const oppName =
+    (isP1Me ? matchInfo?.player2.displayName : matchInfo?.player1.displayName) ||
+    'Đối thủ'
+
+  const isWin = result
+    ? !result.isDraw && (result.winnerUserId === myUid || (isP1Me && (myStats?.eloDelta ?? 0) > 0))
+    : false
+  const isDraw = Boolean(result?.isDraw)
+
+  const isDuel = result?.playFormat === PlayFormat.DUEL
+  const isIrregular = result?.boardLayout === BoardLayoutType.IRREGULAR
+  const newEloTier = myStats ? resolveLevelFromElo(myStats.newRating) : null
+
+  const recordedMatchRef = useRef(false)
+
+  useEffect(() => {
+    if (!result || !matchId || !myStats || recordedMatchRef.current) return
+    const recordKey = `match_rec_${matchId}`
+    if (sessionStorage.getItem(recordKey)) return
+    sessionStorage.setItem(recordKey, '1')
+    recordedMatchRef.current = true
+
+    // Ghi nhận ván đấu multiplayer vào profile
+    if (myUid) {
+      recordLocalGameResult(myUid, Math.max(10, Math.floor(myStats.score / 5)), isWin, myName)
+    }
+
+    // Phát thông báo ELO_CHANGED
+    const deltaStr = myStats.eloDelta >= 0 ? `+${myStats.eloDelta}` : `${myStats.eloDelta}`
+    const eloNotif: AppNotification = {
+      id: `notif-match-${matchId}-${Date.now()}`,
+      type: 'ELO_CHANGED',
+      title: `Elo ${deltaStr} (${myStats.ratingBefore} → ${myStats.newRating})`,
+      body: isWin
+        ? `Chiến thắng trước ${oppName}! Bạn nhận được ${deltaStr} Elo.`
+        : isDraw
+        ? `Hòa điểm với ${oppName}!`
+        : `Thất bại trước ${oppName}. Elo thay đổi ${deltaStr}.`,
+      createdAt: new Date().toISOString(),
+      isRead: false,
+      payload: {
+        type: 'ELO_CHANGED',
+        delta: myStats.eloDelta,
+        oldElo: myStats.ratingBefore,
+        newElo: myStats.newRating,
+        source: 'MULTI',
+        sourceId: matchId,
+      },
+    }
+    createAndPublishNotification(eloNotif)
+  }, [result, matchId, myStats, oppName, isWin, isDraw, myUid, myName])
+
+  if (!result || !myStats || !oppStats) {
     return (
       <div className="multi-result-page">
         <div className="multi-result-card">
@@ -126,32 +194,6 @@ export function MultiplayerResultPage({ profile }: MultiplayerResultPageProps) {
       </div>
     )
   }
-
-  const callerIdentity = matchHub.getCallerIdentity(profile?.displayName)
-  const myUid = callerIdentity.userId
-  const isP1Me = matchInfo
-    ? matchInfo.player1.userId === myUid || matchInfo.player2.userId !== myUid
-    : true
-
-  const myStats = isP1Me ? result.player1 : result.player2
-  const oppStats = isP1Me ? result.player2 : result.player1
-
-  const myName =
-    (isP1Me ? matchInfo?.player1.displayName : matchInfo?.player2.displayName) ||
-    profile?.displayName ||
-    callerIdentity.displayName
-  const oppName =
-    (isP1Me ? matchInfo?.player2.displayName : matchInfo?.player1.displayName) ||
-    'Đối thủ'
-
-  const isWin =
-    !result.isDraw &&
-    (result.winnerUserId === myUid || (isP1Me && myStats.eloDelta > 0))
-  const isDraw = result.isDraw
-
-  const isDuel = result.playFormat === PlayFormat.DUEL
-  const isIrregular = result.boardLayout === BoardLayoutType.IRREGULAR
-  const newEloTier = resolveLevelFromElo(myStats.newRating)
 
   function handlePlayAgain() {
     const modeStr = isDuel ? 'duel' : 'race'

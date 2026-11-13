@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type { UserProfile } from '../gen/sudoku/user/v1/user_pb'
 import { useAuth } from '../auth/useAuth'
 import { clearCachedProfile } from '../api/userClient'
+import { NotificationBell } from '../features/notifications/components/NotificationBell'
 
 type AppShellProps = {
   profile: UserProfile | null
@@ -74,13 +75,7 @@ export function AppShell({ profile, children }: AppShellProps) {
         </nav>
 
         <div className="topbar-right">
-          <Link
-            to="/notices"
-            className="icon-btn"
-            aria-label="Thông báo"
-          >
-            🔔
-          </Link>
+          <NotificationBell />
           <div className="avatar-menu">
             <Link to="/profile" className="topbar-avatar" aria-label="Hồ sơ của tôi">
               {profile?.avatarUrl ? (

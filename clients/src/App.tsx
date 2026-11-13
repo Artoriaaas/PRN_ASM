@@ -1,11 +1,13 @@
 import { lazy, Suspense, useEffect, useState, useCallback } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom'
 import type { UserProfile } from './gen/sudoku/user/v1/user_pb'
 import { useAuth } from './auth/useAuth'
 import { getCachedProfile, syncUserProfile, clearCachedProfile } from './api/userClient'
 import { RequireAuth } from './auth/RequireAuth'
 import { AppShell } from './components/AppShell'
 import { ToastProvider } from './components/ui/Toast'
+import { NotificationsProvider } from './features/notifications/NotificationsProvider'
+import { NotificationToast } from './features/notifications/components/NotificationToast'
 import { AuthPage } from './features/auth/AuthPage'
 import { LandingPage } from './features/landing/LandingPage'
 import { NotFoundPage } from './features/error/NotFoundPage'
@@ -42,6 +44,16 @@ const MultiplayerResultPage = lazy(() =>
 )
 const LearnPage = lazy(() => import('./features/learn/LearnPage').then((m) => ({ default: m.LearnPage })))
 const LessonPage = lazy(() => import('./features/learn/LessonPage').then((m) => ({ default: m.LessonPage })))
+const NoticesPage = lazy(() =>
+  import('./features/notifications/pages/NoticesPage').then((m) => ({
+    default: m.NoticesPage,
+  })),
+)
+
+function RoomRedirect() {
+  const { roomCode } = useParams<{ roomCode: string }>()
+  return <Navigate to={roomCode ? `/match/${roomCode}` : '/play'} replace />
+}
 
 function PageLoader() {
   return (
@@ -117,6 +129,20 @@ function AppRoutes() {
     setProfile(p)
     setProfileLoadError('')
     setProfileLoading(false)
+  }, [])
+
+  // Lắng nghe cập nhật profile cục bộ từ các màn hình chơi game (XP, cấp độ, ván thắng)
+  useEffect(() => {
+    const handleProfileUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<UserProfile>
+      if (customEvent.detail) {
+        setProfile(customEvent.detail)
+        setProfileLoading(false)
+        setProfileLoadError('')
+      }
+    }
+    window.addEventListener('sudoku:profile-updated', handleProfileUpdate)
+    return () => window.removeEventListener('sudoku:profile-updated', handleProfileUpdate)
   }, [])
 
   if (authLoading && !window.location.pathname.startsWith('/preview')) {
@@ -250,6 +276,27 @@ function AppRoutes() {
                 </AppShell>
               }
             />
+            <Route
+              path="/preview/notices"
+              element={
+                <AppShell
+                  profile={
+                    {
+                      displayName: 'Khoa Nguyen',
+                      email: 'khoanguyen@example.com',
+                      avatarUrl: '',
+                      totalGames: 42,
+                      wins: 35,
+                      totalExp: 3850,
+                      playerLevel: 4,
+                      trophies: 12,
+                    } as unknown as UserProfile
+                  }
+                >
+                  <NoticesPage />
+                </AppShell>
+              }
+            />
           </>
         )}
 
@@ -310,7 +357,8 @@ function AppRoutes() {
                   <Route path="/learn/:lessonCode" element={<LessonPage />} />
                   <Route path="/hoc" element={<Navigate to="/learn" replace />} />
                   <Route path="/hoc/:lessonCode" element={<LessonPage />} />
-                  <Route path="/notices" element={<ComingSoon title="Thông báo hệ thống" />} />
+                  <Route path="/notices" element={<NoticesPage />} />
+                  <Route path="/dau-tran/phong/:roomCode" element={<RoomRedirect />} />
                   <Route path="/tournaments" element={<ComingSoon title="Giải đấu" />} />
                   <Route path="/tournaments/new" element={<ComingSoon title="Tạo giải đấu" />} />
                   <Route path="/tournaments/:id" element={<ComingSoon title="Chi tiết giải đấu" />} />
@@ -343,7 +391,10 @@ export default function App() {
   return (
     <BrowserRouter>
       <ToastProvider>
-        <AppRoutes />
+        <NotificationsProvider>
+          <AppRoutes />
+          <NotificationToast />
+        </NotificationsProvider>
       </ToastProvider>
     </BrowserRouter>
   )
