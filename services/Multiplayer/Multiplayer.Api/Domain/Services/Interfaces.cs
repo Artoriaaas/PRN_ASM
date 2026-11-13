@@ -17,7 +17,7 @@ public interface IMatchRepository
 {
     Task<Match?> GetByIdForUpdateAsync(Guid matchId, CancellationToken ct = default);
     Task<MatchDetail?> GetMatchDetailAsync(Guid matchId, CancellationToken ct = default);
-    Task<List<MatchHistoryItem>> GetMatchHistoryAsync(string userId, int playFormat, int limit, CancellationToken ct = default);
+    Task<(List<MatchHistoryItem> Items, int TotalCount, int WinsCount)> GetMatchHistoryAsync(string userId, int playFormat, int limit, int offset, CancellationToken ct = default);
     Task<List<OutboxMessage>> GetUnprocessedOutboxMessagesAsync(int limit, CancellationToken ct = default);
     void Add(Match match);
     void AddMoves(IEnumerable<MatchMove> moves);

@@ -15,6 +15,7 @@ service GameService {
   rpc AbandonGame(AbandonGameRequest) returns (AbandonGameResponse);
   rpc GetHighScores(GetHighScoresRequest) returns (GetHighScoresResponse);
   rpc AcquirePuzzleForMatch(AcquirePuzzleForMatchRequest) returns (AcquirePuzzleForMatchResponse);
+  rpc GetGameHistory(GetGameHistoryRequest) returns (GetGameHistoryResponse);
 }
 
 enum LayoutType {
@@ -191,4 +192,29 @@ message AcquirePuzzleForMatchResponse {
   string solution_board = 5;
   string region_map = 6;
   int32 clue_count = 7;
+}
+
+message GameHistoryItem {
+  string session_id = 1;
+  string level_id = 2;
+  LayoutType layout_type = 3;
+  SessionStatus status = 4;
+  int32 score = 5;
+  int64 elapsed_ms = 6;
+  int32 mistakes_count = 7;
+  int32 hints_used = 8;
+  double accuracy = 9;
+  string started_at = 10;
+  string finished_at = 11;
+}
+
+message GetGameHistoryRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message GetGameHistoryResponse {
+  repeated GameHistoryItem items = 1;
+  int32 total_count = 2;
+  int32 wins_count = 3;
 }

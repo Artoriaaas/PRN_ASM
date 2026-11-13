@@ -187,15 +187,38 @@ export async function fetchRankings(
   }
 }
 
+export type MatchHistoryResult = {
+  matches: MatchHistoryItem[]
+  totalCount: number
+  winsCount: number
+}
+
 export async function fetchMatchHistory(
   playFormat: PlayFormat = PlayFormat.UNSPECIFIED,
   limit = 20,
   signal?: AbortSignal,
 ): Promise<MatchHistoryItem[]> {
   try {
-    const res = await multiClient.getMatchHistory({ playFormat, limit }, { signal })
+    const res = await multiClient.getMatchHistory({ playFormat, limit, offset: 0 }, { signal })
     return res.matches
   } catch {
     return []
+  }
+}
+
+export async function fetchMatchHistoryPaged(
+  playFormat: PlayFormat = PlayFormat.UNSPECIFIED,
+  limit = 15,
+  offset = 0,
+  signal?: AbortSignal,
+): Promise<MatchHistoryResult> {
+  const res = await multiClient.getMatchHistory(
+    { playFormat, limit, offset },
+    { signal },
+  )
+  return {
+    matches: res.matches,
+    totalCount: res.totalCount,
+    winsCount: res.winsCount,
   }
 }

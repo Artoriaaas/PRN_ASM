@@ -99,4 +99,43 @@ public class GameSessionRepository : IGameSessionRepository
             .Take(safeLimit)
             .ToListAsync(ct);
     }
+
+    public async Task<(List<Sudoku.Game.V1.GameHistoryItem> Items, int TotalCount, int WinsCount)> GetUserGameHistoryAsync(
+        string userId,
+        int limit,
+        int offset,
+        CancellationToken ct = default)
+    {
+        int safeLimit = Math.Clamp(limit <= 0 ? 15 : limit, 1, 100);
+        int safeOffset = Math.Max(0, offset);
+
+        var baseQuery = _context.GameSessions
+            .AsNoTracking()
+            .Where(s => s.UserId == userId && s.Status != 1);
+
+        int totalCount = await baseQuery.CountAsync(ct);
+        int winsCount = await baseQuery.CountAsync(s => s.Status == 2, ct);
+
+        var items = await baseQuery
+            .OrderByDescending(s => s.FinishedAt ?? s.StartedAt)
+            .Skip(safeOffset)
+            .Take(safeLimit)
+            .Select(s => new Sudoku.Game.V1.GameHistoryItem
+            {
+                SessionId = s.Id.ToString(),
+                LevelId = s.LevelId,
+                LayoutType = (Sudoku.Game.V1.LayoutType)s.LayoutType,
+                Status = (Sudoku.Game.V1.SessionStatus)s.Status,
+                Score = s.Score,
+                ElapsedMs = s.ElapsedMs,
+                MistakesCount = s.MistakesCount,
+                HintsUsed = s.HintsUsed,
+                Accuracy = s.Accuracy,
+                StartedAt = s.StartedAt.ToString("O"),
+                FinishedAt = s.FinishedAt != null ? s.FinishedAt.Value.ToString("O") : string.Empty
+            })
+            .ToListAsync(ct);
+
+        return (items, totalCount, winsCount);
+    }
 }

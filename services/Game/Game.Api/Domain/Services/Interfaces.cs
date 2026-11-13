@@ -42,4 +42,5 @@ public interface IGameSessionRepository
     void Add(GameSession session);
     void AddOutboxMessage(OutboxMessage outboxMessage);
     Task<List<OutboxMessage>> GetUnprocessedOutboxMessagesAsync(int limit, CancellationToken ct = default);
+    Task<(List<Sudoku.Game.V1.GameHistoryItem> Items, int TotalCount, int WinsCount)> GetUserGameHistoryAsync(string userId, int limit, int offset, CancellationToken ct = default);
 }

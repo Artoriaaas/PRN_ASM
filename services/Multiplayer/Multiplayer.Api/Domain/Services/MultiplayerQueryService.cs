@@ -15,7 +15,7 @@ using Sudoku.User.V1;
 public interface IMultiplayerQueryService
 {
     Task<GetRankingsResponse> GetRankingsAsync(string? callerUserId, int playFormat, int limit, CancellationToken ct = default);
-    Task<GetMatchHistoryResponse> GetMatchHistoryAsync(string userId, int playFormat, int limit, CancellationToken ct = default);
+    Task<GetMatchHistoryResponse> GetMatchHistoryAsync(string userId, int playFormat, int limit, int offset = 0, CancellationToken ct = default);
     Task<GetPlayerRatingsResponse> GetPlayerRatingsAsync(string userId, CancellationToken ct = default);
     Task<MatchDetail> GetMatchAsync(Guid matchId, CancellationToken ct = default);
 }
@@ -96,10 +96,15 @@ public sealed class MultiplayerQueryService : IMultiplayerQueryService
         string userId,
         int playFormat,
         int limit,
+        int offset = 0,
         CancellationToken ct = default)
     {
-        var items = await _matchRepo.GetMatchHistoryAsync(userId, playFormat, limit, ct);
-        var response = new GetMatchHistoryResponse();
+        var (items, totalCount, winsCount) = await _matchRepo.GetMatchHistoryAsync(userId, playFormat, limit, offset, ct);
+        var response = new GetMatchHistoryResponse
+        {
+            TotalCount = totalCount,
+            WinsCount = winsCount
+        };
         response.Matches.AddRange(items);
         return response;
     }

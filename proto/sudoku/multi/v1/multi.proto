@@ -78,10 +78,13 @@ message MatchHistoryItem {
 message GetMatchHistoryRequest {
   int32 limit = 1;
   PlayFormat play_format = 2;
+  int32 offset = 3;
 }
 
 message GetMatchHistoryResponse {
   repeated MatchHistoryItem matches = 1;
+  int32 total_count = 2;
+  int32 wins_count = 3;
 }
 
 message PlayerRatingInfo {

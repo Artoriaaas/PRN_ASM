@@ -7,6 +7,7 @@ import {
   type SessionState,
   type MakeMoveResponse,
   type UseHintResponse,
+  type GameHistoryItem,
 } from '../gen/sudoku/game/v1/game_pb'
 import { transport } from './transport'
 
@@ -161,5 +162,29 @@ export async function abandonGameSession(
   }
   return res.session
 }
+
+export type GameHistoryResult = {
+  items: GameHistoryItem[]
+  totalCount: number
+  winsCount: number
+}
+
+export async function fetchGameHistory(
+  limit = 15,
+  offset = 0,
+  signal?: AbortSignal,
+): Promise<GameHistoryResult> {
+  const response = await gameClient.getGameHistory(
+    { limit, offset },
+    { signal },
+  )
+  return {
+    items: response.items,
+    totalCount: response.totalCount,
+    winsCount: response.winsCount,
+  }
+}
+
+export type { GameHistoryItem }
 
 export { LayoutType, SessionStatus }

@@ -4,6 +4,7 @@ import type { UserProfile } from '../../gen/sudoku/user/v1/user_pb'
 import { useAuth } from '../../auth/useAuth'
 import { getAuthErrorMessage } from '../../auth/firebaseErrors'
 import { updateUserProfile } from '../../api/userClient'
+import { MatchHistorySection } from './MatchHistorySection'
 
 type ProfilePageProps = {
   user: User
@@ -216,6 +217,8 @@ export function ProfilePage({
                     <p>Cúp thành tích</p>
                   </article>
                 </div>
+
+                <MatchHistorySection />
 
                 <div className="profile-note">
                   <div>

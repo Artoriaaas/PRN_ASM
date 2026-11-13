@@ -92,9 +92,15 @@ public class MatchRepository : IMatchRepository
         return detail;
     }
 
-    public Task<List<MatchHistoryItem>> GetMatchHistoryAsync(string userId, int playFormat, int limit, CancellationToken ct = default)
+    public async Task<(List<MatchHistoryItem> Items, int TotalCount, int WinsCount)> GetMatchHistoryAsync(
+        string userId,
+        int playFormat,
+        int limit,
+        int offset = 0,
+        CancellationToken ct = default)
     {
         int safeLimit = Math.Clamp(limit <= 0 ? 20 : limit, 1, 100);
+        int safeOffset = Math.Max(0, offset);
 
         var query = _context.MatchPlayers
             .AsNoTracking()
@@ -105,8 +111,12 @@ public class MatchRepository : IMatchRepository
             query = query.Where(p => p.PlayFormat == playFormat);
         }
 
-        return query
+        int totalCount = await query.CountAsync(ct);
+        int winsCount = await query.CountAsync(p => p.Result == (int)MatchResult.Win, ct);
+
+        var items = await query
             .OrderByDescending(p => p.FinishedAt)
+            .Skip(safeOffset)
             .Take(safeLimit)
             .Select(p => new MatchHistoryItem
             {
@@ -126,6 +136,8 @@ public class MatchRepository : IMatchRepository
                 EndReason = p.EndReason
             })
             .ToListAsync(ct);
+
+        return (items, totalCount, winsCount);
     }
 
     public Task<List<OutboxMessage>> GetUnprocessedOutboxMessagesAsync(int limit, CancellationToken ct = default)

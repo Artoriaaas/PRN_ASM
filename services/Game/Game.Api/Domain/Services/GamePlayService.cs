@@ -23,6 +23,7 @@ public interface IGamePlayService
     Task SaveNotesAsync(string userId, Guid sessionId, string notesJson, CancellationToken ct = default);
     Task<GameSession> AbandonGameAsync(string userId, Guid sessionId, CancellationToken ct = default);
     Task<Puzzle> AcquirePuzzleForMatchAsync(string levelId, int layoutType, bool requireEvenEmptyCells, IReadOnlyList<string> excludeUserIds, CancellationToken ct = default);
+    Task<Sudoku.Game.V1.GetGameHistoryResponse> GetGameHistoryAsync(string userId, int limit, int offset, CancellationToken ct = default);
 }
 
 public class GamePlayService : IGamePlayService
@@ -324,5 +325,17 @@ public class GamePlayService : IGamePlayService
             Payload = evt.ToByteArray(),
             CreatedAt = DateTime.UtcNow
         });
+    }
+
+    public async Task<Sudoku.Game.V1.GetGameHistoryResponse> GetGameHistoryAsync(string userId, int limit, int offset, CancellationToken ct = default)
+    {
+        var (items, totalCount, winsCount) = await _sessionRepo.GetUserGameHistoryAsync(userId, limit, offset, ct);
+        var response = new Sudoku.Game.V1.GetGameHistoryResponse
+        {
+            TotalCount = totalCount,
+            WinsCount = winsCount
+        };
+        response.Items.AddRange(items);
+        return response;
     }
 }

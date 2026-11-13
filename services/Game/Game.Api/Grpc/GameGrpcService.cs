@@ -233,6 +233,17 @@ public class GameGrpcService : GameService.GameServiceBase
         };
     }
 
+    public override async Task<GetGameHistoryResponse> GetGameHistory(GetGameHistoryRequest request, ServerCallContext context)
+    {
+        string userId = GetCallerUserId(context);
+        return await _gamePlayService.GetGameHistoryAsync(
+            userId,
+            request.Limit,
+            request.Offset,
+            context.CancellationToken
+        );
+    }
+
     private static string GetCallerUserId(ServerCallContext context)
     {
         var user = context.GetHttpContext().User;

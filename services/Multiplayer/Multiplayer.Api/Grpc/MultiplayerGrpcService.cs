@@ -39,6 +39,7 @@ public sealed class MultiplayerGrpcService : MultiplayerService.MultiplayerServi
             userId,
             (int)request.PlayFormat,
             request.Limit,
+            request.Offset,
             context.CancellationToken);
     }
 
