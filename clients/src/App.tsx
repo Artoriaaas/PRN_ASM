@@ -49,6 +49,16 @@ const NoticesPage = lazy(() =>
     default: m.NoticesPage,
   })),
 )
+const LeaderboardPage = lazy(() =>
+  import('./features/leaderboard/LeaderboardPage').then((m) => ({
+    default: m.LeaderboardPage,
+  })),
+)
+const QuestsPage = lazy(() =>
+  import('./features/quests/QuestsPage').then((m) => ({
+    default: m.QuestsPage,
+  })),
+)
 
 function RoomRedirect() {
   const { roomCode } = useParams<{ roomCode: string }>()
@@ -350,9 +360,10 @@ function AppRoutes() {
                   <Route path="/play/queue" element={<MultiplayerQueuePage profile={profile} />} />
                   <Route path="/match/:matchId" element={<MultiplayerMatchPage profile={profile} />} />
                   <Route path="/match/:matchId/result" element={<MultiplayerResultPage profile={profile} />} />
-                  <Route path="/leaderboard" element={<ComingSoon title="Bảng xếp hạng" />} />
+                  <Route path="/leaderboard" element={<LeaderboardPage profile={profile} />} />
+                  <Route path="/xep-hang" element={<Navigate to="/leaderboard" replace />} />
                   <Route path="/history" element={<ComingSoon title="Lịch sử đấu" />} />
-                  <Route path="/quests" element={<ComingSoon title="Nhiệm vụ" />} />
+                  <Route path="/quests" element={<QuestsPage />} />
                   <Route path="/learn" element={<LearnPage />} />
                   <Route path="/learn/:lessonCode" element={<LessonPage />} />
                   <Route path="/hoc" element={<Navigate to="/learn" replace />} />

@@ -4,6 +4,7 @@ import { useAuth } from '../../auth/useAuth'
 import { recordLocalGameResult } from '../../api/userClient'
 import { createAndPublishNotification } from '../notifications/services/notificationService'
 import type { AppNotification } from '../notifications/services/types'
+import { checkQuestCompletion, markQuestComplete, todayStr } from '../quests/questSystem'
 
 type ResultState = {
   layout?: string
@@ -73,6 +74,30 @@ export function SoloResultPage() {
     }
     createAndPublishNotification(gameNotif)
 
+    // Kiểm tra nhiệm vụ hằng ngày
+    const layout = (state.layout as string) ?? ''
+    const difficulty = (state.level as string) ?? ''
+    const matchedQuest = checkQuestCompletion(layout, difficulty)
+    if (matchedQuest) {
+      const completedQuest = markQuestComplete(matchedQuest.taskCode)
+      if (completedQuest) {
+        const questNotif: AppNotification = {
+          id: `notif-quest-${Date.now()}`,
+          type: 'TASK_COMPLETED',
+          title: 'Hoàn thành nhiệm vụ hôm nay! 🎉',
+          body: `${completedQuest.title} — +${completedQuest.xpReward} XP thưởng nhiệm vụ.`,
+          createdAt: new Date().toISOString(),
+          isRead: false,
+          payload: {
+            type: 'TASK_COMPLETED',
+            taskCode: completedQuest.taskCode,
+            taskDate: todayStr(),
+          },
+        }
+        createAndPublishNotification(questNotif)
+      }
+    }
+
     // Nếu người chơi thăng cấp độ mới
     if (leveledUp) {
       const levelNotif: AppNotification = {
@@ -91,7 +116,7 @@ export function SoloResultPage() {
       }
       createAndPublishNotification(levelNotif)
     }
-  }, [user, sessionId, xpEarned, duration, accuracy])
+  }, [user, sessionId, xpEarned, duration, accuracy, state.layout, state.level])
 
   return (
     <div className="result-page">

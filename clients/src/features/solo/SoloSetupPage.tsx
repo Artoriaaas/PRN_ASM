@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { startGameSession, fetchLevels, LayoutType } from '../../api/gameClient'
 import { createOfflineSession } from '../../lib/offlineSudoku'
 import { TutorialWelcomeModal } from '../tutorial/TutorialWelcomeModal'
@@ -24,8 +24,10 @@ const LEVELS: { value: Level; label: string; desc: string; color: string }[] = [
 
 export function SoloSetupPage() {
   const navigate = useNavigate()
-  const [layout, setLayout] = useState<Layout>('standard')
-  const [level, setLevel] = useState<Level>('medium')
+  const location = useLocation()
+  const locState = location.state as { layout?: Layout; level?: Level } | null
+  const [layout, setLayout] = useState<Layout>(() => locState?.layout ?? 'standard')
+  const [level, setLevel] = useState<Level>(() => locState?.level ?? 'medium')
   const [logicOnly, setLogicOnly] = useState(false)
   const [isStarting, setIsStarting] = useState(false)
 

@@ -138,7 +138,7 @@ export function MultiplayerResultPage({ profile }: MultiplayerResultPageProps) {
 
   const isDuel = result?.playFormat === PlayFormat.DUEL
   const isIrregular = result?.boardLayout === BoardLayoutType.IRREGULAR
-  const newEloTier = myStats ? resolveLevelFromElo(myStats.newRating) : null
+  const newEloTier = resolveLevelFromElo(myStats?.newRating ?? 1000)
 
   const recordedMatchRef = useRef(false)
 

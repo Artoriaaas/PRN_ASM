@@ -1,0 +1,295 @@
+/* Nhiệm vụ hằng ngày — popup overlay */
+
+.quests-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: fadeIn 0.18s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quests-overlay { animation: none }
+  .quests-modal   { animation: none }
+}
+
+.quests-modal {
+  background: var(--surface, #fff);
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  width: 100%;
+  max-width: 480px;
+  overflow: hidden;
+  animation: slideUp 0.22s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(24px); opacity: 0 }
+  to   { transform: translateY(0);    opacity: 1 }
+}
+
+/* ---- Header ---- */
+.qm-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.qm-header-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.qm-header-text { flex: 1 }
+
+.qm-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--fg, #1a2e1a);
+}
+
+.qm-date {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted, #6b7280);
+}
+
+.qm-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted, #6b7280);
+  font-size: 1.3rem;
+  line-height: 1;
+  padding: 0.3rem;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.qm-close:hover {
+  background: var(--hover, #f3f4f6);
+  color: var(--fg, #1a2e1a);
+}
+
+/* ---- Progress summary ---- */
+.qm-progress-bar {
+  height: 4px;
+  background: var(--border, #e5e7eb);
+  margin: 0;
+}
+
+.qm-progress-fill {
+  height: 100%;
+  background: var(--primary, #15803d);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* ---- Body ---- */
+.qm-body {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+/* ---- Quest card ---- */
+.quest-card {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem 1.125rem;
+  border-radius: 14px;
+  border: 1.5px solid var(--border, #e5e7eb);
+  background: var(--bg, #f8faf6);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.quest-card.completed {
+  opacity: 0.65;
+  background: var(--surface, #fff);
+}
+
+.quest-card:not(.completed):hover {
+  border-color: var(--primary, #15803d);
+  box-shadow: 0 2px 10px rgba(21,128,61,0.1);
+}
+
+.quest-status-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.quest-status-icon.pending {
+  background: var(--bg, #f8faf6);
+  border: 2px dashed var(--border, #d1d5db);
+  color: var(--muted, #9ca3af);
+}
+
+.quest-status-icon.completed {
+  background: var(--primary, #15803d);
+  border: 2px solid var(--primary, #15803d);
+  color: #fff;
+}
+
+.quest-info { flex: 1; min-width: 0 }
+
+.quest-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--fg, #1a2e1a);
+  margin: 0 0 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.quest-title.completed {
+  text-decoration: line-through;
+  color: var(--muted, #6b7280);
+}
+
+.quest-desc {
+  font-size: 0.82rem;
+  color: var(--muted, #6b7280);
+  margin: 0 0 0.6rem;
+}
+
+.quest-badges {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+}
+
+.badge-layout {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.badge-diff-easy   { background: #f0fdf4; color: #15803d }
+.badge-diff-medium { background: #fffbeb; color: #b45309 }
+.badge-diff-hard   { background: #fef2f2; color: #b91c1c }
+
+.badge-xp {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.quest-action {
+  align-self: center;
+}
+
+.quest-play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: var(--primary, #15803d);
+  color: #fff;
+  white-space: nowrap;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.quest-play-btn:hover {
+  background: #166534;
+  transform: scale(1.03);
+}
+
+.quest-done-label {
+  font-size: 0.8rem;
+  color: var(--primary, #15803d);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ---- Footer ---- */
+.qm-footer {
+  padding: 0.875rem 1.5rem 1.25rem;
+  border-top: 1px solid var(--border, #e5e7eb);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.qm-footer-note {
+  font-size: 0.8rem;
+  color: var(--muted, #6b7280);
+  margin: 0;
+}
+
+.qm-close-btn {
+  font-size: 0.85rem;
+  padding: 0.45rem 1.1rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--border, #d1d5db);
+  background: none;
+  cursor: pointer;
+  color: var(--fg, #1a2e1a);
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.qm-close-btn:hover {
+  background: var(--hover, #f3f4f6);
+}
+
+/* ---- All done state ---- */
+.qm-all-done {
+  text-align: center;
+  padding: 1.5rem 1rem;
+}
+
+.qm-all-done-emoji {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.qm-all-done h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--fg, #1a2e1a);
+  margin: 0 0 0.35rem;
+}
+
+.qm-all-done p {
+  font-size: 0.85rem;
+  color: var(--muted, #6b7280);
+  margin: 0;
+}
+
