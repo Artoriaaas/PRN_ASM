@@ -24,11 +24,15 @@ function requireProfile(profile: UserProfile | undefined) {
 
 function cacheProfile(firebaseUid: string, profile: UserProfile) {
   memoryCache.set(firebaseUid, profile)
-  sessionStorage.setItem(cacheKey(firebaseUid), JSON.stringify(profile))
+  try {
+    sessionStorage.setItem(cacheKey(firebaseUid), JSON.stringify(profile))
+  } catch {
+    // Ignore storage quota error
+  }
   return profile
 }
 
-export function getCachedProfile(firebaseUid: string) {
+export function getCachedProfile(firebaseUid: string): UserProfile | null {
   const memoryValue = memoryCache.get(firebaseUid)
   if (memoryValue) {
     return memoryValue
@@ -64,7 +68,24 @@ export function syncUserProfile(user: User, signal: AbortSignal) {
       },
       { signal },
     )
-    .then((response) => cacheProfile(user.uid, requireProfile(response.profile)))
+    .then((response) => {
+      const serverProfile = requireProfile(response.profile)
+      const cached = getCachedProfile(user.uid)
+
+      // Bảo toàn tiến trình nếu local đã tích lũy điểm số/ván đấu (ví dụ khi chơi offline)
+      if (cached) {
+        if ((cached.totalExp ?? 0) > (serverProfile.totalExp ?? 0)) {
+          serverProfile.totalExp = cached.totalExp
+          serverProfile.playerLevel = Math.max(serverProfile.playerLevel, cached.playerLevel)
+        }
+        if ((cached.totalGames ?? 0) > (serverProfile.totalGames ?? 0)) {
+          serverProfile.totalGames = cached.totalGames
+          serverProfile.wins = Math.max(serverProfile.wins, cached.wins)
+        }
+      }
+
+      return cacheProfile(user.uid, serverProfile)
+    })
     .finally(() => inFlight.delete(user.uid))
 
   inFlight.set(user.uid, request)
@@ -82,4 +103,62 @@ export async function updateUserProfile(
 export function clearCachedProfile(firebaseUid: string) {
   memoryCache.delete(firebaseUid)
   sessionStorage.removeItem(cacheKey(firebaseUid))
+}
+
+/**
+ * Ghi nhận kết quả ván đấu cục bộ ngay lập tức (cho cả chế độ online và offline)
+ * Tự động tính toán tăng số ván chơi, chiến thắng, kinh nghiệm (XP) và nâng cấp độ người chơi.
+ */
+export function recordLocalGameResult(
+  firebaseUid: string,
+  xpGained: number,
+  isWin = true,
+  fallbackDisplayName = 'Người chơi',
+): {
+  profile: UserProfile
+  leveledUp: boolean
+  oldLevel: number
+  newLevel: number
+} {
+  const current = getCachedProfile(firebaseUid)
+  const baseProfile: UserProfile = current ?? ({
+    id: firebaseUid,
+    displayName: fallbackDisplayName,
+    email: '',
+    avatarUrl: '',
+    country: 'VN',
+    totalGames: 0,
+    wins: 0,
+    totalExp: 0,
+    playerLevel: 1,
+    trophies: 0,
+  } as unknown as UserProfile)
+
+  const oldLevel = baseProfile.playerLevel || 1
+  const oldExp = baseProfile.totalExp || 0
+  const updatedExp = oldExp + xpGained
+  // Công thức thăng cấp: Mỗi 500 XP lên 1 cấp (Cấp 1: 0-499, Cấp 2: 500-999...)
+  const newLevel = Math.max(1, 1 + Math.floor(updatedExp / 500))
+  const leveledUp = newLevel > oldLevel
+
+  const updatedProfile: UserProfile = {
+    ...baseProfile,
+    totalGames: (baseProfile.totalGames || 0) + 1,
+    wins: isWin ? (baseProfile.wins || 0) + 1 : (baseProfile.wins || 0),
+    totalExp: updatedExp,
+    playerLevel: newLevel,
+    trophies: (baseProfile.trophies || 0) + (isWin ? 5 : 0),
+  } as unknown as UserProfile
+
+  cacheProfile(firebaseUid, updatedProfile)
+
+  // Bắn sự kiện window để cập nhật Header, HomePage, XpBar ngay lập tức
+  window.dispatchEvent(new CustomEvent('sudoku:profile-updated', { detail: updatedProfile }))
+
+  return {
+    profile: updatedProfile,
+    leveledUp,
+    oldLevel,
+    newLevel,
+  }
 }

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type { UserProfile } from '../gen/sudoku/user/v1/user_pb'
 import { useAuth } from '../auth/useAuth'
 import { clearCachedProfile } from '../api/userClient'
+import { NotificationBell } from '../features/notifications/components/NotificationBell'
 
 type AppShellProps = {
   profile: UserProfile | null
@@ -56,25 +57,25 @@ export function AppShell({ profile, children }: AppShellProps) {
         </Link>
 
         <nav className="topbar-nav" aria-label="Điều hướng chính">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={`nav-link${location.pathname === item.to ? ' active' : ''}`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            const isActive =
+              location.pathname === item.to ||
+              (item.to === '/learn' &&
+                (location.pathname.startsWith('/learn') || location.pathname.startsWith('/hoc')))
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`nav-link${isActive ? ' active' : ''}`}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
         </nav>
 
         <div className="topbar-right">
-          <Link
-            to="/notices"
-            className="icon-btn"
-            aria-label="Thông báo"
-          >
-            🔔
-          </Link>
+          <NotificationBell />
           <div className="avatar-menu">
             <Link to="/profile" className="topbar-avatar" aria-label="Hồ sơ của tôi">
               {profile?.avatarUrl ? (

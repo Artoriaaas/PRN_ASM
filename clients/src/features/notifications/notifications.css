@@ -1,0 +1,1087 @@
+/* ── Hệ thống thông báo (Sudoku Online) ────────────────────────── */
+
+/* ── Chuông & Huy hiệu ── */
+.notif-bell-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  padding: 0;
+}
+
+.notif-bell-btn:hover {
+  background: var(--surface-hover);
+  border-color: #D1CEC5;
+  transform: translateY(-1px);
+}
+
+.notif-bell-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.notif-bell-icon {
+  font-size: 1.18rem;
+  line-height: 1;
+  display: inline-block;
+  transition: transform var(--t-fast);
+}
+
+/* Hiệu ứng rung chuông khi có lời mời đấu đang chờ */
+@keyframes notif-bell-shake {
+  0% { transform: rotate(0); }
+  15% { transform: rotate(14deg); }
+  30% { transform: rotate(-12deg); }
+  45% { transform: rotate(10deg); }
+  60% { transform: rotate(-8deg); }
+  75% { transform: rotate(4deg); }
+  100% { transform: rotate(0); }
+}
+
+.notif-bell-shake .notif-bell-icon {
+  animation: notif-bell-shake 0.85s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notif-bell-shake .notif-bell-icon {
+    animation: none !important;
+  }
+}
+
+/* Huy hiệu số chưa đọc */
+.notif-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #FFFFFF;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  font-family: var(--font-num, inherit);
+  transition: background-color var(--t-fast);
+}
+
+/* Khi có lời mời đấu chờ phản hồi: huy hiệu đổi sang màu xanh dương */
+.notif-badge.badge-invite {
+  background: #0284C7;
+}
+
+/* ── Popover ── */
+.notif-popover-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.notif-popover-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 380px;
+  max-width: calc(100vw - 24px);
+  max-height: 72vh;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(25, 46, 33, 0.16);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: notif-fade-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes notif-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .notif-popover-dropdown {
+    position: fixed;
+    top: 66px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100vh - 140px);
+  }
+}
+
+.notif-popover-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: #FFFFFF;
+}
+
+.notif-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.notif-header-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.notif-mark-all-btn {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.notif-mark-all-btn:hover:not(:disabled) {
+  background: var(--primary-soft);
+}
+
+.notif-mark-all-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  color: var(--text-muted);
+}
+
+/* Tabs */
+.notif-tabs {
+  display: flex;
+  gap: 6px;
+  background: #F4F7F2;
+  padding: 3px;
+  border-radius: 10px;
+}
+
+.notif-tab-btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.notif-tab-btn.active {
+  background: #FFFFFF;
+  color: var(--text);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(25, 46, 33, 0.08);
+}
+
+.notif-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  font-size: 0.72rem;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.notif-tab-btn.active .notif-tab-count {
+  background: var(--primary);
+  color: #FFFFFF;
+}
+
+/* Body & Items list */
+.notif-popover-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 0;
+}
+
+.notif-section-label {
+  padding: 8px 16px 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.notif-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  background: #FFFFFF;
+  transition: background var(--t-fast);
+  text-align: left;
+  width: 100%;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  color: inherit;
+  font-family: inherit;
+}
+
+.notif-item:hover {
+  background: var(--surface-hover);
+}
+
+.notif-item.is-unread {
+  background: #F7FAF6;
+}
+
+.notif-item.is-unread:hover {
+  background: #EEF4EC;
+}
+
+.notif-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notif-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.notif-item-title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.notif-item.is-unread .notif-item-title {
+  font-weight: 750;
+  color: #0F3A22;
+}
+
+.notif-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.notif-item-body {
+  margin: 0 0 4px 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notif-item-time {
+  font-size: 0.72rem;
+  color: #6C8274;
+}
+
+/* Elo highlight pill */
+.notif-elo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 750;
+  font-family: var(--font-num, inherit);
+}
+
+.notif-elo-badge.gain {
+  background: rgba(21, 128, 61, 0.14);
+  color: #15803D;
+}
+
+.notif-elo-badge.loss {
+  background: rgba(220, 38, 38, 0.12);
+  color: #DC2626;
+}
+
+.notif-elo-badge.neutral {
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748B;
+}
+
+/* Footer popover */
+.notif-popover-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-subtle);
+  background: #FAFBF9;
+  text-align: center;
+}
+
+.notif-view-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--primary);
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color var(--t-fast);
+}
+
+.notif-view-all-link:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+/* ── Thẻ Lời mời đấu (MATCH_INVITE) ── */
+.notif-invite-card {
+  background: #F2F8FD;
+  border: 1px solid #BAE6FD;
+  border-radius: 12px;
+  padding: 12px;
+  margin: 4px 0;
+}
+
+.notif-invite-card.expired,
+.notif-invite-card.declined,
+.notif-invite-card.cancelled {
+  background: #F8FAFC;
+  border-color: #E2E8F0;
+  opacity: 0.85;
+}
+
+.notif-invite-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.notif-invite-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #0284C7;
+  color: #FFFFFF;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.notif-invite-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.notif-invite-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-invite-name {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.notif-invite-meta {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: #0369A1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.notif-invite-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  background: #E0F2FE;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.notif-invite-timer {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: var(--font-num, inherit);
+  color: #0284C7;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.notif-invite-timer.warning {
+  color: #DC2626;
+  animation: notif-pulse 1s infinite alternate;
+}
+
+@keyframes notif-pulse {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+.notif-invite-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.notif-btn-accept {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: none;
+  background: var(--primary);
+  color: #FFFFFF;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.notif-btn-accept:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.notif-btn-accept:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.notif-btn-decline {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #FFFFFF;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.notif-btn-decline:hover:not(:disabled) {
+  background: #FEE2E2;
+  border-color: #FCA5A5;
+  color: #DC2626;
+}
+
+.notif-btn-decline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.notif-invite-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.notif-invite-status-badge.accepted {
+  background: #DCFCE7;
+  color: #15803D;
+}
+
+.notif-invite-status-badge.declined {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.notif-invite-status-badge.expired {
+  background: #F1F5F9;
+  color: #64748B;
+}
+
+.notif-invite-status-badge.cancelled {
+  background: #F1F5F9;
+  color: #64748B;
+}
+
+.notif-in-game-hint {
+  font-size: 0.72rem;
+  color: #B45309;
+  margin-top: 4px;
+}
+
+/* ── Trang /notices ── */
+.notices-page-wrapper {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+}
+
+.notices-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.notices-title-group h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 850;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.notices-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.notices-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Thanh bộ lọc (Chips) */
+.notices-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 14px;
+  margin-bottom: 16px;
+  scrollbar-width: thin;
+}
+
+.notices-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #FFFFFF;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--t-fast);
+}
+
+.notices-filter-chip:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: #CBD5E1;
+}
+
+.notices-filter-chip.active {
+  background: var(--primary);
+  color: #FFFFFF;
+  border-color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(21, 128, 61, 0.25);
+}
+
+.notices-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.notices-filter-chip.active .notices-filter-count {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Danh sách nhóm ngày trong /notices */
+.notices-group {
+  margin-bottom: 24px;
+}
+
+.notices-group-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 0 0 10px 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notices-group-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+.notices-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notices-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(25, 46, 33, 0.04);
+  transition: all var(--t-fast);
+  cursor: pointer;
+  position: relative;
+}
+
+.notices-card:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 12px rgba(25, 46, 33, 0.08);
+  transform: translateY(-1px);
+}
+
+.notices-card.is-unread {
+  background: #F8FAF6;
+  border-color: #D3E0D1;
+}
+
+.notices-card.is-warning {
+  border-color: #F59E0B;
+  background: #FFFDF9;
+}
+
+.notices-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.notices-card-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.notices-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.notices-card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.notices-card.is-unread .notices-card-title {
+  font-weight: 800;
+  color: #0F3A22;
+}
+
+.notices-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.notices-card-body {
+  margin: 6px 0 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.notices-expand-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 4px 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Sentinel / Loading thêm */
+.notices-infinite-sentinel {
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.notices-load-more-btn {
+  padding: 10px 24px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #FFFFFF;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.notices-load-more-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* ── Toast góc phải dưới (Lời mời đấu mới) ── */
+.notif-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.notif-toast {
+  pointer-events: auto;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  background: #FFFFFF;
+  border: 1.5px solid #0284C7;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 16px 36px rgba(2, 132, 199, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: notif-toast-in 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes notif-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.notif-toast-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.notif-toast-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-toast-title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 750;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.notif-toast-desc {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.notif-toast-view-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #0284C7;
+  color: #FFFFFF;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.notif-toast-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+/* ── Trạng thái rỗng, Đang tải, Lỗi ── */
+.notif-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.notif-empty-icon {
+  font-size: 2.4rem;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
+.notif-empty-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 6px;
+}
+
+.notif-empty-desc {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  max-width: 280px;
+  margin: 0;
+}
+
+/* Skeleton loader */
+.notif-skeleton-list {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notif-skeleton-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.notif-skeleton-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #E8EDE6;
+  animation: notif-shimmer 1.2s infinite ease-in-out;
+}
+
+.notif-skeleton-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.notif-skeleton-line {
+  height: 12px;
+  border-radius: 4px;
+  background: #E8EDE6;
+  animation: notif-shimmer 1.2s infinite ease-in-out;
+}
+
+.notif-skeleton-line.short {
+  width: 45%;
+}
+
+.notif-skeleton-line.full {
+  width: 90%;
+}
+
+@keyframes notif-shimmer {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+/* Error state */
+.notif-error-state {
+  padding: 24px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.notif-error-msg {
+  font-size: 0.85rem;
+  color: var(--danger);
+  margin: 0;
+}
+
+.notif-retry-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #FFFFFF;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.notif-retry-btn:hover {
+  background: var(--surface-hover);
+}
+
+/* Dev Controls (giả lập thông báo khi DEV) */
+.notif-dev-panel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #FEF3C7;
+  border: 1px dashed #F59E0B;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.notif-dev-label {
+  font-weight: 750;
+  color: #B45309;
+}
+
+.notif-dev-btn {
+  padding: 3px 8px;
+  background: #FFFFFF;
+  border: 1px solid #D97706;
+  color: #92400E;
+  border-radius: 4px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.notif-dev-btn:hover {
+  background: #FDE68A;
+}
+
+/* Sound Toggle Switch */
+.notif-sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.notif-switch-track {
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: #CBD5E1;
+  position: relative;
+  transition: background-color var(--t-fast);
+}
+
+.notif-switch-track.active {
+  background: var(--primary);
+}
+
+.notif-switch-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform var(--t-fast);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.notif-switch-track.active .notif-switch-thumb {
+  transform: translateX(16px);
+}
+
