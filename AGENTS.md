@@ -13,7 +13,7 @@ File này luôn được agent nạp. Chỉ chứa **luật bắt buộc + bản
 | User | `services/User/User.Api` | 5102 | 8080 | `user_db` |
 | Support | `services/Support/Support.Api` | 5104 | 8080 | `support_db` |
 | Multiplayer | `services/Multiplayer/Multiplayer.Api` | 5105 gRPC / 5115 SignalR | 8080 / 8081 | `multiplayer_db` |
-| Web | `web/` | 5173 | — | — |
+|Web|`clients/`|5173|5173|—|
 
 - Proto (nguồn chân lý API & event): `proto/sudoku/<domain>/v1/*.proto`. Kafka topic: `sudoku.events`.
 - Building blocks: `building-block/Sudoku.{Auth,Messaging,Observability}`.

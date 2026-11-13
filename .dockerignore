@@ -4,3 +4,5 @@
 .vs
 .git
 web
+clients/node_modules
+clients/dist

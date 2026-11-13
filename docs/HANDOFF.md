@@ -68,7 +68,7 @@ PRN_ASM/
 │   ├── Game/Game.Api/         # Logic ván cờ Sudoku, Levels, Bảng xếp hạng điểm
 │   ├── Multiplayer/Multiplayer.Api/ # Ghép trận, Đấu Realtime (SignalR)
 │   └── Support/Support.Api/   # Hướng dẫn luật chơi, ticket hỗ trợ
-├── web/                       # Single Page Application (React + Vite)
+├── clients/                   # Single Page Application (React + Vite)
 ├── deploy/                    # docker-compose.yml & script khởi tạo Database
 └── PRN_ASM.sln                # Visual Studio Solution gốc
 ```
@@ -394,7 +394,7 @@ dotnet run --project services/Support/Support.Api
 
 ### 3. Chạy Frontend (Web):
 ```powershell
-cd web
+cd clients
 npm install
 npm run dev
 ```
