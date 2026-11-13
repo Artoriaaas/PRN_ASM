@@ -56,15 +56,21 @@ export function AppShell({ profile, children }: AppShellProps) {
         </Link>
 
         <nav className="topbar-nav" aria-label="Điều hướng chính">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={`nav-link${location.pathname === item.to ? ' active' : ''}`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            const isActive =
+              location.pathname === item.to ||
+              (item.to === '/learn' &&
+                (location.pathname.startsWith('/learn') || location.pathname.startsWith('/hoc')))
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`nav-link${isActive ? ' active' : ''}`}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
         </nav>
 
         <div className="topbar-right">

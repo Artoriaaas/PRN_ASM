@@ -40,6 +40,8 @@ const MultiplayerResultPage = lazy(() =>
     default: m.MultiplayerResultPage,
   })),
 )
+const LearnPage = lazy(() => import('./features/learn/LearnPage').then((m) => ({ default: m.LearnPage })))
+const LessonPage = lazy(() => import('./features/learn/LessonPage').then((m) => ({ default: m.LessonPage })))
 
 function PageLoader() {
   return (
@@ -206,6 +208,48 @@ function AppRoutes() {
                 </AppShell>
               }
             />
+            <Route
+              path="/preview/learn"
+              element={
+                <AppShell
+                  profile={
+                    {
+                      displayName: 'Khoa Nguyen',
+                      email: 'khoanguyen@example.com',
+                      avatarUrl: '',
+                      totalGames: 42,
+                      wins: 35,
+                      totalExp: 3850,
+                      playerLevel: 4,
+                      trophies: 12,
+                    } as unknown as UserProfile
+                  }
+                >
+                  <LearnPage />
+                </AppShell>
+              }
+            />
+            <Route
+              path="/preview/learn/:lessonCode"
+              element={
+                <AppShell
+                  profile={
+                    {
+                      displayName: 'Khoa Nguyen',
+                      email: 'khoanguyen@example.com',
+                      avatarUrl: '',
+                      totalGames: 42,
+                      wins: 35,
+                      totalExp: 3850,
+                      playerLevel: 4,
+                      trophies: 12,
+                    } as unknown as UserProfile
+                  }
+                >
+                  <LessonPage />
+                </AppShell>
+              }
+            />
           </>
         )}
 
@@ -262,8 +306,10 @@ function AppRoutes() {
                   <Route path="/leaderboard" element={<ComingSoon title="Bảng xếp hạng" />} />
                   <Route path="/history" element={<ComingSoon title="Lịch sử đấu" />} />
                   <Route path="/quests" element={<ComingSoon title="Nhiệm vụ" />} />
-                  <Route path="/learn" element={<ComingSoon title="Học kỹ thuật" />} />
-                  <Route path="/learn/:techniqueId" element={<ComingSoon title="Chi tiết kỹ thuật" />} />
+                  <Route path="/learn" element={<LearnPage />} />
+                  <Route path="/learn/:lessonCode" element={<LessonPage />} />
+                  <Route path="/hoc" element={<Navigate to="/learn" replace />} />
+                  <Route path="/hoc/:lessonCode" element={<LessonPage />} />
                   <Route path="/notices" element={<ComingSoon title="Thông báo hệ thống" />} />
                   <Route path="/tournaments" element={<ComingSoon title="Giải đấu" />} />
                   <Route path="/tournaments/new" element={<ComingSoon title="Tạo giải đấu" />} />
