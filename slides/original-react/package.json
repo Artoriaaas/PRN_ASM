@@ -1,0 +1,11 @@
+{
+  "name": "prn-asm-react-presentation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Offline-ready, interactive React slide presentation for PRN ASM Sudoku Online",
+  "scripts": {
+    "start": "python -m http.server 5173",
+    "serve": "python -m http.server 5173"
+  },
+  "license": "UNLICENSED"
+}
