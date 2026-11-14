@@ -293,27 +293,4 @@ export const DUEL_RULES: MultiplayerRulesSection[] = [
   },
 ]
 
-export const TOURNAMENT_RULES: MultiplayerRulesSection[] = [
-  {
-    id: 'tournament-overview',
-    icon: '🏆',
-    title: 'Giải đấu (Tournament)',
-    content:
-      'Giải đấu là cuộc thi nhiều người theo nhánh đấu loại (4, 8 hoặc 16 người). Mỗi vòng là một trận Race hoặc Duel — người thắng đi tiếp, người thua bị loại.',
-  },
-  {
-    id: 'tournament-bracket',
-    icon: '🎪',
-    title: 'Nhánh đấu',
-    content:
-      'Nhánh đấu: Vòng 16 → Tứ kết → Bán kết → Chung kết. Trận Chung kết quyết định vô địch giải. Kết quả mỗi trận cập nhật nhánh đấu theo thời gian thực.',
-  },
-  {
-    id: 'tournament-join',
-    icon: '📋',
-    title: 'Cách tham gia',
-    content:
-      'Vào trang Giải đấu, chọn giải đang mở đăng ký và nhấn "Đăng ký". Khi đến lượt thi đấu, bạn sẽ nhận thông báo và nút "Vào trận" xuất hiện trong trang Chi tiết giải.',
-  },
-]
 

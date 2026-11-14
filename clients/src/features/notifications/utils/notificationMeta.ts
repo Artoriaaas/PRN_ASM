@@ -103,7 +103,7 @@ export function getNotificationMeta(notification: AppNotification): Notification
         bgSoft: 'rgba(124, 58, 237, 0.12)',
         category: 'system',
         categoryLabel: 'Giải đấu',
-        targetRoute: '/tournaments',
+        targetRoute: undefined,
       }
     case 'FEEDBACK_REPLY':
       return {

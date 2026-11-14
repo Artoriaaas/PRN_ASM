@@ -370,9 +370,6 @@ function AppRoutes() {
                   <Route path="/hoc/:lessonCode" element={<LessonPage />} />
                   <Route path="/notices" element={<NoticesPage />} />
                   <Route path="/dau-tran/phong/:roomCode" element={<RoomRedirect />} />
-                  <Route path="/tournaments" element={<ComingSoon title="Giải đấu" />} />
-                  <Route path="/tournaments/new" element={<ComingSoon title="Tạo giải đấu" />} />
-                  <Route path="/tournaments/:id" element={<ComingSoon title="Chi tiết giải đấu" />} />
                   <Route path="/admin/*" element={<ComingSoon title="Admin" />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>

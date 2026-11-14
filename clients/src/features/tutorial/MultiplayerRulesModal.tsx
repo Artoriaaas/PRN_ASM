@@ -1,5 +1,5 @@
 /**
- * MultiplayerRulesModal — popup luật chơi cho Race, Duel và Tournament.
+ * MultiplayerRulesModal — popup luật chơi cho Race và Duel.
  * Dùng tab để chuyển đổi giữa các mode.
  */
 import { useState } from 'react'
@@ -7,11 +7,10 @@ import { Modal } from '../../components/ui/Modal'
 import {
   RACE_RULES,
   DUEL_RULES,
-  TOURNAMENT_RULES,
   type MultiplayerRulesSection,
 } from './tutorialData'
 
-export type RulesTab = 'race' | 'duel' | 'tournament'
+export type RulesTab = 'race' | 'duel'
 
 type MultiplayerRulesModalProps = {
   open: boolean
@@ -48,7 +47,6 @@ export function MultiplayerRulesModal({
   const tabs: { value: RulesTab; label: string; icon: string }[] = [
     { value: 'race', label: 'Race', icon: '⚡' },
     { value: 'duel', label: 'Duel', icon: '♟️' },
-    { value: 'tournament', label: 'Giải đấu', icon: '🏆' },
   ]
 
   return (
@@ -123,33 +121,6 @@ export function MultiplayerRulesModal({
                   <div className="rs-item">⚡ Điền nhanh: Bonus thêm</div>
                   <div className="rs-item danger">❌ Điền sai: -5 điểm, mất lượt, mất tim</div>
                   <div className="rs-item">⏰ Hết giờ lượt: Mất lượt (không phạt)</div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {resolvedTab === 'tournament' && (
-            <>
-              <div className="rules-intro">
-                <h3>🏆 Giải đấu — Tournament</h3>
-                <p>
-                  Cuộc thi nhiều người theo nhánh <strong>đấu loại trực tiếp</strong>.
-                  Mỗi trận là Race hoặc Duel. Thắng thì đi tiếp — thua thì loại.
-                </p>
-              </div>
-              <RulesSectionList sections={TOURNAMENT_RULES} />
-              <div className="rules-summary">
-                <strong>Các vòng đấu:</strong>
-                <div className="rules-bracket">
-                  <div className="bracket-row">
-                    <span>Vòng 16</span>
-                    <span className="bracket-arrow">→</span>
-                    <span>Tứ kết</span>
-                    <span className="bracket-arrow">→</span>
-                    <span>Bán kết</span>
-                    <span className="bracket-arrow">→</span>
-                    <span className="bracket-final">🏆 Chung kết</span>
-                  </div>
                 </div>
               </div>
             </>

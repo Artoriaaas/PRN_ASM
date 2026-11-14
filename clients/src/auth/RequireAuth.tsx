@@ -22,8 +22,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const isGuestAllowed =
     location.pathname.startsWith('/solo') ||
     location.pathname.startsWith('/play') ||
-    location.pathname.startsWith('/match') ||
-    location.pathname.startsWith('/tournaments')
+    location.pathname.startsWith('/match')
 
   if (!user && !isGuestAllowed) {
     return <Navigate to="/auth" state={{ from: location }} replace />

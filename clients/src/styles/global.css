@@ -2518,7 +2518,7 @@
 }
 
 /* ============================================================
-   Multiplayer Lobby (4 nút: Race, Duel, Tournament, Custom Room)
+   Multiplayer Lobby (3 nút: Race, Duel, Custom Room)
    ============================================================ */
 
 .multi-lobby-page {
@@ -2607,14 +2607,14 @@
   box-shadow: 0 2px 8px rgba(21, 128, 61, 0.28);
 }
 
-/* 4 nút lớn ở Sảnh Multiplayer (Grid 2x2) */
+/* 3 nút lớn ở Sảnh Multiplayer (Grid 3 cột trên desktop, 1 cột trên mobile) */
 .multi-four-modes {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 22px;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 960px) {
   .multi-four-modes {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -2685,15 +2685,7 @@
   border-color: #E11D48;
 }
 
-/* 3. Tournament: Tím hoàng gia */
-.multi-mode-btn.mode-tournament::before {
-  background: linear-gradient(180deg, #8B5CF6, #6D28D9);
-}
-.multi-mode-btn.mode-tournament:hover {
-  border-color: #8B5CF6;
-}
-
-/* 4. Custom Room: Xanh ngọc lục bảo / Emerald */
+/* 3. Custom Room: Xanh ngọc lục bảo / Emerald */
 .multi-mode-btn.mode-custom::before {
   background: linear-gradient(180deg, #10B981, #059669);
 }
@@ -2726,10 +2718,6 @@
 
 .mode-duel .multi-mode-icon {
   background: #FFE4E6;
-}
-
-.mode-tournament .multi-mode-icon {
-  background: #F3E8FF;
 }
 
 .mode-custom .multi-mode-icon {
@@ -2847,10 +2835,6 @@
 
 .mode-duel .multi-mode-cta {
   color: #E11D48;
-}
-
-.mode-tournament .multi-mode-cta {
-  color: #7C3AED;
 }
 
 .mode-custom .multi-mode-cta {

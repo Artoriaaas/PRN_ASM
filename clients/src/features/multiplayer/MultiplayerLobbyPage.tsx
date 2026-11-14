@@ -64,10 +64,6 @@ export function MultiplayerLobbyPage({ profile }: MultiplayerLobbyPageProps) {
     navigate(`/play/queue?mode=duel&layout=${layoutParam}`)
   }
 
-  function handleSelectTournament() {
-    navigate('/tournaments')
-  }
-
   function handleOpenCustomRoom(defaultTab: CustomRoomTab = 'create') {
     setCustomTab(defaultTab)
     setCustomModalOpen(true)
@@ -134,8 +130,8 @@ export function MultiplayerLobbyPage({ profile }: MultiplayerLobbyPageProps) {
         </div>
       </header>
 
-      {/* 4 Nút lớn: Race, Duel, Tournament, Custom Room */}
-      <section className="multi-four-modes" aria-label="4 chế độ phòng Multiplayer">
+      {/* 3 Chế độ chơi: Race, Duel, Custom Room */}
+      <section className="multi-four-modes" aria-label="3 chế độ phòng Multiplayer">
         {/* 1. RACE */}
         <button
           type="button"
@@ -198,33 +194,7 @@ export function MultiplayerLobbyPage({ profile }: MultiplayerLobbyPageProps) {
           </div>
         </button>
 
-        {/* 3. TOURNAMENT */}
-        <button
-          type="button"
-          className="multi-mode-btn mode-tournament"
-          onClick={handleSelectTournament}
-        >
-          <div className="multi-mode-top">
-            <span className="multi-mode-icon" aria-hidden="true">🏆</span>
-            <span className="multi-mode-tag-pill">4 / 8 / 16 NGƯỜI</span>
-          </div>
-          <div className="multi-mode-body">
-            <h2>Tournament</h2>
-            <p className="multi-mode-tagline">Giải đấu loại trực tiếp theo nhánh</p>
-            <p className="multi-mode-desc">
-              Tham gia các giải đấu định kỳ hoặc tạo giải đấu mới theo thể thức nhánh
-              đấu (Tứ kết, Bán kết, Chung kết) để tranh cúp vô địch.
-            </p>
-          </div>
-          <div className="multi-mode-footer">
-            <span className="multi-difficulty-chip neutral">
-              Nhánh đấu Bracket
-            </span>
-            <span className="multi-mode-cta">Vào giải đấu →</span>
-          </div>
-        </button>
-
-        {/* 4. CUSTOM ROOM */}
+        {/* 3. CUSTOM ROOM */}
         <button
           type="button"
           className="multi-mode-btn mode-custom"
