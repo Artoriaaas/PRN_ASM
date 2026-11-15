@@ -1,0 +1,642 @@
+/* PRN ASM — 18 tờ trình chiếu theo rubric PRN232 Final Assignment.
+   Nội dung: mục tiêu, kiến trúc, REST API, background job, Kafka, gRPC, JWT,
+   deploy Docker, yêu cầu kỹ thuật, sản phẩm nộp, kịch bản demo, ghi chú.
+   Giao diện: "Bản vẽ kỹ thuật động" — giấy kẻ ô, mực cobalt, nhãn mono. */
+(function(){
+'use strict';
+const R=window.React, RD=window.ReactDOM;
+const h=R.createElement;
+const TOTAL=18;
+const div=(p,...c)=>h('div',p,...c);
+const span=(p,...c)=>h('span',p,...c);
+
+/* ---------------- khối dùng chung ---------------- */
+function Frame(props){
+  const {tag='HÌNH',cap='',children,style,className=''} = props;
+  return h('figure',{className:'fig '+className,style},
+    span({className:'tick tl'}),span({className:'tick tr'}),
+    span({className:'tick bl'}),span({className:'tick br'}),
+    div({className:'body'},children),
+    h('figcaption',{className:'cap'},span(null,h('b',null,tag)),span(null,cap))
+  );
+}
+const Node=(props)=>{
+  const {t,s,tone='',style,children}=props;
+  return div({className:'node '+tone,style},h('b',null,t),s?span(null,s):null,children||null);
+};
+const VLine=({label})=>div({className:'vline'},span(null,label||''));
+const Harrow=()=>span({className:'harrow'},'→');
+const Strip=({k,tone='',children})=>div({className:'strip '+tone},h('b',null,k),div(null,children));
+
+function Thread({i}){
+  return div({className:'thread'},...Array.from({length:TOTAL},(_,k)=>
+    h('i',{key:k,className:(k<i?'done':k===i?'now':'')})));
+}
+function Shell({n,eb,title,children,note,className=''}){
+  return div({className:'slide-inner '+className},
+    div({className:'eb r'},h('i'),eb),
+    h('h2',{className:'r',style:{'--i':1}},title),
+    children,
+    div({className:'pg'},String(n).padStart(2,'0'),h('small',null,' / '+TOTAL)),
+    h(Thread,{i:n-1}),
+    div({className:'foot'},
+      h('b',null,'PRN232'),
+      span({className:'dot'},'·'),
+      span(null,note||'Sudoku Online · .NET 8'),
+      span({style:{marginLeft:'auto'}},'PRN_ASM · Nhóm 4')
+    )
+  );
+}
+
+/* ---------------- dữ liệu ---------------- */
+const MEMBERS=[['Nguyễn Duy Phong','SE192969'],['Phạm Gia Huy','SE192867'],['Mai Tuấn Vỹ','SE194261'],['Nguyễn Tuấn Kiệt','SE192837']];
+const PUZZLE=[
+ [5,3,0,0,7,0,0,0,0],[6,0,0,1,9,5,0,0,0],[0,9,8,0,0,0,0,6,0],
+ [8,0,0,0,6,0,0,0,3],[4,0,0,8,0,3,0,0,1],[7,0,0,0,2,0,0,0,6],
+ [0,6,0,0,0,0,2,8,0],[0,0,0,4,1,9,0,0,5],[0,0,0,0,8,0,0,7,9]
+];
+function Board(){
+  return div({className:'sudoku'},...PUZZLE.flatMap((row,r)=>row.map((v,c)=>{
+    const cls=[];
+    if(c%3===2&&c<8)cls.push('bR');
+    if(r%3===2&&r<8)cls.push('bB');
+    if(v)cls.push('given');
+    if(r===4&&c===4)cls.push('focus');
+    return span({key:r*9+c,className:cls.join(' ')},v?String(v):'');
+  })));
+}
+const RATE=[['Kiến trúc & thiết kế hệ thống',20,'p'],['REST API',20,'p'],['Message Broker',15,'m'],['gRPC service',15,'m'],['Background job',10,''],['Docker / Cloud deploy',10,''],['Tài liệu & thuyết trình',10,'']];
+const WORKERS=[
+ ['2 giây','OutboxProcessorWorker','Quét OutboxMessage chưa gửi, publish lên Kafka rồi đánh dấu đã xử lý.','Game.Api + Multiplayer.Api · Messaging/'],
+ ['60 giây','PuzzleReplenishWorker','Giữ tối thiểu 15 puzzle chưa chơi cho mỗi cấp độ đang mở để không cạn đề.','Game.Api · khởi động chờ 10 giây'],
+ ['1 giây','MatchLifecycleWorker','Quét phòng 1v1 đang chạy: hết giờ chuẩn bị, quá hạn, chốt trận và phát kết quả.','Multiplayer.Api · Redis runtime store']
+];
+const PROTOS=[
+ ['game/v1/game.proto','Sinh đề · nước đi · điểm'],
+ ['user/v1/user.proto','Hồ sơ · thống kê'],
+ ['multi/v1/multi.proto','Ghép trận · Elo'],
+ ['support/v1/support.proto','Luật chơi · hướng dẫn'],
+ ['events/v1/events.proto','GameFinished · MatchCompleted']
+];
+const STEPS=[
+ ['01','StartGame','gRPC qua Envoy, chọn cấp độ, nhận puzzle','hot'],
+ ['02','Phiên chơi','EF Core ghi game_db, giữ thời gian và lỗi',''],
+ ['03','SubmitResult','Kiểm tra lời giải ở server, tính điểm',''],
+ ['04','GameFinished','Ghi OutboxMessage cùng transaction',''],
+ ['05','Kafka','Worker phát vào sudoku.events',''],
+ ['06','User Service','Consumer cộng total_games, wins','']
+];
+const COMPOSE=[
+ ['gateway','Envoy 8080 · host 18080','son'],['web','Nginx + React build',''],
+ ['game-service','gRPC 8080',''],['user-service','gRPC 8080',''],
+ ['multiplayer-service','gRPC 8080 · WS 8081',''],['support-service','HTTP 8080',''],
+ ['postgres','PostgreSQL 16','flat'],['redis','Redis 7','flat'],['kafka','Apache Kafka 3.9','flat']
+];
+const MATRIX=[
+ ['.NET 8 / ASP.NET Core','4 service trong services/'],
+ ['Entity Framework Core','GameDbContext · migrations'],
+ ['CSDL quan hệ','PostgreSQL 16 · 4 database'],
+ ['Dependency Injection','AddScoped / AddSingleton'],
+ ['Configuration','appsettings + env · Services:*'],
+ ['Logging & exception','ILogger · RpcException chuẩn'],
+ ['JWT Authentication','Sudoku.Auth · Envoy JWKS'],
+ ['RESTful API design','Support.Api /api/v1'],
+ ['gRPC communication','proto/sudoku/*/v1'],
+ ['Message Broker','Kafka + Outbox/Inbox'],
+ ['Background Service','3 worker · 3 chu kỳ'],
+ ['Docker containerization','Dockerfile + docker-compose']
+];
+const DELIV=[
+ ['Mã nguồn','Toàn bộ solution .NET 8 và React SPA','services/ · clients/ · building-block/'],
+ ['Migration','Mỗi service có DbContext và migration riêng','Data/Migrations/*'],
+ ['Dockerfile','Bốn service, gateway và web đều có Dockerfile','services/*/Dockerfile'],
+ ['Docker Compose','Mười container chạy bằng một lệnh','deploy/docker-compose.yml'],
+ ['API documentation','Swagger cho REST, .proto cho gRPC','/swagger · proto/sudoku'],
+ ['README','Kiến trúc, cài đặt, deploy và phân công','README.md · README_VI.md']
+];
+const AGENDA=[
+ ['00:00','Kiến trúc tổng thể','4 service · 3 kho dữ liệu','BẢNG 1'],
+ ['01:00','REST API','GET /api/v1/tutorials?search=&page=2','SWAGGER'],
+ ['02:00','JWT','POST thiếu token → 401, có token → 201','401 / 201'],
+ ['03:00','gRPC','Chơi một ván solo, xem log request','CONNECTRPC'],
+ ['04:30','Background job','Log OutboxProcessorWorker gửi GameFinished','2 GIÂY'],
+ ['05:30','Kafka','Consumer User cộng total_games','INBOX'],
+ ['06:30','Docker','docker compose ps · web qua cổng 18080','COMPOSE']
+];
+
+/* ---------------- 01 · bìa ---------------- */
+function SlideCover(){
+  return div({className:'slide-inner'},
+    div({className:'eb r'},h('i'),'PRN232 · FINAL ASSIGNMENT · HỆ PHÂN TÁN VỚI .NET'),
+    div({className:'cover'},
+      div({className:'cover-copy'},
+        h('h1',{className:'r',style:{'--i':1}},'Bàn cờ Sudoku,',h('br'),h('em',null,'bốn service'),h('br'),'và một dòng sự kiện'),
+        h('p',{className:'cover-sub r',style:{'--i':2}},'Xây dựng ứng dụng phân tán bằng .NET 8 — REST API, background job, Apache Kafka, gRPC và Docker Compose — minh hoạ trên một game Sudoku có chế độ 1v1 thời gian thực.'),
+        div({className:'cover-meta r',style:{'--i':3}},
+          h('b',null,'Nhóm'),span(null,'PRN_ASM · Sudoku Online Platform'),
+          h('b',null,'Học phần'),span(null,'PRN232 · Final Assignment'),
+          h('b',null,'Ngày'),span(null,'Tháng 11 · 2026'),
+          h('b',null,'Thành viên'),div({className:'mem'},...MEMBERS.map(([name,id],k)=>
+            h('i',{key:k},name,h('small',null,id))))
+        )
+      ),
+      h(Frame,{className:'cover-fig',tag:'HÌNH 1',cap:'BÀN CỜ 9×9 · 81 Ô · 27 RÀNG BUỘC'},
+        div({className:'body'},div({style:{width:'420px'}},h(Board))),
+        div({className:'dim'},'HÀNG 9 · CỘT 9 · KHỐI 3×3'),
+        div({className:'dim'},'PUZZLE BANK ≥ 15 / CẤP ĐỘ')
+      )
+    )
+  );
+}
+
+/* ---------------- 02 · tiêu chí ---------------- */
+function SlideRubric(){
+  return h(Shell,{n:2,eb:'MỤC 7 · TIÊU CHÍ CHẤM',
+    title:h('span',null,'Bảy hạng mục, ',h('em',null,'một nửa điểm'),' nằm ở kiến trúc và API')},
+    div({className:'bars r',style:{'--i':2}},...RATE.map(([name,w,tone],k)=>
+      div({className:'bar',key:k},
+        span(null,name),
+        div({className:'t'},div({className:'f '+tone,style:{width:w*4.6+'%'}})),
+        span({className:'v'},w+'%')))),
+    div({className:'legend r',style:{'--i':3}},
+      span(null,h('i',{style:{background:'var(--son)'}}),'Trọng số 20%'),
+      span(null,h('i',{style:{background:'var(--si)'}}),'15%'),
+      span(null,h('i',{style:{background:'var(--nghe)'}}),'10%')),
+    h(Strip,{k:'Tổng',tone:'son'},'100% điểm nằm ở bảy dòng trên. Nhóm chọn domain Sudoku để mỗi tiêu chí có một thành phần cụ thể để đối chiếu, không phải mô tả chung.')
+  );
+}
+
+/* ---------------- 03 · phạm vi ---------------- */
+function SlideScope(){
+  const cards=[
+    ['SOLO','01','Chơi đơn theo bốn cấp độ: sinh đề, kiểm tra nước đi, gợi ý, tính điểm và lưu phiên.','gRPC + PostgreSQL',
+      ['Ngân hàng đề giữ tối thiểu 15 puzzle mỗi cấp','Server kiểm lời giải, không tin client','Lưu phiên và nước đi vào game_db']],
+    ['1V1','02','Đối kháng thời gian thực: ghép trận theo Elo, đồng bộ từng nước, chốt kết quả sau ván.','SignalR + Redis',
+      ['Ghép trận theo Elo, hai thể thức Race và Duel','Nước đi qua MatchHub, trạng thái phòng trong Redis','Chốt trận mới ghi PostgreSQL và phát MatchCompleted']],
+    ['NỘI DUNG','03','Luật chơi, bài hướng dẫn, thông báo hệ thống: đọc nhiều nên tách thành REST.','REST API + Redis cache',
+      ['CRUD notices và tutorials có tìm kiếm, lọc','Phân trang, sắp xếp, cache Redis cho bài đọc','Portal game-overview tổng hợp số liệu qua gRPC']]
+  ];
+  return h(Shell,{n:3,eb:'MỤC 1–2 · MỤC TIÊU & PHẠM VI',
+    title:h('span',null,'Domain nhỏ, nhưng ',h('em',null,'đủ chỗ'),' cho cả bốn công nghệ')},
+    div({className:'row c3 grow r',style:{'--i':2}},...cards.map(([k,n,t,tech,items],idx)=>
+      div({className:'panel',key:idx},
+        span({className:'lbl'},k+' · '+n),
+        h('h3',null,idx===0?'Chơi đơn có kiểm soát':idx===1?'Hai người, một bàn cờ':'Nội dung tĩnh, đọc nhiều'),
+        h('p',{className:'sm'},t),
+        h('ul',{className:'ticks'},...items.map((x,ki)=>h('li',{key:ki},x))),
+        span({className:'mono lbl',style:{color:'var(--son)'}},tech)
+      ))),
+    h(Strip,{k:'Ràng buộc đề'},'Tối thiểu: một REST API, một background job, một producer và một consumer, một service gRPC độc lập, toàn bộ chạy bằng Docker Compose.')
+  );
+}
+
+/* ---------------- 04 · kiến trúc ---------------- */
+function SlideArch(){
+  return h(Shell,{n:4,eb:'MỤC 2–3 · KIẾN TRÚC TỔNG THỂ',
+    title:h('span',null,'Một cửa vào, ',h('em',null,'bốn service'),', ba kho dữ liệu')},
+    h(Frame,{className:'grow r',style:{'--i':2},tag:'HÌNH 2',cap:'THÀNH PHẦN · DATABASE-PER-SERVICE · EVENT BUS'},
+      div({className:'arch'},
+        div({className:'band'},h('b',null,'React 19 SPA · ConnectRPC + SignalR'),span(null,'localhost:5173 · Firebase Auth')),
+        h(VLine,{label:'HTTPS · gRPC-Web + WebSocket'}),
+        div({className:'band'},h('b',null,'Envoy Gateway'),span(null,'8080 · JWT JWKS · CORS · WS upgrade')),
+        h(VLine,{label:'HTTP/2 gRPC'}),
+        div({className:'svcs'},
+          h(Node,{t:'Game 5101',s:'puzzle · phiên · điểm',tone:'son'}),
+          h(Node,{t:'User 5102',s:'hồ sơ · thống kê'}),
+          h(Node,{t:'Multiplayer 5105',s:'1v1 · SignalR 5115'}),
+          h(Node,{t:'Support 5104',s:'REST · luật chơi'})),
+        h(VLine,{label:'EF Core · Npgsql · Confluent.Kafka'}),
+        div({className:'data'},
+          h(Node,{t:'game_db',s:'PostgreSQL 16',tone:'flat'}),
+          h(Node,{t:'user_db',s:'PostgreSQL 16',tone:'flat'}),
+          h(Node,{t:'multiplayer_db',s:'PostgreSQL 16',tone:'flat'}),
+          h(Node,{t:'support_db',s:'PostgreSQL 16',tone:'flat'}),
+          h(Node,{t:'Redis 7',s:'room · cache',tone:'si'}),
+          h(Node,{t:'Kafka 3.9',s:'sudoku.events',tone:'nghe'}))
+      )),
+    h(Strip,{k:'Nguyên tắc',tone:'son'},'Không service nào đọc database của service khác. Dữ liệu chia sẻ đi qua gRPC hoặc Kafka, không qua bảng chung.')
+  );
+}
+
+/* ---------------- 05 · tầng ---------------- */
+function SlideLayers(){
+  const lay=[['API','GrpcService / Controller','nhận request, map Protobuf hoặc DTO'],[
+    'DOMAIN','Domain service · rule policy','nghiệp vụ Sudoku, Elo, kiểm tra lời giải'],[
+    'DATA','Repository · EF Core','truy vấn AsNoTracking, ghi qua UnitOfWork']];
+  return h(Shell,{n:5,eb:'MỤC 2.1 · KIẾN TRÚC TẦNG',
+    title:h('span',null,'Mỗi service ',h('em',null,'ba tầng'),', mỗi service một database')},
+    div({className:'row r grow',style:{'--i':2,gridTemplateColumns:'1.15fr .85fr',gap:'40px'}},
+      div({className:'layers'},
+        ...lay.map(([k,b,s],i)=>div({className:'lay '+(i===0?'son':''),key:i},
+          h('em',null,k),div(null,h('b',null,b),span(null,s)))),
+        div({className:'lay'},h('em',null,'DB'),div({style:{background:'var(--vai)',color:'var(--on-vai)'}},h('b',null,'PostgreSQL 16'),span({style:{color:'var(--on-vai)',opacity:.7}},'database riêng của service')))
+      ),
+      div({className:'stack',style:{justifyContent:'center'}},
+        div({className:'dbs'},...['game_db','user_db','multiplayer_db','support_db'].map((d,i)=>
+          h(Node,{key:i,t:d,s:'chỉ service sở hữu truy cập'}))),
+        h(Strip,{k:'Quy ước'},'Repository không gọi SaveChangesAsync; Domain service gom một lần qua IUnitOfWork.'),
+        h(Strip,{k:'Đọc',tone:'son'},'Mọi query đọc dùng AsNoTracking + projection + Take(limit).')
+      )
+    )
+  );
+}
+
+/* ---------------- 06 · REST ---------------- */
+function SlideRest(){
+  const ep=(m,path,cls)=>div({className:'ep'},span({className:'method '+cls},m),span(null,path));
+  return h(Shell,{n:6,eb:'MỤC 2.1 · REST API',
+    title:h('span',null,'REST cho phần đọc nhiều: ',h('em',null,'CRUD, lọc, sắp xếp, phân trang'))},
+    div({className:'row r grow',style:{'--i':2,gridTemplateColumns:'1.06fr .94fr'}},
+      div({className:'panel'},
+        div({className:'grp'},'Notices · Support.Api'),
+        div({className:'api'},
+          ep('GET','/api/v1/notices','g'),ep('GET','/api/v1/notices/{id}','g'),
+          ep('POST','/api/v1/notices','p'),ep('PUT','/api/v1/notices/{id}','y'),
+          ep('DELETE','/api/v1/notices/{id}','')),
+        div({className:'grp'},'Tutorials · Support.Api'),
+        div({className:'api'},
+          ep('GET','/api/v1/tutorials','g'),ep('GET','/api/v1/tutorials/{id}','g'),
+          ep('POST','/api/v1/tutorials','p'),ep('PUT','/api/v1/tutorials/{id}','y'),
+          ep('DELETE','/api/v1/tutorials/{id}',''),
+          ep('GET','/api/v1/portal/game-overview','g'))
+      ),
+      div({className:'panel dark'},
+        span({className:'lbl'},'Query params · TutorialQueryParams'),
+        div({className:'q'},...['search','category','difficulty','isPublished','sortBy','sortDir','page','pageSize'].map((q,i)=>h('code',{key:i},q))),
+        div({className:'kv',style:{marginTop:'10px'}},
+          span(null,'Phản hồi'),h('b',null,'PagedResponse'),
+          span(null,'Mặc định'),h('b',null,'10 / trang'),
+          span(null,'Ghi dữ liệu'),h('b',null,'[Authorize]'),
+          span(null,'Tài liệu'),h('b',null,'/swagger')),
+        h(Strip,{k:'Lỗi'},'Domain exception → ProblemDetails 400/404; thiếu token → 401 từ Envoy.')
+      )
+    )
+  );
+}
+
+/* ---------------- 07 · background job ---------------- */
+function SlideJobs(){
+  return h(Shell,{n:7,eb:'MỤC 2.2 · BACKGROUND JOB',
+    title:h('span',null,'Ba việc chạy nền, ',h('em',null,'không chặn người chơi'))},
+    div({className:'stack grow r',style:{'--i':2,justifyContent:'center',gap:'12px'}},
+      ...WORKERS.map(([iv,name,desc,file],i)=>div({className:'wk',key:i},
+        span({className:'iv'},iv),h('b',null,name),h('p',null,desc),span({className:'file'},file)))),
+    h(Strip,{k:'Vòng đời'},'Chạy cùng process với API nhưng tách vòng lặp; mỗi job nhận CancellationToken và ghi log khi lỗi.')
+  );
+}
+
+/* ---------------- 08 · kafka ---------------- */
+function SlideKafka(){
+  return h(Shell,{n:8,eb:'MỤC 2.3 · MESSAGE BROKER',
+    title:h('span',null,'Ghi outbox trong transaction, ',h('em',null,'Kafka chỉ là bước sau'))},
+    h(Frame,{className:'grow r',style:{'--i':2},tag:'HÌNH 3',cap:'TRANSACTIONAL OUTBOX → KAFKA → IDEMPOTENT INBOX'},
+      div({className:'pipe'},
+        h(Node,{t:'Game / Multiplayer',s:'BEGIN TRANSACTION'}),
+        h(Harrow),
+        h(Node,{t:'OutboxMessage',s:'cùng transaction với dữ liệu'}),
+        h(Harrow),
+        h(Node,{t:'OutboxProcessorWorker',s:'mỗi 2 giây',tone:'son'}),
+        h(Harrow),
+        div({className:'topic',style:{flex:'1.25'}},h('b',null,'sudoku.events'),span(null,'APACHE KAFKA 3.9 · KRaft'),
+          div({className:'evt',style:{marginTop:'6px'}},h('code',null,'GameFinished'),h('code',null,'MatchCompleted'))),
+        h(Harrow),
+        h(Node,{t:'User Service',s:'group user-service-events-consumer'}),
+        h(Harrow),
+        h(Node,{t:'InboxMessage',s:'chống xử lý lặp',tone:'si'})),
+      div({className:'branch'},
+        div({className:'panel'},span({className:'lbl'},'Producer'),h('p',{className:'sm'},'Game Service phát GameFinished khi người chơi nộp bài đúng. Multiplayer phát MatchCompleted khi trận kết thúc.')),
+        div({className:'panel'},span({className:'lbl'},'Consumer'),h('p',{className:'sm'},'User Service cộng total_games và wins; mỗi sự kiện được kiểm tra InboxMessage trước khi xử lý.'))
+      )),
+    h(Strip,{k:'Vì sao',tone:'nghe'},'Không publish Kafka trong request: nếu broker chết, sự kiện vẫn nằm trong outbox và được gửi lại ở vòng quét sau.')
+  );
+}
+
+/* ---------------- 09 · gRPC ---------------- */
+function SlideGrpc(){
+  return h(Shell,{n:9,eb:'MỤC 2.4 · gRPC SERVICE',
+    title:h('span',null,'Hợp đồng viết trước, ',h('em',null,'client sinh tự động'))},
+    div({className:'row r grow',style:{'--i':2,gridTemplateColumns:'1fr 120px 1fr',gap:'22px',alignItems:'center'}},
+      h(Frame,{tag:'NGUỒN CHÂN LÝ',cap:'proto/sudoku/*/v1',style:{height:'100%',justifyContent:'center'}},
+        div({className:'protos'},...PROTOS.map(([f,note],i)=>
+          div({className:'pf',key:i},f,span(null,note))))),
+      div({className:'stack',style:{alignItems:'center',justifyContent:'center',gap:'10px'}},
+        div({className:'node',style:{textAlign:'center',minWidth:'110px'}},h('b',null,'buf'),span(null,'generate')),
+        span({className:'harrow',style:{transform:'rotate(90deg)'}},'→')),
+      div({className:'stack',style:{gap:'10px',justifyContent:'center'}},
+        h(Node,{t:'C# server stub',s:'Game · User · Multiplayer · Support',tone:'son'}),
+        h(Node,{t:'TypeScript client',s:'@connectrpc/connect-web'}),
+        h(Node,{t:'Envoy transcode',s:'gRPC-Web → HTTP/2 gRPC',tone:'nghe'}),
+        h(Node,{t:'Deadline + CancellationToken',s:'mọi lời gọi liên service',tone:'si'}))
+    ),
+    h(Strip,{k:'Độc lập',tone:'son'},'Multiplayer là service gRPC riêng ở cổng 5105. Support.Api (REST) gọi sang Game và User bằng gRPC client có deadline.')
+  );
+}
+
+/* ---------------- 10 · auth ---------------- */
+function SlideAuth(){
+  const steps=[
+    ['01','React đăng nhập bằng Firebase','FIREBASE SDK'],
+    ['02','Firebase trả ID Token (JWT)','HIỆU LỰC 1 GIỜ'],
+    ['03','Client gắn Authorization: Bearer','CONNECTRPC'],
+    ['04','Envoy xác thực chữ ký qua Google JWKS','SAI → 401'],
+    ['05','Service đọc claim sub làm UserId','MapInboundClaims = false']
+  ];
+  return h(Shell,{n:10,eb:'MỤC 4 · JWT AUTHENTICATION',
+    title:h('span',null,'Token kiểm ở cửa, ',h('em',null,'UserId lấy từ claim sub'))},
+    div({className:'row r grow',style:{'--i':2,gridTemplateColumns:'1.2fr .8fr',gap:'36px'}},
+      div({className:'seq'},...steps.map(([n,t,s],i)=>
+        div({className:'st',key:i},h('i',null,n),h('b',null,t),span(null,s)))),
+      div({className:'stack',style:{justifyContent:'center',gap:'12px'}},
+        div({className:'claim'},h('b',null,'claims.sub'),span(null,'Firebase UID — khoá chính xuyên service, không nhận userId từ request body.')),
+        div({className:'claim'},h('b',null,'Authorization'),span(null,'Bearer <ID token> · Envoy kiểm trước khi request chạm service.')),
+        h(Strip,{k:'Phân quyền'},'GET công khai cho nội dung; POST/PUT/DELETE yêu cầu [Authorize].'))
+    )
+  );
+}
+
+/* ---------------- 11 · luồng solo ---------------- */
+function SlideSoloFlow(){
+  return h(Shell,{n:11,eb:'MỤC 6 · END-TO-END WORKFLOW',
+    title:h('span',null,'Một ván solo đi qua ',h('em',null,'cả bốn thành phần'))},
+    div({className:'steps r',style:{'--i':2}},...STEPS.map(([n,t,d,tone],i)=>
+      div({className:'st '+tone,key:i},span({className:'n'},n),h('b',null,t),span({className:'sm'},d)))),
+    div({className:'row c3 r',style:{'--i':3,marginTop:'4px'}},
+      div({className:'panel'},span({className:'lbl'},'Ghi'),h('p',{className:'sm'},'Phiên và nước đi nằm trong game_db; kết thúc ván ghi OutboxMessage cùng transaction.')),
+      div({className:'panel'},span({className:'lbl'},'Phát'),h('p',{className:'sm'},'OutboxProcessorWorker đẩy GameFinished lên sudoku.events trong tối đa 2 giây.')),
+      div({className:'panel'},span({className:'lbl'},'Đọc'),h('p',{className:'sm'},'User Service cộng total_games, wins; leaderboard đọc lại từ dữ liệu đã cập nhật.'))),
+    div({className:'row c4 r',style:{'--i':4,marginTop:'4px'}},
+      div({className:'leaf'},span({className:'lbl'},'Topic'),div({className:'mono',style:{fontSize:'19px',marginTop:'4px'}},'sudoku.events')),
+      div({className:'leaf'},span({className:'lbl'},'Consumer group'),div({className:'mono',style:{fontSize:'19px',marginTop:'4px'}},'user-service-events')),
+      div({className:'leaf'},span({className:'lbl'},'Idempotent'),div({className:'mono',style:{fontSize:'19px',marginTop:'4px'}},'InboxMessage · EventId')),
+      div({className:'leaf'},span({className:'lbl'},'Truy vết'),div({className:'mono',style:{fontSize:'19px',marginTop:'4px'}},'OpenTelemetry + ILogger'))),
+    h(Strip,{k:'Demo',tone:'son'},'Đây là luồng bấm khi trình diễn: chơi một ván, rồi mở log của worker và consumer để thấy sự kiện chạy.')
+  );
+}
+
+/* ---------------- 12 · multiplayer ---------------- */
+function SlideMulti(){
+  return h(Shell,{n:12,eb:'MỤC 6 · REALTIME 1V1',
+    title:h('span',null,'Nước đi ',h('em',null,'không chạm database'))},
+    div({className:'hub r',style:{'--i':2}},
+      div({className:'hubcol'},
+        h(Node,{t:'Trình duyệt A',s:'SignalR · /hubs/match',tone:'son'}),
+        h(Node,{t:'Matchmaking queue',s:'ghép theo Elo'}),
+        h(Node,{t:'Race / Duel',s:'hai thể thức'})),
+      div({className:'hubc'},h('b',null,'MatchHub'),span(null,'WebSocket qua Envoy'),span(null,'move · progress')),
+      div({className:'hubcol'},
+        h(Node,{t:'Redis 7',s:'room state · Elo cache',tone:'si'}),
+        h(Node,{t:'PostgreSQL',s:'kết quả trận · lịch sử'}),
+        h(Node,{t:'Kafka',s:'MatchCompleted',tone:'nghe'}))),
+    div({className:'row c2 r',style:{'--i':3,marginTop:'2px'}},
+      div({className:'leaf'},span({className:'lbl'},'Vì sao Redis'),h('p',{className:'sm',style:{marginTop:'6px'}},'Trạng thái phòng là dữ liệu tạm: đọc và ghi mỗi nước đi, TTL ngắn, không cần transaction.')),
+      div({className:'leaf'},span({className:'lbl'},'Khi nào ghi database'),h('p',{className:'sm',style:{marginTop:'6px'}},'Chỉ khi trận kết thúc: kết quả, Elo và lịch sử được ghi một lần cho cả trận.'))),
+    h(Strip,{k:'Hot path'},'Mỗi nước đi chỉ đọc/ghi Redis và RAM của hub; database chỉ ghi khi trận kết thúc. Đây là lý do chọn Redis cho phòng đấu.')
+  );
+}
+
+/* ---------------- 13 · deploy ---------------- */
+function SlideDeploy(){
+  return h(Shell,{n:13,eb:'MỤC 3 · DEPLOYMENT',
+    title:h('span',null,'Cả hệ thống lên bằng ',h('em',null,'một lệnh docker compose'))},
+    div({className:'row r grow',style:{'--i':2,gridTemplateColumns:'1.25fr .75fr',gap:'34px'}},
+      h(Frame,{tag:'HÌNH 4',cap:'deploy/docker-compose.yml · mạng nội bộ prn-asm'},
+        div({className:'compose',style:{gap:'10px'}},...COMPOSE.map(([n,s,tone],i)=>
+          h(Node,{key:i,t:n,s:s,tone:tone}))),
+        div({className:'dim',style:{marginTop:'4px'}},'HOST 18080 · 5173 · 5432 · 6379 · 9092')
+      ),
+      div({className:'stack',style:{justifyContent:'center',gap:'14px'}},
+        div({className:'panel'},span({className:'lbl'},'Cổng host'),
+          div({className:'ports'},div({className:'kv'},
+            span(null,'Gateway'),h('b',null,'18080'),
+            span(null,'Web'),h('b',null,'5173'),
+            span(null,'Support'),h('b',null,'5104'))),
+          div({className:'kv'},span(null,'PostgreSQL'),h('b',null,'5432'),span(null,'Redis'),h('b',null,'6379'),span(null,'Kafka'),h('b',null,'9092'))),
+        h(Strip,{k:'Cấu hình'},'Mật khẩu, Firebase project và bootstrap Kafka đọc từ .env — không hardcode trong compose.')
+      )
+    )
+  );
+}
+
+/* ---------------- 14 · yêu cầu kỹ thuật ---------------- */
+function SlideTech(){
+  return h(Shell,{n:14,eb:'MỤC 4 · TECHNICAL REQUIREMENTS',
+    title:h('span',null,'Mười hai yêu cầu, ',h('em',null,'mỗi dòng một chỗ đối chiếu'))},
+    div({className:'row r grow',style:{'--i':2,gridTemplateColumns:'1fr 1fr',gap:'36px'}},
+      h('table',{className:'matrix'},h('tbody',null,...MATRIX.slice(0,6).map(([a,b],i)=>
+        h('tr',{key:i},h('td',null,h('span',{className:'ok'},'✓'),a),h('td',null,b))))),
+      h('table',{className:'matrix'},h('tbody',null,...MATRIX.slice(6).map(([a,b],i)=>
+        h('tr',{key:i},h('td',null,h('span',{className:'ok'},'✓'),a),h('td',null,b)))))),
+    h(Strip,{k:'Đối chiếu',tone:'si'},'Mỗi dòng tương ứng một mục trong đề; cột phải là nơi có thể mở ra xem khi bị hỏi.')
+  );
+}
+
+/* ---------------- 15 · nộp bài ---------------- */
+function SlideDeliverables(){
+  return h(Shell,{n:15,eb:'MỤC 5 · DELIVERABLES',
+    title:h('span',null,'Sáu thứ phải nộp, ',h('em',null,'tất cả nằm trong repo'))},
+    div({className:'deliv r',style:{'--i':2}},...DELIV.map(([t,s,path],i)=>
+      div({className:'card',key:i},span({className:'chk'},'✓ có trong repo'),h('b',null,t),span(null,s),span({className:'path'},path)))),
+    div({className:'row c2 r',style:{'--i':3,marginTop:'18px'}},
+      div({className:'panel'},
+        span({className:'lbl'},'Cách nộp'),
+        div({className:'kv tight'},
+          span(null,'Repository'),h('b',{style:{fontSize:'17px'}},'github.com/Artoriaaas/PRN_ASM'),
+          span(null,'Nhánh'),h('b',null,'main'),
+          span(null,'Lệnh chạy'),h('b',{style:{fontSize:'17px'}},'docker compose up -d --build'))),
+      div({className:'panel'},
+        span({className:'lbl'},'Kiểm tra trước khi nộp'),
+        div({className:'kv tight'},
+          span(null,'Backend build'),h('b',{style:{fontSize:'16px'}},'dotnet build PRN_ASM.sln'),
+          span(null,'Web'),h('b',{style:{fontSize:'16px'}},'npm run build · lint'),
+          span(null,'Sửa .proto'),h('b',{style:{fontSize:'16px'}},'npm run gen'),
+          span(null,'Smoke test'),h('b',{style:{fontSize:'16px'}},'compose up · /swagger')))),
+    h(Strip,{k:'README'},'Mô tả dự án, kiến trúc, công nghệ, hướng dẫn cài đặt, hướng dẫn deploy và phân công thành viên — đúng danh mục đề yêu cầu.')
+  );
+}
+
+/* ---------------- 16 · demo ---------------- */
+function SlideAgenda(){
+  return h(Shell,{n:16,eb:'MỤC 6 · KỊCH BẢN TRÌNH DIỄN',
+    title:h('span',null,'Tám phút, ',h('em',null,'bảy điểm bấm'))},
+    div({className:'agenda r',style:{'--i':2}},...AGENDA.flatMap(([t,a,b],i)=>[
+      div({key:'t'+i,className:'t'},t),
+      div({key:'a'+i,className:'a'},h('b',null,a),' — ',b),
+      div({key:'b'+i,className:'b'},AGENDA[i][3])
+    ])),
+    h(Strip,{k:'Dự phòng',tone:'nghe'},'Mỗi điểm bấm có ảnh log hoặc video 20 giây: mạng lớp học lỗi vẫn trình diễn được.')
+  );
+}
+
+/* ---------------- 17 · quyết định ---------------- */
+function SlideDecisions(){
+  const dec=[
+    ['01','Contract-first','.proto là nguồn chân lý cho API và event; C# lẫn TypeScript đều sinh từ đó nên không lệch kiểu.',
+      ['Sửa hợp đồng trước, sinh mã sau','Một .proto dùng cho cả client và server'],
+      ['game.proto','protoc','C# + TS']],
+    ['02','Outbox + Inbox','Sự kiện không mất khi broker chết, không xử lý hai lần, và không publish ngay trong request.',
+      ['OutboxMessage ghi cùng transaction','Consumer chặn trùng bằng InboxMessage'],
+      ['outbox','worker','Kafka → inbox']],
+    ['03','Hot path riêng','SignalR chỉ chạm Redis và RAM; database ghi một lần khi trận kết thúc.',
+      ['Nước đi đi qua hub, không qua DB','Chốt trận mới ghi PostgreSQL + Kafka'],
+      ['nước đi','MatchHub','Redis']]
+  ];
+  return h(Shell,{n:17,eb:'MỤC 8 · GHI CHÚ & BÀI HỌC',
+    title:h('span',null,'Ba quyết định giữ hệ thống ',h('em',null,'nhất quán'))},
+    div({className:'row c3 grow r',style:{'--i':2,alignItems:'stretch'}},...dec.map(([n,t,d,items,chain],i)=>
+      div({className:'dec',key:i},span({className:'num'},n),h('h3',null,t),h('p',null,d),
+        div({className:'chain'},...chain.flatMap((x,ci)=>ci?[h('i',{key:'i'+ci}),h('b',{key:'b'+ci},x)]:[h('b',{key:'b'+ci},x)])),
+        h('ul',{className:'ticks'},...items.map((x,ki)=>h('li',{key:ki},x)))))),
+    h(Strip,{k:'Điểm cộng'},'OpenTelemetry tracing, cache Redis cho nội dung và xUnit cho rule engine là ba phần mở rộng đã có chỗ cắm.')
+  );
+}
+
+/* ---------------- 18 · kết ---------------- */
+function SlideEnd(){
+  return h(Shell,{n:18,eb:'KẾT · HỎI ĐÁP',
+    title:h('span',null,'Bàn cờ nhỏ, ',h('em',null,'hệ thống thật'))},
+    div({className:'closing r',style:{'--i':2}},
+      div({className:'stack',style:{gap:'22px'}},
+        h('p',{className:'sm',style:{fontSize:'24px'}},'Bốn yêu cầu của đề — REST, background job, message broker, gRPC — đều có một chỗ đứng trong cùng một luồng nghiệp vụ Sudoku.'),
+        div({className:'kpis'},
+          h(Node,{t:'4',s:'service .NET 8',tone:'son'}),
+          h(Node,{t:'5',s:'hợp đồng .proto'}),
+          h(Node,{t:'3',s:'background worker'}),
+          h(Node,{t:'10',s:'container compose'}))),
+      div({className:'panel dark',style:{gap:'16px'}},
+        span({className:'lbl'},'Chạy thử'),
+        div({className:'repo'},h('b',null,'Compose'),'cd deploy && docker compose up -d --build'),
+        div({className:'repo'},h('b',null,'Web / Gateway'),'localhost:5173 · localhost:18080'),
+        div({className:'repo'},h('b',null,'Mã nguồn'),'github.com/Artoriaaas/PRN_ASM'))),
+    h(Strip,{k:'Cảm ơn',tone:'son'},'Nhóm PRN_ASM sẵn sàng nhận câu hỏi về kiến trúc, luồng sự kiện và phần demo.')
+  );
+}
+
+/* ---------------- bộ khung trình chiếu ---------------- */
+const slides=[SlideCover,SlideRubric,SlideScope,SlideArch,SlideLayers,SlideRest,SlideJobs,SlideKafka,
+  SlideGrpc,SlideAuth,SlideSoloFlow,SlideMulti,SlideDeploy,SlideTech,SlideDeliverables,SlideAgenda,
+  SlideDecisions,SlideEnd];
+const slideTitles=['Bìa · Bàn cờ Sudoku, bốn service','Bảy tiêu chí chấm điểm','Mục tiêu & phạm vi','Kiến trúc tổng thể',
+  'Kiến trúc tầng & database','REST API (Support)','Background job','Kafka & Outbox–Inbox','gRPC contract-first',
+  'Xác thực JWT','Luồng solo end-to-end','Multiplayer realtime','Deploy bằng Docker Compose','Yêu cầu kỹ thuật',
+  'Sản phẩm phải nộp','Kịch bản demo 8 phút','Ba quyết định thiết kế','Kết & Q&A'];
+const NOTES=[
+ 'Chào thầy và các bạn. Nhóm em làm Sudoku Online: chơi đơn và đấu 1v1 thời gian thực. Bài hôm nay đi theo đúng bảy tiêu chí của đề, mỗi tiêu chí chỉ vào một thành phần cụ thể trong hệ thống.',
+ 'Đề cho 100 điểm, trong đó kiến trúc và REST API chiếm 40. Nhóm em ưu tiên hai phần này trước, các phần còn lại vẫn phải có bằng chứng chạy được.',
+ 'Domain Sudoku được chọn vì nó có ba loại tải khác nhau: đọc nội dung nhiều, chơi đơn cần kiểm tra ở server, và đấu 1v1 cần độ trễ thấp. Mỗi loại ứng với một công nghệ trong đề.',
+ 'Toàn bộ hệ thống có một cửa vào là Envoy. Envoy làm ba việc: chuyển gRPC-Web sang gRPC, kiểm JWT, và nâng cấp WebSocket cho SignalR. Phía sau là bốn service, mỗi service một database.',
+ 'Mọi service theo cùng một khuôn: tầng API, tầng Domain, tầng Data. Quy ước quan trọng là Repository không tự SaveChanges, Domain service gom một lần qua UnitOfWork.',
+ 'Phần nội dung đọc nhiều được tách thành REST: notices và tutorials có CRUD, tìm kiếm, lọc theo category hoặc difficulty, sắp xếp và phân trang. GET công khai, ghi dữ liệu cần JWT.',
+ 'Ba worker đang chạy: quét outbox mỗi 2 giây, bổ sung puzzle mỗi 60 giây để không cạn đề, và quét vòng đời trận 1v1 mỗi giây. Cả ba đều không chặn request của người chơi.',
+ 'Điểm chính của slide này: sự kiện được ghi vào outbox trong cùng transaction với dữ liệu, rồi worker mới đẩy lên Kafka. Phía nhận kiểm tra Inbox trước khi xử lý nên không bị cộng hai lần.',
+ 'Toàn bộ API viết bằng proto trước. Sinh mã C# cho server và TypeScript cho client. Multiplayer là service gRPC độc lập; Support gọi sang Game và User bằng gRPC client có deadline.',
+ 'Token Firebase được kiểm ngay ở Envoy bằng Google JWKS, nên service không phải gọi mạng mỗi request. Backend chỉ đọc claim sub làm UserId, không nhận userId từ body.',
+ 'Đây là luồng sẽ bấm khi demo: bắt đầu ván, đánh vài nước, nộp bài. Sau đó mở log để thấy outbox được gửi, Kafka nhận GameFinished và User Service cộng total_games.',
+ 'Multiplayer là phần nặng nhất về độ trễ. Nước đi chỉ đi qua hub và Redis, không ghi database. Khi trận kết thúc mới ghi PostgreSQL và phát MatchCompleted.',
+ 'Cả hệ thống chạy bằng một lệnh compose: mười container, gồm gateway, web, bốn service, PostgreSQL, Redis và Kafka. Cấu hình đọc từ .env, không hardcode secret.',
+ 'Bảng này là bản đối chiếu để trả lời câu hỏi: mỗi yêu cầu kỹ thuật của đề nằm ở đâu trong mã nguồn. Cột phải là đường dẫn hoặc thành phần có thể mở ra xem ngay.',
+ 'Sáu sản phẩm nộp đều nằm trong repo. Phần dễ mất điểm nhất là README và phân công, nên nhóm ghi rõ từng người phụ trách service nào.',
+ 'Kịch bản tám phút, bảy điểm bấm. Mỗi mục có thời lượng riêng để không bị cháy giờ; nếu mạng lỗi thì dùng ảnh log đã chuẩn bị.',
+ 'Ba quyết định giữ cho hệ thống nhất quán: hợp đồng viết trước, outbox/inbox cho sự kiện, và tách hot path realtime ra khỏi database.',
+ 'Cảm ơn thầy và các bạn. Nhóm em nhận câu hỏi, ưu tiên câu hỏi về kiến trúc và luồng sự kiện vì đó là phần nhóm đầu tư nhiều nhất.'
+];
+
+const uiIcon={left:'←',right:'→',full:'⤢',grid:'▦',help:'?',notes:'N'};
+class Presentation extends R.Component{
+  constructor(p){
+    super(p);
+    const hash=Number(location.hash.replace('#',''));
+    this.state={index:Number.isFinite(hash)&&hash>=1&&hash<=TOTAL?hash-1:0,overview:false,help:false,notes:false,scale:1};
+    this.touchStart=null;this.lastWheel=0;
+    this.keyHandler=this.handleKey.bind(this);this.resizer=this.resize.bind(this);this.wheeler=this.wheel.bind(this);
+  }
+  componentDidMount(){
+    window.addEventListener('keydown',this.keyHandler);
+    window.addEventListener('resize',this.resizer);
+    window.addEventListener('wheel',this.wheeler,{passive:false});
+    this.hashHandler=()=>{const n=Number(location.hash.slice(1));if(n>=1&&n<=TOTAL)this.setState({index:n-1});};
+    window.addEventListener('hashchange',this.hashHandler);
+    this.resize();
+  }
+  componentWillUnmount(){
+    window.removeEventListener('keydown',this.keyHandler);
+    window.removeEventListener('resize',this.resizer);
+    window.removeEventListener('wheel',this.wheeler);
+    window.removeEventListener('hashchange',this.hashHandler);
+  }
+  resize(){this.setState({scale:Math.min(window.innerWidth/1600,window.innerHeight/900)});}
+  go(delta){
+    this.setState(s=>{
+      const index=Math.max(0,Math.min(TOTAL-1,s.index+delta));
+      if(index!==s.index)window.history.replaceState(null,'','#'+(index+1));
+      return {index,overview:false,help:false};
+    });
+  }
+  goto(index){window.history.replaceState(null,'','#'+(index+1));this.setState({index,overview:false,help:false});}
+  theme(){
+    const order=['giay','reu','cham'];
+    const now=document.documentElement.dataset.look||'giay';
+    const next=order[(order.indexOf(now)+1)%order.length];
+    if(next==='giay')delete document.documentElement.dataset.look;else document.documentElement.dataset.look=next;
+  }
+  handleKey(e){
+    const tag=document.activeElement?.tagName;
+    if(tag==='INPUT'||tag==='TEXTAREA'||document.activeElement?.isContentEditable)return;
+    const k=e.key;
+    if(['ArrowRight','ArrowDown',' ','PageDown','Enter'].includes(k)){e.preventDefault();this.go(1);}
+    else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(k)){e.preventDefault();this.go(-1);}
+    else if(k==='Home')this.goto(0);
+    else if(k==='End')this.goto(TOTAL-1);
+    else if(k.toLowerCase()==='o')this.setState(s=>({overview:!s.overview,help:false}));
+    else if(k.toLowerCase()==='n')this.setState(s=>({notes:!s.notes}));
+    else if(k.toLowerCase()==='d')this.theme();
+    else if(k.toLowerCase()==='f')this.fullscreen();
+    else if(k==='?'||k.toLowerCase()==='h')this.setState(s=>({help:!s.help,overview:false}));
+    else if(k==='Escape')this.setState({help:false,overview:false,notes:false});
+  }
+  wheel(e){
+    if(Math.abs(e.deltaY)<18||this.state.overview)return;
+    const t=Date.now();if(t-this.lastWheel<650)return;this.lastWheel=t;this.go(e.deltaY>0?1:-1);
+  }
+  fullscreen(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.();}
+  render(){
+    const {index,scale,overview,help,notes}=this.state;
+    const Active=slides[index];
+    return div({className:'presentation-shell',
+      onTouchStart:ev=>{this.touchStart={x:ev.touches[0].clientX,y:ev.touches[0].clientY};},
+      onTouchEnd:ev=>{if(!this.touchStart)return;const dx=ev.changedTouches[0].clientX-this.touchStart.x;if(Math.abs(dx)>75)this.go(dx<0?1:-1);this.touchStart=null;}},
+      div({className:'stage',style:{transform:`translate(-50%,-50%) scale(${scale})`}},
+        div({className:'slide-canvas',key:index},h(Active,{}))),
+      div({className:'app-topline'},span({className:'live-dot'}),span(null,'PRN ASM'),span({className:'app-divider'}),span(null,'Sudoku Online')),
+      div({className:'app-bottom'},
+        div({className:'nav-controls'},
+          h('button',{className:'nav-btn',title:'Tờ trước (←)',onClick:()=>this.go(-1),disabled:index===0},uiIcon.left),
+          h('button',{className:'nav-btn active-nav',title:'Tờ sau (→)',onClick:()=>this.go(1),disabled:index===TOTAL-1},uiIcon.right)),
+        div({className:'progress-zone'},
+          div({className:'progress-rail'},div({className:'progress-current',style:{width:(index+1)/TOTAL*100+'%'}})),
+          span({className:'progress-numbers'},String(index+1).padStart(2,'0')+' / '+TOTAL)),
+        div({className:'nav-tools'},
+          h('button',{className:'tool-btn'+(notes?' selected':''),title:'Ghi chú người nói (N)',onClick:()=>this.setState({notes:!notes})},uiIcon.notes),
+          h('button',{className:'tool-btn'+(overview?' selected':''),title:'Xem tất cả tờ (O)',onClick:()=>this.setState({overview:!overview,help:false})},uiIcon.grid),
+          h('button',{className:'tool-btn'+(help?' selected':''),title:'Phím tắt (?)',onClick:()=>this.setState({help:!help,overview:false})},uiIcon.help),
+          h('button',{className:'tool-btn',title:'Toàn màn hình (F)',onClick:()=>this.fullscreen()},uiIcon.full))),
+      notes?div({className:'note-band'},h('b',null,'Ghi chú · tờ '+String(index+1).padStart(2,'0')),h('p',null,NOTES[index])):null,
+      overview?div({className:'modal-backdrop',onClick:()=>this.setState({overview:false})},
+        div({className:'overview-modal',onClick:ev=>ev.stopPropagation()},
+          div({className:'modal-head'},h('b',null,'18 tờ · PRN ASM'),h('button',{onClick:()=>this.setState({overview:false})},'×')),
+          div({className:'slide-picker'},...slideTitles.map((name,i)=>
+            div({className:'slide-thumb'+(i===index?' current':''),key:i,onClick:()=>this.goto(i)},
+              span({className:'thumb-n'},String(i+1).padStart(2,'0')),
+              span({className:'thumb-name'},name),
+              div({className:'thumb-bar'})))))):null,
+      help?div({className:'modal-backdrop',onClick:()=>this.setState({help:false})},
+        div({className:'help-modal',onClick:ev=>ev.stopPropagation()},
+          div({className:'modal-head'},h('b',null,'Điều khiển trình chiếu'),h('button',{onClick:()=>this.setState({help:false})},'×')),
+          div({className:'help-list'},...[['→ / Space','Tờ tiếp theo'],['← / Backspace','Tờ trước'],['Home / End','Đầu / cuối'],
+            ['N','Ghi chú người nói'],['O','Xem tất cả 18 tờ'],['D','Đổi kiểu màu (giấy · rêu · chàm)'],
+            ['F','Toàn màn hình'],['Esc','Đóng bảng này']].map(([k,v],i)=>
+            div({className:'help-row',key:i},span({className:'keycap'},k),span(null,v)))))):null
+    );
+  }
+}
+RD.render(h(Presentation),document.getElementById('root'));
+})();
