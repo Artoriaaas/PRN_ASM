@@ -2,6 +2,8 @@
 
 Nền tảng giải đố Sudoku trực tuyến kết hợp thi đấu đối kháng 1v1 thời gian thực, xây dựng theo kiến trúc **Event-Driven Microservices** và **Contract-First (gRPC & Protobuf)**.
 
+Slide: https://artoriaaas.github.io/PRN_ASM/prn-asm-slides/index.html#1
+
 ## 🛠️ Tech Stack
 - **Backend Framework**: ASP.NET Core (.NET 8, C# 12)
 - **Inter-service & API**: gRPC & Protocol Buffers (Contract-First), SignalR WebSockets (Realtime)
