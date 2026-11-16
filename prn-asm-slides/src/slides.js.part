@@ -87,10 +87,13 @@ const STEPS=[
  ['06','User Service','Consumer cộng total_games, wins','']
 ];
 const COMPOSE=[
- ['gateway','Envoy 8080 · host 18080','son'],['web','Nginx + React build',''],
- ['game-service','gRPC 8080',''],['user-service','gRPC 8080',''],
- ['multiplayer-service','gRPC 8080 · WS 8081',''],['support-service','HTTP 8080',''],
- ['postgres','PostgreSQL 16','flat'],['redis','Redis 7','flat'],['kafka','Apache Kafka 3.9','flat']
+ ['Lớp biên',[
+   ['gateway','Envoy 8080 · host 18080','son'],['web','Nginx + React build','']]],
+ ['Ứng dụng',[
+   ['game-service','gRPC 8080',''],['user-service','gRPC 8080',''],
+   ['multiplayer-service','gRPC 8080 · WS 8081',''],['support-service','HTTP 8080','']]],
+ ['Hạ tầng',[
+   ['postgres','PostgreSQL 16','flat'],['redis','Redis 7','flat'],['kafka','Apache Kafka 3.9','flat']]]
 ];
 const MATRIX=[
  ['.NET 8 / ASP.NET Core','4 service trong services/'],
@@ -360,10 +363,13 @@ function SlideSoloFlow(){
     title:h('span',null,'Một ván solo đi qua ',h('em',null,'cả bốn thành phần'))},
     div({className:'steps r',style:{'--i':2}},...STEPS.map(([n,t,d,tone],i)=>
       div({className:'st '+tone,key:i},span({className:'n'},n),h('b',null,t),span({className:'sm'},d)))),
-    div({className:'row c3 r',style:{'--i':3,marginTop:'4px'}},
-      div({className:'panel'},span({className:'lbl'},'Ghi'),h('p',{className:'sm'},'Phiên và nước đi nằm trong game_db; kết thúc ván ghi OutboxMessage cùng transaction.')),
-      div({className:'panel'},span({className:'lbl'},'Phát'),h('p',{className:'sm'},'OutboxProcessorWorker đẩy GameFinished lên sudoku.events trong tối đa 2 giây.')),
-      div({className:'panel'},span({className:'lbl'},'Đọc'),h('p',{className:'sm'},'User Service cộng total_games, wins; leaderboard đọc lại từ dữ liệu đã cập nhật.'))),
+    div({className:'row c3 grow r',style:{'--i':3,marginTop:'4px'}},
+      div({className:'panel'},span({className:'lbl'},'Ghi'),h('p',{className:'sm'},'Phiên và nước đi nằm trong game_db; kết thúc ván ghi OutboxMessage cùng transaction.'),
+        span({className:'mono',style:{marginTop:'auto',fontSize:'15px',color:'var(--vai-3)'}},'game_db · sessions · moves')),
+      div({className:'panel'},span({className:'lbl'},'Phát'),h('p',{className:'sm'},'OutboxProcessorWorker đẩy GameFinished lên sudoku.events trong tối đa 2 giây.'),
+        span({className:'mono',style:{marginTop:'auto',fontSize:'15px',color:'var(--vai-3)'}},'outbox · sudoku.events')),
+      div({className:'panel'},span({className:'lbl'},'Đọc'),h('p',{className:'sm'},'User Service cộng total_games, wins; leaderboard đọc lại từ dữ liệu đã cập nhật.'),
+        span({className:'mono',style:{marginTop:'auto',fontSize:'15px',color:'var(--vai-3)'}},'user_db · leaderboard'))),
     div({className:'row c4 r',style:{'--i':4,marginTop:'4px'}},
       div({className:'leaf'},span({className:'lbl'},'Topic'),div({className:'mono',style:{fontSize:'19px',marginTop:'4px'}},'sudoku.events')),
       div({className:'leaf'},span({className:'lbl'},'Consumer group'),div({className:'mono',style:{fontSize:'19px',marginTop:'4px'}},'user-service-events')),
@@ -400,8 +406,11 @@ function SlideDeploy(){
     title:h('span',null,'Cả hệ thống lên bằng ',h('em',null,'một lệnh docker compose'))},
     div({className:'row r grow',style:{'--i':2,gridTemplateColumns:'1.25fr .75fr',gap:'34px'}},
       h(Frame,{tag:'HÌNH 4',cap:'deploy/docker-compose.yml · mạng nội bộ prn-asm'},
-        div({className:'compose',style:{gap:'10px'}},...COMPOSE.map(([n,s,tone],i)=>
-          h(Node,{key:i,t:n,s:s,tone:tone}))),
+        div({className:'compose'},...COMPOSE.map(([label,list],ri)=>
+          div({className:'crow',key:'r'+ri},
+            span({className:'rlbl'},label),
+            div({className:'rgrid',style:{gridTemplateColumns:'repeat('+list.length+',1fr)'}},
+              ...list.map(([n,s,tone],ni)=>h(Node,{key:ni,t:n,s:s,tone:tone})))))),
         div({className:'dim',style:{marginTop:'4px'}},'HOST 18080 · 5173 · 5432 · 6379 · 9092')
       ),
       div({className:'stack',style:{justifyContent:'center',gap:'14px'}},
@@ -472,18 +481,26 @@ function SlideDecisions(){
   const dec=[
     ['01','Contract-first','.proto là nguồn chân lý cho API và event; C# lẫn TypeScript đều sinh từ đó nên không lệch kiểu.',
       ['Sửa hợp đồng trước, sinh mã sau','Một .proto dùng cho cả client và server'],
-      ['game.proto','protoc','C# + TS']],
+      ['game.proto','protoc','C# + TS'],
+      'proto/sudoku/*/v1/*.proto',
+      'Sửa .proto là phải sinh lại mã ở cả hai phía; bù lại client và server không thể lệch kiểu.'],
     ['02','Outbox + Inbox','Sự kiện không mất khi broker chết, không xử lý hai lần, và không publish ngay trong request.',
       ['OutboxMessage ghi cùng transaction','Consumer chặn trùng bằng InboxMessage'],
-      ['outbox','worker','Kafka → inbox']],
+      ['outbox','worker','Kafka → inbox'],
+      'building-block/Sudoku.Messaging',
+      'Sự kiện đến chậm tối đa một chu kỳ quét (2 giây); bù lại không mất khi broker chết.'],
     ['03','Hot path riêng','SignalR chỉ chạm Redis và RAM; database ghi một lần khi trận kết thúc.',
       ['Nước đi đi qua hub, không qua DB','Chốt trận mới ghi PostgreSQL + Kafka'],
-      ['nước đi','MatchHub','Redis']]
+      ['nước đi','MatchHub','Redis'],
+      'Multiplayer.Api/Hubs/MatchHub.cs',
+      'Redis là điểm chết của phòng đấu; bù lại mỗi nước đi không chạm database.']
   ];
   return h(Shell,{n:17,eb:'MỤC 8 · GHI CHÚ & BÀI HỌC',
     title:h('span',null,'Ba quyết định giữ hệ thống ',h('em',null,'nhất quán'))},
-    div({className:'row c3 grow r',style:{'--i':2,alignItems:'stretch'}},...dec.map(([n,t,d,items,chain],i)=>
+    div({className:'row c3 grow r',style:{'--i':2,alignItems:'stretch'}},...dec.map(([n,t,d,items,chain,ev,trade],i)=>
       div({className:'dec',key:i},span({className:'num'},n),h('h3',null,t),h('p',null,d),
+        div({className:'ev'},span({className:'lbl'},'Bằng chứng'),h('code',null,ev)),
+        div({className:'trade'},span({className:'lbl'},'Đánh đổi'),h('p',{className:'sm'},trade)),
         div({className:'chain'},...chain.flatMap((x,ci)=>ci?[h('i',{key:'i'+ci}),h('b',{key:'b'+ci},x)]:[h('b',{key:'b'+ci},x)])),
         h('ul',{className:'ticks'},...items.map((x,ki)=>h('li',{key:ki},x)))))),
     h(Strip,{k:'Điểm cộng'},'OpenTelemetry tracing, cache Redis cho nội dung và xUnit cho rule engine là ba phần mở rộng đã có chỗ cắm.')
@@ -495,14 +512,15 @@ function SlideEnd(){
   return h(Shell,{n:18,eb:'KẾT · HỎI ĐÁP',
     title:h('span',null,'Bàn cờ nhỏ, ',h('em',null,'hệ thống thật'))},
     div({className:'closing r',style:{'--i':2}},
-      div({className:'stack',style:{gap:'22px'}},
+      div({className:'stack',style:{gap:'26px',justifyContent:'space-between'}},
         h('p',{className:'sm',style:{fontSize:'24px'}},'Bốn yêu cầu của đề — REST, background job, message broker, gRPC — đều có một chỗ đứng trong cùng một luồng nghiệp vụ Sudoku.'),
+        div({className:'qm',style:{fontSize:'33px',lineHeight:'1.35',color:'var(--vai-2)'}},'“Hợp đồng viết trước, sự kiện đi qua outbox, hot path không chạm database.”'),
         div({className:'kpis'},
           h(Node,{t:'4',s:'service .NET 8',tone:'son'}),
           h(Node,{t:'5',s:'hợp đồng .proto'}),
           h(Node,{t:'3',s:'background worker'}),
           h(Node,{t:'10',s:'container compose'}))),
-      div({className:'panel dark',style:{gap:'16px'}},
+      div({className:'panel dark',style:{gap:'16px',alignSelf:'center'}},
         span({className:'lbl'},'Chạy thử'),
         div({className:'repo'},h('b',null,'Compose'),'cd deploy && docker compose up -d --build'),
         div({className:'repo'},h('b',null,'Web / Gateway'),'localhost:5173 · localhost:18080'),
