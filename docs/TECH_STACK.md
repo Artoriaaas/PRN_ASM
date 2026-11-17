@@ -873,6 +873,167 @@ URL đổi mỗi lần là tradeoff chấp nhận được vì `?api=` mechanism
 
 ---
 
+## 16. Auth Hardening + CI/CD — commit `07b6a2b` ("fix: auth")
+
+> [!NOTE]
+> Commit này cải hóa toàn bộ luồng auth dev/prod và bổ sung GitHub Actions CI. Các thay đổi không phải feature mới mà là **sửa đúng thiết kế** để không leak dev token ra production.
+
+### Vấn đề trước đó
+
+Backend luôn chấp nhận cả Firebase token lẫn dev HS256 token mà **không cần config gì** — dev token không thể tắt, bất kỳ ai cũng có thể tự ký token admin nếu biết secret mặc định.
+
+Frontend luôn gắn `Authorization` header dù chưa đăng nhập, dùng secret hardcode trong code.
+
+### Những gì thay đổi
+
+#### 1. `AuthExtensions.cs` — dev token phải bật tường minh
+
+```csharp
+// Trước: dev token luôn được chấp nhận
+ValidIssuers = [googleIssuer, DevIssuer],
+
+// Sau: chỉ chấp nhận khi Auth:AllowDevTokens = true
+var allowDevTokens = bool.TryParse(config["Auth:AllowDevTokens"], out var allowDev) && allowDev;
+
+ValidIssuers = allowDevTokens ? [googleIssuer, DevIssuer] : [googleIssuer],
+ValidAudiences = allowDevTokens ? [projectId, DevAudience] : [projectId],
+
+// Secret cũng đọc từ config thay vì hardcode:
+var devSecret = config["Auth:DevSecret"];  // phải >= 32 ký tự
+// Fallback về default key chỉ nếu chạy local dev (không dùng config)
+```
+
+Backend prod: chỉ cần không set `Auth__AllowDevTokens=true` → dev token reject hoàn toàn, không phụ thuộc vào secret có bị lộ hay không.
+
+#### 2. `clients/src/auth/devAuth.ts` — dev-auth chỉ bật khi có env
+
+```ts
+// Trước: secret hardcode, luôn ký được token
+const DEV_SECRET = 'sudoku-platform-insecure-dev-jwt-secret-key-2026-minimum-32-chars!'
+
+// Sau: đọc từ VITE_DEV_AUTH_SECRET, chỉ fallback về default khi vite dev
+const configuredSecret = import.meta.env.VITE_DEV_AUTH_SECRET?.trim()
+
+export const DEV_AUTH_SECRET =
+  configuredSecret && configuredSecret.length >= 32
+    ? configuredSecret
+    : import.meta.env.DEV          // ← chỉ true khi chạy vite dev
+      ? DEV_SECRET_FALLBACK
+      : ''                         // ← prod build không có env → tắt hoàn toàn
+
+export const isDevAuthEnabled = DEV_AUTH_SECRET.length >= 32
+```
+
+Mọi hàm `getDevToken()`, `getAdminDevToken()`, `buildDevToken()` đều check `isDevAuthEnabled` đầu tiên, trả `null` ngay nếu tắt — không ký token, không gửi header.
+
+#### 3. `clients/src/auth/accessToken.ts` — điểm tập trung duy nhất
+
+File mới hoàn toàn, là **nguồn duy nhất** cung cấp token cho mọi HTTP/gRPC call:
+
+```ts
+export async function getAccessToken(fallbackSub = 'guest-solo-user'): Promise<string | null> {
+  // 1. Dev-admin session (sessionStorage flag)
+  if (isDevAdminSession()) return getAdminDevToken()
+
+  // 2. Firebase đang đăng nhập
+  const user = auth.currentUser
+  if (user) {
+    try { return await user.getIdToken() }
+    catch { return getDevToken(fallbackSub) }  // refresh fail → thử dev token
+  }
+
+  // 3. Dev token guest (nếu dev-auth bật)
+  return getDevToken(fallbackSub)
+  // 4. null nếu tắt → không gắn Authorization header → endpoint protected trả Unauthenticated
+}
+```
+
+Trước đây mỗi client tự lấy token theo cách riêng, dễ sót. Nay tất cả import từ đây.
+
+#### 4. `clients/src/api/apiBase.ts` — resolve base URL chuẩn hoá
+
+File mới hoàn toàn, chuẩn hoá logic `?api=` đã nói ở Section 15:
+
+```ts
+// 5 mức ưu tiên, cached sau lần resolve đầu tiên
+export function getApiBase(): string { ... }
+
+// Ghép path thông thường (HTTP)
+export function getApiUrl(path: string): string { ... }
+
+// URL tuyệt đối — bắt buộc cho WebSocket/SignalR
+// (browser không nhận URL tương đối cho new WebSocket(...))
+export function getAbsoluteApiUrl(path: string): string {
+  const base = getApiBase()
+  if (base) return `${base}${normalizedPath}`
+  return `${window.location.origin}${normalizedPath}`
+}
+```
+
+`getAbsoluteApiUrl` quan trọng: `matchHubClient.ts` dùng hàm này để xây URL SignalR — đảm bảo WebSocket luôn có scheme + host đầy đủ dù API base là rỗng (same-origin).
+
+#### 5. `clients/vercel.json` — config Vercel một lần
+
+```json
+{
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
+```
+
+Rewrite `/*` → `index.html` giúp React Router (BrowserRouter) hoạt động khi user refresh trang ở `/play/match-id` hay bất kỳ route nào — không trả 404.
+
+> [!WARNING]
+> Không dùng Vercel rewrite để proxy `/api` → tunnel vì Vercel rewrite **không hỗ trợ WebSocket**. SignalR sẽ chết. Cứ để FE gọi thẳng tunnel URL (CORS đã mở ở Envoy).
+
+#### 6. `deploy/.env.example` — tường minh hoá config auth
+
+```dotenv
+# Dev JWT (chỉ cho local/demo)
+# ALLOW_DEV_TOKENS: true = backend chấp nhận token HS256 do FE tự ký
+# DEV_AUTH_SECRET: phải TRÙNG với VITE_DEV_AUTH_SECRET khi build FE (>= 32 ký tự)
+ALLOW_DEV_TOKENS=true
+DEV_AUTH_SECRET=sudoku-platform-insecure-dev-jwt-secret-key-2026-minimum-32-chars!
+```
+
+Thêm vào `.env.example` để người clone repo biết phải set gì — không còn magic default ẩn.
+
+#### 7. `.github/workflows/ci.yml` — GitHub Actions CI
+
+Ba job chạy song song trên mỗi push/PR vào `main`:
+
+```yaml
+jobs:
+  backend:   # dotnet restore → build Release → test
+  frontend:  # npm ci → npm run gen (buf) → oxlint → tsc + vite build
+  proto:     # npx buf lint
+```
+
+| Job | Lệnh kiểm tra |
+|---|---|
+| `backend` | `dotnet build PRN_ASM.sln -c Release` + `dotnet test` |
+| `frontend` | `npm run gen` (proto stubs) → `npm run lint` (oxlint) → `npm run build` (tsc + vite) |
+| `proto` | `buf lint` — kiểm tra naming convention và comment requirement |
+
+`concurrency: cancel-in-progress: true` — nếu push commit mới khi CI đang chạy, job cũ bị cancel, tiết kiệm minutes.
+
+> [!TIP]
+> `frontend` job chạy `npm run gen` trước khi build để đảm bảo `src/gen/` luôn up-to-date — phát hiện ngay nếu proto thay đổi mà quên commit lại file gen.
+
+### Tóm tắt: trạng thái auth theo môi trường
+
+| Môi trường | `ALLOW_DEV_TOKENS` | `VITE_DEV_AUTH_SECRET` | Kết quả |
+|---|---|---|---|
+| `vite dev` (local) | — (không cần set) | — | Dev auth bật tự động, dùng secret fallback |
+| Docker Compose | `true` | — (compose set từ `DEV_AUTH_SECRET`) | Dev auth bật, secret đọc từ `.env` |
+| Vercel (không set env) | `false` (không có) | — | Dev auth tắt, bắt buộc đăng nhập Firebase |
+| Vercel (set env) | `true` ở backend | `VITE_DEV_AUTH_SECRET` = secret trùng BE | Dev auth bật cho demo |
+| Production thật | `false` | — | Chỉ Firebase ID token hợp lệ |
+
+---
+
 ## Tổng quan kiến trúc — Data flow
 
 ```mermaid
