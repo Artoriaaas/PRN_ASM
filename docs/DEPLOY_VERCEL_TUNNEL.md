@@ -1,6 +1,6 @@
 # 🚀 Deploy Frontend lên Vercel + Backend qua Cloudflare Quick Tunnel
 
-Mục tiêu: **mỗi lần chạy lại quick tunnel (URL đổi) chỉ phải sửa CONFIG (Vercel env / query `?api=` / Firebase authorized domain), không phải sửa code hay sửa CORS.**
+Mục tiêu: **mỗi lần chạy lại quick tunnel (URL đổi) chỉ phải mở link `?api=` mà script in ra — không sửa code, không sửa CORS, không đụng Vercel/Firebase.**
 
 ---
 
@@ -39,18 +39,34 @@ pwsh -File deploy/start-be.ps1 -NoBuild # khởi động nhanh với image sẵn
 
 Kết quả mong đợi: 9 container `Up`, in ra `http://localhost:5173` và `http://localhost:18080`.
 
-### Bước 2 — Mở quick tunnel
+### Bước 2 — Mở quick tunnel (script in sẵn link demo)
 
 ```powershell
 pwsh -File deploy/quick-tunnel.ps1      # tunnel vào web :5173 (UI + proxy API)
 # hoặc: pwsh -File deploy/quick-tunnel.ps1 -Port 18080   # chỉ public API Gateway
+# đổi domain FE: -VercelUrl https://my-app.vercel.app  (hoặc set env PRN_ASM_VERCEL_URL)
 ```
 
-Copy dòng `https://<random-words>.trycloudflare.com`.
+Script đọc URL tunnel từ log cloudflared rồi in nguyên block để copy:
+
+```
+==================== LINK DEMO ====================
+  Tunnel (API + SignalR) : https://<random-words>.trycloudflare.com
+  Web local              : http://localhost:5173
+
+  Copy đúng 1 dòng dưới đây để mở app Vercel:
+  https://<vercel-app>/?api=https://<random-words>.trycloudflare.com
+
+  Xoá override (về VITE_API_URL) : https://<vercel-app>/?api=reset
+==================================================
+```
+
+Dòng link thứ hai chính là URL cần mở (Bước 3 — Cách A). Để cửa sổ này mở trong suốt buổi demo.
 
 ### Bước 3 — Trỏ frontend Vercel vào tunnel (chọn 1)
 
-**Cách A — không deploy lại (nhanh nhất, khuyến nghị khi demo):**
+**Cách A — không deploy lại (nhanh nhất, khuyến nghị khi demo):** dùng đúng dòng
+`...?api=...` mà `quick-tunnel.ps1` in ra ở Bước 2, dạng:
 
 ```
 https://<vercel-app>.vercel.app/?api=https://<tunnel>.trycloudflare.com
@@ -74,14 +90,18 @@ Rồi **Deployments → …  → Redeploy** (Vite inline env lúc build nên ph�
 **Cách C — pin trong HTML (không khuyến nghị, bẩn git):** điền URL vào
 `<meta name="api-base" content="...">` trong `clients/index.html`.
 
-### Bước 4 — Firebase: thêm domain được phép đăng nhập
+### Bước 4 — Firebase: chỉ một lần
 
 Firebase Console → **Authentication → Settings → Authorized domains** → thêm:
 
-- `<vercel-app>.vercel.app`
-- host của tunnel, dạng `<random-words>.trycloudflare.com` (đổi mỗi lần chạy)
+- `<vercel-app>.vercel.app` — **origin của trang**, đây là thứ Firebase kiểm tra.
 
-Thiếu bước này ⇒ đăng nhập Google/Email báo `auth/unauthorized-domain`.
+Domain tunnel **không cần** thêm: tunnel chỉ là địa chỉ API mà FE gọi tới (header `Authorization`),
+Firebase không thấy host đó. Chỉ thêm `<random-words>.trycloudflare.com` nếu bạn mở **thẳng app**
+từ URL tunnel thay vì từ domain Vercel.
+
+Thiếu domain trang ⇒ đăng nhập Google/Email báo `auth/unauthorized-domain`.
+Login dev-admin (`sudokuadmin@gmail.com`) và guest đi bằng dev JWT nên không cần Firebase.
 Quick tunnel không cần khai báo gì thêm ở Cloudflare (không có account).
 
 ---
@@ -140,9 +160,10 @@ ALLOW_DEV_TOKENS=false
 | Triệu chứng | Nguyên nhân | Cách xử lý |
 | :--- | :--- | :--- |
 | `401 Unauthenticated` toàn bộ | dev token bị tắt, hoặc secret FE ≠ BE | set `VITE_DEV_AUTH_SECRET` = `DEV_AUTH_SECRET`, redeploy FE |
-| `auth/unauthorized-domain` | domain chưa khai báo ở Firebase | thêm domain (Bước 4) |
+| `auth/unauthorized-domain` | domain **trang** chưa khai báo ở Firebase | thêm domain Vercel (Bước 4) |
 | Trắng trang / mọi request đi `localhost:8080` | `VITE_API_URL` cũ trong bundle + chưa có `?api=` | mở `?api=https://<tunnel>` hoặc Redeploy với env mới |
-| API 502/404 qua tunnel | tunnel đã chết (quick tunnel không có SLA) | chạy lại `quick-tunnel.ps1`, cập nhật URL |
+| Vẫn gọi tunnel cũ dù đã có tunnel mới | `localStorage` còn giữ `?api=` lần trước | mở link `?api=<tunnel-mới>` (hoặc `?api=reset`) |
+| API 502/404 qua tunnel | tunnel đã chết (quick tunnel không có SLA) | chạy lại `quick-tunnel.ps1`, mở link nó in ra |
 | SignalR không kết nối (`/hubs/match`) | URL tunnel cũ, hoặc `?api=` thiếu scheme | dùng `?api=https://...` (phải có `https://`) |
 | Websocket bị chặn ở mạng công ty/trường | outbound 7844 bị chặn | dùng mạng khác, hoặc `cloudflared tunnel --protocol http2 --url ...` |
 

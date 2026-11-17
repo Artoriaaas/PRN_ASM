@@ -319,7 +319,7 @@ PRN_ASM/
 ├── deploy/                              # [DevOps & Infrastructure]
 │   ├── docker-compose.yml               # Container: Envoy, 4 service, web, Postgres, Kafka, Redis
 │   ├── start-be.ps1                     # Khởi động toàn bộ backend (compose up -d --build)
-│   ├── quick-tunnel.ps1                 # Mở Cloudflare Quick Tunnel trỏ vào UI (:5173) hoặc API (:18080)
+│   ├── quick-tunnel.ps1                 # Mở Cloudflare Quick Tunnel (UI :5173 hoặc API :18080) + in link Vercel `?api=`
 │   ├── postgres-init/01-create-dbs.sql  # Script tạo sẵn 4 cơ sở dữ liệu
 │   └── .env.example                     # Mẫu biến môi trường
 └── PRN_ASM.sln                          # Solution .NET quản lý toàn bộ backend
