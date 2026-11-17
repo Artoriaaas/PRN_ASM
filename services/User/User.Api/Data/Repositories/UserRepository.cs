@@ -97,4 +97,148 @@ public sealed class UserRepository(UserDbContext dbContext) : IUserRepository
     {
         return dbContext.InboxMessages.AddAsync(message, cancellationToken).AsTask();
     }
+
+    public async Task<(IReadOnlyList<UserAccount> Items, int TotalCount)> AdminListUsersAsync(
+        int page,
+        int pageSize,
+        string? search,
+        string? statusFilter,
+        string? sortBy,
+        CancellationToken cancellationToken)
+    {
+        var query = dbContext.Users.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim().ToLower();
+            query = query.Where(u => u.DisplayName.ToLower().Contains(term) || u.Email.ToLower().Contains(term));
+        }
+
+        if (!string.IsNullOrWhiteSpace(statusFilter))
+        {
+            var status = statusFilter.Trim().ToLower();
+            query = query.Where(u => u.Status.ToLower() == status);
+        }
+
+        int totalCount = await query.CountAsync(cancellationToken);
+
+        query = string.Equals(sortBy, "elo", StringComparison.OrdinalIgnoreCase)
+            ? query.OrderByDescending(u => u.Trophies).ThenByDescending(u => u.CreatedAt)
+            : query.OrderByDescending(u => u.CreatedAt);
+
+        int safePage = Math.Max(1, page);
+        int safePageSize = Math.Clamp(pageSize, 1, 100);
+
+        var items = await query
+            .Skip((safePage - 1) * safePageSize)
+            .Take(safePageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
+    public Task<UserAccount?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return dbContext.Users
+            .AsNoTracking()
+            .Where(u => u.Id == id)
+            .Take(1)
+            .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public Task<UserAccount?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return dbContext.Users
+            .Where(u => u.Id == id)
+            .Take(1)
+            .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public Task<int> CountActiveAdminsAsync(CancellationToken cancellationToken)
+    {
+        return dbContext.Users
+            .AsNoTracking()
+            .CountAsync(u => u.Role.ToLower() == "admin" && u.Status.ToLower() != "deleted", cancellationToken);
+    }
+
+    public Task AddAuditLogAsync(AuditLog log, CancellationToken cancellationToken)
+    {
+        return dbContext.AuditLogs.AddAsync(log, cancellationToken).AsTask();
+    }
+
+    public async Task<(IReadOnlyList<AuditLog> Items, int TotalCount)> ListAuditLogsAsync(
+        Guid? actorId,
+        Guid? targetId,
+        DateTimeOffset? fromDate,
+        DateTimeOffset? toDate,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var query = dbContext.AuditLogs.AsNoTracking();
+
+        if (actorId.HasValue && actorId.Value != Guid.Empty)
+        {
+            query = query.Where(l => l.ActorId == actorId.Value);
+        }
+
+        if (targetId.HasValue && targetId.Value != Guid.Empty)
+        {
+            query = query.Where(l => l.TargetId == targetId.Value);
+        }
+
+        if (fromDate.HasValue)
+        {
+            query = query.Where(l => l.CreatedAt >= fromDate.Value);
+        }
+
+        if (toDate.HasValue)
+        {
+            query = query.Where(l => l.CreatedAt <= toDate.Value);
+        }
+
+        int totalCount = await query.CountAsync(cancellationToken);
+
+        int safePage = Math.Max(1, page);
+        int safePageSize = Math.Clamp(pageSize, 1, 100);
+
+        var items = await query
+            .OrderByDescending(l => l.CreatedAt)
+            .Skip((safePage - 1) * safePageSize)
+            .Take(safePageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
+    public Task AddEloHistoryAsync(EloHistory entry, CancellationToken cancellationToken)
+    {
+        return dbContext.EloHistories.AddAsync(entry, cancellationToken).AsTask();
+    }
+
+    public async Task<IReadOnlyList<EloHistory>> GetRecentEloHistoryAsync(Guid userId, int limit, CancellationToken cancellationToken)
+    {
+        int safeLimit = Math.Clamp(limit, 1, 50);
+        return await dbContext.EloHistories
+            .AsNoTracking()
+            .Where(e => e.UserId == userId)
+            .OrderByDescending(e => e.CreatedAt)
+            .Take(safeLimit)
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task AddOutboxMessageAsync(Sudoku.Messaging.OutboxMessage message, CancellationToken cancellationToken)
+    {
+        return dbContext.OutboxMessages.AddAsync(message, cancellationToken).AsTask();
+    }
+
+    public async Task<IReadOnlyList<Sudoku.Messaging.OutboxMessage>> GetUnprocessedOutboxMessagesAsync(int limit, CancellationToken cancellationToken)
+    {
+        int safeLimit = Math.Clamp(limit, 1, 100);
+        return await dbContext.OutboxMessages
+            .Where(x => x.ProcessedAt == null)
+            .OrderBy(x => x.CreatedAt)
+            .Take(safeLimit)
+            .ToListAsync(cancellationToken);
+    }
 }

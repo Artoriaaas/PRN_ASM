@@ -15,6 +15,9 @@ public sealed class UserAccount
     public int TotalExp { get; set; }
     public int PlayerLevel { get; set; } = 1;
     public int Trophies { get; set; }
+    public string? BanReason { get; set; }
+    public DateTimeOffset? BannedUntil { get; set; }
+    public DateTimeOffset? LastLoginAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 }

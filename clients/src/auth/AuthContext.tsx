@@ -15,19 +15,69 @@ import {
   signInWithPopup,
   signOut,
   updateProfile,
+  type IdTokenResult,
   type User,
 } from 'firebase/auth'
 import { auth } from './firebase'
 import { AuthContext, type AuthContextValue } from './authContextValue'
+import {
+  getAdminDevToken,
+  DEV_ADMIN_UID,
+  DEV_ADMIN_EMAIL,
+  DEV_ADMIN_PASSWORD,
+} from './devAuth'
 
 const googleProvider = new GoogleAuthProvider()
 googleProvider.setCustomParameters({ prompt: 'select_account' })
+
+// ---------------------------------------------------------------------------
+// Dev-admin mock user: giả lập Firebase User object cho tài khoản admin local
+// ---------------------------------------------------------------------------
+function buildDevAdminUser(token: string): User {
+  const claims = { role: 'admin' }
+  const tokenResult: IdTokenResult = {
+    token,
+    claims,
+    authTime: new Date().toISOString(),
+    issuedAtTime: new Date().toISOString(),
+    expirationTime: new Date(Date.now() + 3600_000).toISOString(),
+    signInProvider: 'password',
+    signInSecondFactor: null,
+  }
+  return {
+    uid: DEV_ADMIN_UID,
+    email: DEV_ADMIN_EMAIL,
+    emailVerified: true,
+    displayName: 'Sudoku Admin',
+    photoURL: null,
+    phoneNumber: null,
+    isAnonymous: false,
+    metadata: { creationTime: undefined, lastSignInTime: undefined },
+    providerData: [],
+    refreshToken: '',
+    tenantId: null,
+    providerId: 'password',
+    delete: async () => {},
+    getIdToken: async () => token,
+    getIdTokenResult: async (_forceRefresh?: boolean) => tokenResult,
+    reload: async () => {},
+    toJSON: () => ({ uid: DEV_ADMIN_UID }),
+  } as unknown as User
+}
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Nếu đã lưu dev-admin session, khôi phục ngay
+    if (sessionStorage.getItem('dev-admin-active') === 'true') {
+      getAdminDevToken().then((token) => {
+        setUser(buildDevAdminUser(token))
+        setLoading(false)
+      })
+      return
+    }
     return onIdTokenChanged(auth, (nextUser) => {
       setUser(nextUser)
       setLoading(false)
@@ -35,6 +85,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [])
 
   const login = useCallback(async (email: string, password: string) => {
+    // Dev-admin shortcut: sudokuadmin@gmail.com / Admin@123
+    if (email.trim() === DEV_ADMIN_EMAIL && password === DEV_ADMIN_PASSWORD) {
+      const token = await getAdminDevToken()
+      sessionStorage.setItem('dev-admin-active', 'true')
+      setUser(buildDevAdminUser(token))
+      return
+    }
     await signInWithEmailAndPassword(auth, email.trim(), password)
   }, [])
 
@@ -66,6 +123,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [])
 
   const logout = useCallback(async () => {
+    sessionStorage.removeItem('dev-admin-active')
+    setUser(null)
     await signOut(auth)
   }, [])
 

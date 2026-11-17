@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 
@@ -31,8 +31,45 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
-/** Bảo vệ route admin — cần claim role=admin (future) */
+/** Bảo vệ route admin — cần claim role=admin */
 export function RequireAdmin({ children }: { children: ReactNode }) {
-  // TODO: kiểm tra custom claim khi có admin
-  return <RequireAuth>{children}</RequireAuth>
+  const { user, loading } = useAuth()
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(false)
+      return
+    }
+
+    user
+      .getIdTokenResult()
+      .then((tokenResult) => {
+        const role = tokenResult.claims.role || tokenResult.claims.Role
+        // Cho phép nếu có claim role = admin hoặc dev admin
+        setIsAdmin(role === 'admin' || role === 'ADMIN' || Boolean(user.email?.includes('admin')))
+      })
+      .catch(() => {
+        setIsAdmin(user.email?.includes('admin') ?? false)
+      })
+  }, [user])
+
+  if (loading || isAdmin === null) {
+    return (
+      <main className="splash-screen" aria-live="polite">
+        <div className="loader" />
+        <p>Đang xác thực quyền Quản trị viên…</p>
+      </main>
+    )
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />
+  }
+
+  return <>{children}</>
 }

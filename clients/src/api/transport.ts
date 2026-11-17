@@ -1,9 +1,16 @@
 import type { Interceptor } from '@connectrpc/connect'
 import { createGrpcWebTransport } from '@connectrpc/connect-web'
 import { auth } from '../auth/firebase'
-import { getDevToken } from '../auth/devAuth'
+import { getDevToken, getAdminDevToken } from '../auth/devAuth'
 
 const authInterceptor: Interceptor = (next) => async (request) => {
+  // Dev-admin session: dùng admin token (có claim role=admin) thay vì Firebase
+  if (sessionStorage.getItem('dev-admin-active') === 'true') {
+    const adminToken = await getAdminDevToken()
+    request.header.set('Authorization', `Bearer ${adminToken}`)
+    return next(request)
+  }
+
   const user = auth.currentUser
   if (user) {
     try {

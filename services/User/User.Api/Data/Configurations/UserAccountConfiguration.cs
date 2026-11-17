@@ -24,6 +24,9 @@ public sealed class UserAccountConfiguration : IEntityTypeConfiguration<UserAcco
         builder.Property(user => user.TotalExp).HasColumnName("total_exp");
         builder.Property(user => user.PlayerLevel).HasColumnName("player_level");
         builder.Property(user => user.Trophies).HasColumnName("trophies");
+        builder.Property(user => user.BanReason).HasColumnName("ban_reason").HasMaxLength(500);
+        builder.Property(user => user.BannedUntil).HasColumnName("banned_until");
+        builder.Property(user => user.LastLoginAt).HasColumnName("last_login_at");
         builder.Property(user => user.CreatedAt).HasColumnName("created_at").IsRequired();
         builder.Property(user => user.UpdatedAt).HasColumnName("updated_at").IsRequired();
 

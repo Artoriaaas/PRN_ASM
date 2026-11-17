@@ -99,6 +99,7 @@ public sealed class GameEventsConsumerWorker : BackgroundService
                     catch (ConsumeException ex)
                     {
                         _logger.LogWarning(ex, "ConsumeException in GameEventsConsumerWorker: {Reason}", ex.Error.Reason);
+                        await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
                     }
                     catch (Exception ex) when (ex is not OperationCanceledException)
                     {

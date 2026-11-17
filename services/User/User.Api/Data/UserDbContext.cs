@@ -8,6 +8,9 @@ public sealed class UserDbContext(DbContextOptions<UserDbContext> options) : DbC
 {
     public DbSet<UserAccount> Users => Set<UserAccount>();
     public DbSet<InboxMessage> InboxMessages => Set<InboxMessage>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<EloHistory> EloHistories => Set<EloHistory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

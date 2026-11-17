@@ -63,6 +63,18 @@ public class GameDataSeeder : IHostedService
                 }
                 await uow.SaveChangesAsync(cancellationToken);
             }
+
+            bool hasModes = await db.GameModes.AnyAsync(cancellationToken);
+            if (!hasModes)
+            {
+                _logger.LogInformation("Seeding initial GameModes...");
+                db.GameModes.AddRange(
+                    new GameMode { Id = Guid.NewGuid(), Code = "classic", Name = "Classic", Description = "Chế độ Sudoku tiêu chuẩn 9x9", IsActive = true, SortOrder = 1, Version = 1 },
+                    new GameMode { Id = Guid.NewGuid(), Code = "shuffle", Name = "Shuffle", Description = "Chế độ Sudoku xáo trộn ngẫu nhiên", IsActive = true, SortOrder = 2, Version = 1 }
+                );
+                await uow.SaveChangesAsync(cancellationToken);
+                _logger.LogInformation("GameModes seeded successfully.");
+            }
         }
         catch (Exception ex)
         {

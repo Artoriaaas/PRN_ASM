@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type { UserProfile } from '../gen/sudoku/user/v1/user_pb'
 import { useAuth } from '../auth/useAuth'
@@ -15,12 +15,30 @@ const NAV_ITEMS = [
   { to: '/play', label: 'Đấu trận' },
   { to: '/leaderboard', label: 'Xếp hạng' },
   { to: '/learn', label: 'Học' },
+  { to: '/feedback', label: 'Góp ý' },
 ]
 
 export function AppShell({ profile, children }: AppShellProps) {
   const { user, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(false)
+      return
+    }
+    user
+      .getIdTokenResult()
+      .then((res) => {
+        const role = res.claims.role || res.claims.Role
+        setIsAdmin(role === 'admin' || role === 'ADMIN' || (user.email?.includes('admin') ?? false))
+      })
+      .catch(() => {
+        setIsAdmin(user.email?.includes('admin') ?? false)
+      })
+  }, [user])
 
   // Ẩn nav khi trong trận
   const inGame =
@@ -72,6 +90,15 @@ export function AppShell({ profile, children }: AppShellProps) {
               </Link>
             )
           })}
+          {isAdmin && (
+            <Link
+              to="/admin/users"
+              className={`nav-link admin-nav-link${location.pathname.startsWith('/admin') ? ' active' : ''}`}
+              style={{ color: '#ea580c', fontWeight: 600 }}
+            >
+              🛡️ Quản trị
+            </Link>
+          )}
         </nav>
 
         <div className="topbar-right">

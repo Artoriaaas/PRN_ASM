@@ -9,6 +9,9 @@ public class GameDbContext : DbContext
     public GameDbContext(DbContextOptions<GameDbContext> options) : base(options) { }
 
     public DbSet<Level> Levels => Set<Level>();
+    public DbSet<GameMode> GameModes => Set<GameMode>();
+    public DbSet<TaskDefinition> TaskDefinitions => Set<TaskDefinition>();
+    public DbSet<GameAuditLog> GameAuditLogs => Set<GameAuditLog>();
     public DbSet<Puzzle> Puzzles => Set<Puzzle>();
     public DbSet<GameSession> GameSessions => Set<GameSession>();
     public DbSet<GameMove> GameMoves => Set<GameMove>();

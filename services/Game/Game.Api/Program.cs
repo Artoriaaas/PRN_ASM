@@ -28,6 +28,7 @@ builder.Services.AddScoped<ISoloRulePolicy, ClassicSoloRulePolicy>();
 builder.Services.AddScoped<IPuzzleBankService, PuzzleBankService>();
 builder.Services.AddScoped<IGamePlayService, GamePlayService>();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
+builder.Services.AddScoped<IAdminGameService, AdminGameService>();
 
 builder.Services.AddSudokuKafkaPublisher();
 

@@ -16,6 +16,18 @@ service GameService {
   rpc GetHighScores(GetHighScoresRequest) returns (GetHighScoresResponse);
   rpc AcquirePuzzleForMatch(AcquirePuzzleForMatchRequest) returns (AcquirePuzzleForMatchResponse);
   rpc GetGameHistory(GetGameHistoryRequest) returns (GetGameHistoryResponse);
+
+  // Game Modes & Rules
+  rpc ListGameModes(ListGameModesRequest) returns (ListGameModesResponse);
+
+  // Admin Game Rules Management
+  rpc AdminListGameModes(AdminListGameModesRequest) returns (AdminListGameModesResponse);
+  rpc AdminUpdateGameMode(AdminUpdateGameModeRequest) returns (AdminUpdateGameModeResponse);
+  rpc AdminListLevelConfigs(AdminListLevelConfigsRequest) returns (AdminListLevelConfigsResponse);
+  rpc AdminUpdateLevel(AdminUpdateLevelRequest) returns (AdminUpdateLevelResponse);
+  rpc AdminListTaskDefs(AdminListTaskDefsRequest) returns (AdminListTaskDefsResponse);
+  rpc AdminCreateTaskDef(AdminCreateTaskDefRequest) returns (AdminCreateTaskDefResponse);
+  rpc AdminUpdateTaskDef(AdminUpdateTaskDefRequest) returns (AdminUpdateTaskDefResponse);
 }
 
 enum LayoutType {
@@ -217,4 +229,125 @@ message GetGameHistoryResponse {
   repeated GameHistoryItem items = 1;
   int32 total_count = 2;
   int32 wins_count = 3;
+}
+
+message GameModeInfo {
+  string id = 1;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+  bool is_active = 5;
+  int32 sort_order = 6;
+  int32 version = 7;
+  string updated_at = 8;
+}
+
+message ListGameModesRequest {}
+
+message ListGameModesResponse {
+  repeated GameModeInfo game_modes = 1;
+}
+
+message AdminListGameModesRequest {}
+
+message AdminListGameModesResponse {
+  repeated GameModeInfo game_modes = 1;
+}
+
+message AdminUpdateGameModeRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  bool is_active = 4;
+  bool notify_players = 5;
+  string notification_message = 6;
+  string reason = 7;
+}
+
+message AdminUpdateGameModeResponse {
+  GameModeInfo game_mode = 1;
+}
+
+message LevelConfigInfo {
+  string level_id = 1;
+  string name = 2;
+  int32 sort_order = 3;
+  int32 min_clues = 4;
+  int32 max_clues = 5;
+  int32 max_mistakes = 6;
+  int32 max_hints = 7;
+  bool is_active = 8;
+  double score_multiplier = 9;
+  int32 time_limit_seconds = 10;
+  int32 version = 11;
+  string updated_at = 12;
+}
+
+message AdminListLevelConfigsRequest {}
+
+message AdminListLevelConfigsResponse {
+  repeated LevelConfigInfo levels = 1;
+}
+
+message AdminUpdateLevelRequest {
+  string level_id = 1;
+  int32 min_clues = 2;
+  int32 max_clues = 3;
+  int32 max_mistakes = 4;
+  int32 max_hints = 5;
+  bool is_active = 6;
+  double score_multiplier = 7;
+  int32 time_limit_seconds = 8;
+  bool notify_players = 9;
+  string notification_message = 10;
+  string reason = 11;
+}
+
+message AdminUpdateLevelResponse {
+  LevelConfigInfo level = 1;
+}
+
+message TaskDefInfo {
+  string id = 1;
+  string code = 2;
+  string description = 3;
+  string condition_type = 4;
+  int32 target = 5;
+  string progress_source = 6;
+  bool is_active = 7;
+  int32 sort_order = 8;
+  string updated_at = 9;
+}
+
+message AdminListTaskDefsRequest {}
+
+message AdminListTaskDefsResponse {
+  repeated TaskDefInfo task_defs = 1;
+}
+
+message AdminCreateTaskDefRequest {
+  string code = 1;
+  string description = 2;
+  string condition_type = 3;
+  int32 target = 4;
+  string progress_source = 5;
+  int32 sort_order = 6;
+  string reason = 7;
+}
+
+message AdminCreateTaskDefResponse {
+  TaskDefInfo task_def = 1;
+}
+
+message AdminUpdateTaskDefRequest {
+  string id = 1;
+  string description = 2;
+  bool is_active = 3;
+  int32 target = 4;
+  int32 sort_order = 5;
+  string reason = 6;
+}
+
+message AdminUpdateTaskDefResponse {
+  TaskDefInfo task_def = 1;
 }

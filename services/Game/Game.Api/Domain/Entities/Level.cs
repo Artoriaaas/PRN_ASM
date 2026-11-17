@@ -10,4 +10,8 @@ public class Level
     public int MaxMistakes { get; set; } = 3;
     public int MaxHints { get; set; } = 3;
     public bool IsActive { get; set; } = true;
+    public double ScoreMultiplier { get; set; } = 1.0;
+    public int? TimeLimitSeconds { get; set; }
+    public int Version { get; set; } = 1;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

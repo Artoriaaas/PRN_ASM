@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file sudoku/game/v1/game.proto.
  */
 export const file_sudoku_game_v1_game: GenFile = /*@__PURE__*/
-  fileDesc("ChlzdWRva3UvZ2FtZS92MS9nYW1lLnByb3RvEg5zdWRva3UuZ2FtZS52MSKOAQoJTGV2ZWxJbmZvEhAKCGxldmVsX2lkGAEgASgJEgwKBG5hbWUYAiABKAkSEgoKc29ydF9vcmRlchgDIAEoBRIRCgltaW5fY2x1ZXMYBCABKAUSEQoJbWF4X2NsdWVzGAUgASgFEhQKDG1heF9taXN0YWtlcxgGIAEoBRIRCgltYXhfaGludHMYByABKAUiNwoIQ2VsbE5vdGUSEgoKY2VsbF9pbmRleBgBIAEoBRIXCg9jYW5kaWRhdGVzX21hc2sYAiABKAUijwMKDFNlc3Npb25TdGF0ZRISCgpzZXNzaW9uX2lkGAEgASgJEhAKCGxldmVsX2lkGAIgASgJEi8KC2xheW91dF90eXBlGAMgASgOMhouc3Vkb2t1LmdhbWUudjEuTGF5b3V0VHlwZRItCgZzdGF0dXMYBCABKA4yHS5zdWRva3UuZ2FtZS52MS5TZXNzaW9uU3RhdHVzEhUKDWluaXRpYWxfYm9hcmQYBSABKAkSFQoNY3VycmVudF9ib2FyZBgGIAEoCRISCgpyZWdpb25fbWFwGAcgASgJEicKBW5vdGVzGAggAygLMhguc3Vkb2t1LmdhbWUudjEuQ2VsbE5vdGUSFgoObWlzdGFrZXNfY291bnQYCSABKAUSFAoMbWF4X21pc3Rha2VzGAogASgFEhIKCmhpbnRzX3VzZWQYCyABKAUSEQoJbWF4X2hpbnRzGAwgASgFEg0KBXNjb3JlGA0gASgFEhIKCmVsYXBzZWRfbXMYDiABKAMSEAoIYWNjdXJhY3kYDyABKAFKBAgUEBUiEwoRTGlzdExldmVsc1JlcXVlc3QiPwoSTGlzdExldmVsc1Jlc3BvbnNlEikKBmxldmVscxgBIAMoCzIZLnN1ZG9rdS5nYW1lLnYxLkxldmVsSW5mbyJbChBTdGFydEdhbWVSZXF1ZXN0EhAKCGxldmVsX2lkGAEgASgJEi8KC2xheW91dF90eXBlGAIgASgOMhouc3Vkb2t1LmdhbWUudjEuTGF5b3V0VHlwZUoECAoQCyJCChFTdGFydEdhbWVSZXNwb25zZRItCgdzZXNzaW9uGAEgASgLMhwuc3Vkb2t1LmdhbWUudjEuU2Vzc2lvblN0YXRlIhkKF0dldEFjdGl2ZVNlc3Npb25SZXF1ZXN0ImUKGEdldEFjdGl2ZVNlc3Npb25SZXNwb25zZRIaChJoYXNfYWN0aXZlX3Nlc3Npb24YASABKAgSLQoHc2Vzc2lvbhgCIAEoCzIcLnN1ZG9rdS5nYW1lLnYxLlNlc3Npb25TdGF0ZSInChFHZXRTZXNzaW9uUmVxdWVzdBISCgpzZXNzaW9uX2lkGAEgASgJIkMKEkdldFNlc3Npb25SZXNwb25zZRItCgdzZXNzaW9uGAEgASgLMhwuc3Vkb2t1LmdhbWUudjEuU2Vzc2lvblN0YXRlIk4KD01ha2VNb3ZlUmVxdWVzdBISCgpzZXNzaW9uX2lkGAEgASgJEgsKA3JvdxgCIAEoBRILCgNjb2wYAyABKAUSDQoFdmFsdWUYBCABKAUiwAEKEE1ha2VNb3ZlUmVzcG9uc2USEgoKaXNfY29ycmVjdBgBIAEoCBIaChJpc19kdXBsaWNhdGVfd3JvbmcYAiABKAgSNwoPZGlmZmljdWx0eV90aWVyGAMgASgOMh4uc3Vkb2t1LmdhbWUudjEuRGlmZmljdWx0eVRpZXISFAoMcG9pbnRzX2RlbHRhGAQgASgFEi0KB3Nlc3Npb24YBSABKAsyHC5zdWRva3UuZ2FtZS52MS5TZXNzaW9uU3RhdGUidAoOVXNlSGludFJlcXVlc3QSEgoKc2Vzc2lvbl9pZBgBIAEoCRIXCgp0YXJnZXRfcm93GAIgASgFSACIAQESFwoKdGFyZ2V0X2NvbBgDIAEoBUgBiAEBQg0KC190YXJnZXRfcm93Qg0KC190YXJnZXRfY29sIrQBCg9Vc2VIaW50UmVzcG9uc2USCwoDcm93GAEgASgFEgsKA2NvbBgCIAEoBRINCgV2YWx1ZRgDIAEoBRIwCgl0ZWNobmlxdWUYBCABKA4yHS5zdWRva3UuZ2FtZS52MS5IaW50VGVjaG5pcXVlEhcKD2hpZ2hsaWdodF9jZWxscxgFIAMoBRItCgdzZXNzaW9uGAYgASgLMhwuc3Vkb2t1LmdhbWUudjEuU2Vzc2lvblN0YXRlIk8KEFNhdmVOb3Rlc1JlcXVlc3QSEgoKc2Vzc2lvbl9pZBgBIAEoCRInCgVub3RlcxgCIAMoCzIYLnN1ZG9rdS5nYW1lLnYxLkNlbGxOb3RlIhMKEVNhdmVOb3Rlc1Jlc3BvbnNlIigKEkFiYW5kb25HYW1lUmVxdWVzdBISCgpzZXNzaW9uX2lkGAEgASgJIkQKE0FiYW5kb25HYW1lUmVzcG9uc2USLQoHc2Vzc2lvbhgBIAEoCzIcLnN1ZG9rdS5nYW1lLnYxLlNlc3Npb25TdGF0ZSJuChRHZXRIaWdoU2NvcmVzUmVxdWVzdBIQCghsZXZlbF9pZBgBIAEoCRIvCgtsYXlvdXRfdHlwZRgCIAEoDjIaLnN1ZG9rdS5nYW1lLnYxLkxheW91dFR5cGUSDQoFbGltaXQYAyABKAVKBAgKEAsiZwoOSGlnaFNjb3JlRW50cnkSDAoEcmFuaxgBIAEoBRIPCgd1c2VyX2lkGAIgASgJEhMKC3BsYXllcl9uYW1lGAMgASgJEg0KBXNjb3JlGAQgASgFEhIKCmVsYXBzZWRfbXMYBSABKAMiSAoVR2V0SGlnaFNjb3Jlc1Jlc3BvbnNlEi8KB2VudHJpZXMYASADKAsyHi5zdWRva3UuZ2FtZS52MS5IaWdoU2NvcmVFbnRyeSKdAQocQWNxdWlyZVB1enpsZUZvck1hdGNoUmVxdWVzdBIQCghsZXZlbF9pZBgBIAEoCRIvCgtsYXlvdXRfdHlwZRgCIAEoDjIaLnN1ZG9rdS5nYW1lLnYxLkxheW91dFR5cGUSIAoYcmVxdWlyZV9ldmVuX2VtcHR5X2NlbGxzGAMgASgIEhgKEGV4Y2x1ZGVfdXNlcl9pZHMYBCADKAkizAEKHUFjcXVpcmVQdXp6bGVGb3JNYXRjaFJlc3BvbnNlEhEKCXB1enpsZV9pZBgBIAEoCRIQCghsZXZlbF9pZBgCIAEoCRIvCgtsYXlvdXRfdHlwZRgDIAEoDjIaLnN1ZG9rdS5nYW1lLnYxLkxheW91dFR5cGUSFQoNaW5pdGlhbF9ib2FyZBgEIAEoCRIWCg5zb2x1dGlvbl9ib2FyZBgFIAEoCRISCgpyZWdpb25fbWFwGAYgASgJEhIKCmNsdWVfY291bnQYByABKAUioQIKD0dhbWVIaXN0b3J5SXRlbRISCgpzZXNzaW9uX2lkGAEgASgJEhAKCGxldmVsX2lkGAIgASgJEi8KC2xheW91dF90eXBlGAMgASgOMhouc3Vkb2t1LmdhbWUudjEuTGF5b3V0VHlwZRItCgZzdGF0dXMYBCABKA4yHS5zdWRva3UuZ2FtZS52MS5TZXNzaW9uU3RhdHVzEg0KBXNjb3JlGAUgASgFEhIKCmVsYXBzZWRfbXMYBiABKAMSFgoObWlzdGFrZXNfY291bnQYByABKAUSEgoKaGludHNfdXNlZBgIIAEoBRIQCghhY2N1cmFjeRgJIAEoARISCgpzdGFydGVkX2F0GAogASgJEhMKC2ZpbmlzaGVkX2F0GAsgASgJIjYKFUdldEdhbWVIaXN0b3J5UmVxdWVzdBINCgVsaW1pdBgBIAEoBRIOCgZvZmZzZXQYAiABKAUicQoWR2V0R2FtZUhpc3RvcnlSZXNwb25zZRIuCgVpdGVtcxgBIAMoCzIfLnN1ZG9rdS5nYW1lLnYxLkdhbWVIaXN0b3J5SXRlbRITCgt0b3RhbF9jb3VudBgCIAEoBRISCgp3aW5zX2NvdW50GAMgASgFKl4KCkxheW91dFR5cGUSGwoXTEFZT1VUX1RZUEVfVU5TUEVDSUZJRUQQABIYChRMQVlPVVRfVFlQRV9TVEFOREFSRBABEhkKFUxBWU9VVF9UWVBFX0lSUkVHVUxBUhACKqYBCg1TZXNzaW9uU3RhdHVzEh4KGlNFU1NJT05fU1RBVFVTX1VOU1BFQ0lGSUVEEAASHgoaU0VTU0lPTl9TVEFUVVNfSU5fUFJPR1JFU1MQARIcChhTRVNTSU9OX1NUQVRVU19DT01QTEVURUQQAhIZChVTRVNTSU9OX1NUQVRVU19GQUlMRUQQAxIcChhTRVNTSU9OX1NUQVRVU19BQkFORE9ORUQQBCqUAQoORGlmZmljdWx0eVRpZXISHwobRElGRklDVUxUWV9USUVSX1VOU1BFQ0lGSUVEEAASIAocRElGRklDVUxUWV9USUVSX05BS0VEX1NJTkdMRRABEiEKHURJRkZJQ1VMVFlfVElFUl9ISURERU5fU0lOR0xFEAISHAoYRElGRklDVUxUWV9USUVSX0FEVkFOQ0VEEAMq5wEKDUhpbnRUZWNobmlxdWUSHgoaSElOVF9URUNITklRVUVfVU5TUEVDSUZJRUQQABIfChtISU5UX1RFQ0hOSVFVRV9OQUtFRF9TSU5HTEUQARIkCiBISU5UX1RFQ0hOSVFVRV9ISURERU5fU0lOR0xFX1JPVxACEiQKIEhJTlRfVEVDSE5JUVVFX0hJRERFTl9TSU5HTEVfQ09MEAMSJwojSElOVF9URUNITklRVUVfSElEREVOX1NJTkdMRV9SRUdJT04QBBIgChxISU5UX1RFQ0hOSVFVRV9ESVJFQ1RfUkVWRUFMEAUy6gcKC0dhbWVTZXJ2aWNlElMKCkxpc3RMZXZlbHMSIS5zdWRva3UuZ2FtZS52MS5MaXN0TGV2ZWxzUmVxdWVzdBoiLnN1ZG9rdS5nYW1lLnYxLkxpc3RMZXZlbHNSZXNwb25zZRJQCglTdGFydEdhbWUSIC5zdWRva3UuZ2FtZS52MS5TdGFydEdhbWVSZXF1ZXN0GiEuc3Vkb2t1LmdhbWUudjEuU3RhcnRHYW1lUmVzcG9uc2USZQoQR2V0QWN0aXZlU2Vzc2lvbhInLnN1ZG9rdS5nYW1lLnYxLkdldEFjdGl2ZVNlc3Npb25SZXF1ZXN0Giguc3Vkb2t1LmdhbWUudjEuR2V0QWN0aXZlU2Vzc2lvblJlc3BvbnNlElMKCkdldFNlc3Npb24SIS5zdWRva3UuZ2FtZS52MS5HZXRTZXNzaW9uUmVxdWVzdBoiLnN1ZG9rdS5nYW1lLnYxLkdldFNlc3Npb25SZXNwb25zZRJNCghNYWtlTW92ZRIfLnN1ZG9rdS5nYW1lLnYxLk1ha2VNb3ZlUmVxdWVzdBogLnN1ZG9rdS5nYW1lLnYxLk1ha2VNb3ZlUmVzcG9uc2USSgoHVXNlSGludBIeLnN1ZG9rdS5nYW1lLnYxLlVzZUhpbnRSZXF1ZXN0Gh8uc3Vkb2t1LmdhbWUudjEuVXNlSGludFJlc3BvbnNlElAKCVNhdmVOb3RlcxIgLnN1ZG9rdS5nYW1lLnYxLlNhdmVOb3Rlc1JlcXVlc3QaIS5zdWRva3UuZ2FtZS52MS5TYXZlTm90ZXNSZXNwb25zZRJWCgtBYmFuZG9uR2FtZRIiLnN1ZG9rdS5nYW1lLnYxLkFiYW5kb25HYW1lUmVxdWVzdBojLnN1ZG9rdS5nYW1lLnYxLkFiYW5kb25HYW1lUmVzcG9uc2USXAoNR2V0SGlnaFNjb3JlcxIkLnN1ZG9rdS5nYW1lLnYxLkdldEhpZ2hTY29yZXNSZXF1ZXN0GiUuc3Vkb2t1LmdhbWUudjEuR2V0SGlnaFNjb3Jlc1Jlc3BvbnNlEnQKFUFjcXVpcmVQdXp6bGVGb3JNYXRjaBIsLnN1ZG9rdS5nYW1lLnYxLkFjcXVpcmVQdXp6bGVGb3JNYXRjaFJlcXVlc3QaLS5zdWRva3UuZ2FtZS52MS5BY3F1aXJlUHV6emxlRm9yTWF0Y2hSZXNwb25zZRJfCg5HZXRHYW1lSGlzdG9yeRIlLnN1ZG9rdS5nYW1lLnYxLkdldEdhbWVIaXN0b3J5UmVxdWVzdBomLnN1ZG9rdS5nYW1lLnYxLkdldEdhbWVIaXN0b3J5UmVzcG9uc2VCEaoCDlN1ZG9rdS5HYW1lLlYxYgZwcm90bzM");
+  fileDesc("ChlzdWRva3UvZ2FtZS92MS9nYW1lLnByb3RvEg5zdWRva3UuZ2FtZS52MSKOAQoJTGV2ZWxJbmZvEhAKCGxldmVsX2lkGAEgASgJEgwKBG5hbWUYAiABKAkSEgoKc29ydF9vcmRlchgDIAEoBRIRCgltaW5fY2x1ZXMYBCABKAUSEQoJbWF4X2NsdWVzGAUgASgFEhQKDG1heF9taXN0YWtlcxgGIAEoBRIRCgltYXhfaGludHMYByABKAUiNwoIQ2VsbE5vdGUSEgoKY2VsbF9pbmRleBgBIAEoBRIXCg9jYW5kaWRhdGVzX21hc2sYAiABKAUijwMKDFNlc3Npb25TdGF0ZRISCgpzZXNzaW9uX2lkGAEgASgJEhAKCGxldmVsX2lkGAIgASgJEi8KC2xheW91dF90eXBlGAMgASgOMhouc3Vkb2t1LmdhbWUudjEuTGF5b3V0VHlwZRItCgZzdGF0dXMYBCABKA4yHS5zdWRva3UuZ2FtZS52MS5TZXNzaW9uU3RhdHVzEhUKDWluaXRpYWxfYm9hcmQYBSABKAkSFQoNY3VycmVudF9ib2FyZBgGIAEoCRISCgpyZWdpb25fbWFwGAcgASgJEicKBW5vdGVzGAggAygLMhguc3Vkb2t1LmdhbWUudjEuQ2VsbE5vdGUSFgoObWlzdGFrZXNfY291bnQYCSABKAUSFAoMbWF4X21pc3Rha2VzGAogASgFEhIKCmhpbnRzX3VzZWQYCyABKAUSEQoJbWF4X2hpbnRzGAwgASgFEg0KBXNjb3JlGA0gASgFEhIKCmVsYXBzZWRfbXMYDiABKAMSEAoIYWNjdXJhY3kYDyABKAFKBAgUEBUiEwoRTGlzdExldmVsc1JlcXVlc3QiPwoSTGlzdExldmVsc1Jlc3BvbnNlEikKBmxldmVscxgBIAMoCzIZLnN1ZG9rdS5nYW1lLnYxLkxldmVsSW5mbyJbChBTdGFydEdhbWVSZXF1ZXN0EhAKCGxldmVsX2lkGAEgASgJEi8KC2xheW91dF90eXBlGAIgASgOMhouc3Vkb2t1LmdhbWUudjEuTGF5b3V0VHlwZUoECAoQCyJCChFTdGFydEdhbWVSZXNwb25zZRItCgdzZXNzaW9uGAEgASgLMhwuc3Vkb2t1LmdhbWUudjEuU2Vzc2lvblN0YXRlIhkKF0dldEFjdGl2ZVNlc3Npb25SZXF1ZXN0ImUKGEdldEFjdGl2ZVNlc3Npb25SZXNwb25zZRIaChJoYXNfYWN0aXZlX3Nlc3Npb24YASABKAgSLQoHc2Vzc2lvbhgCIAEoCzIcLnN1ZG9rdS5nYW1lLnYxLlNlc3Npb25TdGF0ZSInChFHZXRTZXNzaW9uUmVxdWVzdBISCgpzZXNzaW9uX2lkGAEgASgJIkMKEkdldFNlc3Npb25SZXNwb25zZRItCgdzZXNzaW9uGAEgASgLMhwuc3Vkb2t1LmdhbWUudjEuU2Vzc2lvblN0YXRlIk4KD01ha2VNb3ZlUmVxdWVzdBISCgpzZXNzaW9uX2lkGAEgASgJEgsKA3JvdxgCIAEoBRILCgNjb2wYAyABKAUSDQoFdmFsdWUYBCABKAUiwAEKEE1ha2VNb3ZlUmVzcG9uc2USEgoKaXNfY29ycmVjdBgBIAEoCBIaChJpc19kdXBsaWNhdGVfd3JvbmcYAiABKAgSNwoPZGlmZmljdWx0eV90aWVyGAMgASgOMh4uc3Vkb2t1LmdhbWUudjEuRGlmZmljdWx0eVRpZXISFAoMcG9pbnRzX2RlbHRhGAQgASgFEi0KB3Nlc3Npb24YBSABKAsyHC5zdWRva3UuZ2FtZS52MS5TZXNzaW9uU3RhdGUidAoOVXNlSGludFJlcXVlc3QSEgoKc2Vzc2lvbl9pZBgBIAEoCRIXCgp0YXJnZXRfcm93GAIgASgFSACIAQESFwoKdGFyZ2V0X2NvbBgDIAEoBUgBiAEBQg0KC190YXJnZXRfcm93Qg0KC190YXJnZXRfY29sIrQBCg9Vc2VIaW50UmVzcG9uc2USCwoDcm93GAEgASgFEgsKA2NvbBgCIAEoBRINCgV2YWx1ZRgDIAEoBRIwCgl0ZWNobmlxdWUYBCABKA4yHS5zdWRva3UuZ2FtZS52MS5IaW50VGVjaG5pcXVlEhcKD2hpZ2hsaWdodF9jZWxscxgFIAMoBRItCgdzZXNzaW9uGAYgASgLMhwuc3Vkb2t1LmdhbWUudjEuU2Vzc2lvblN0YXRlIk8KEFNhdmVOb3Rlc1JlcXVlc3QSEgoKc2Vzc2lvbl9pZBgBIAEoCRInCgVub3RlcxgCIAMoCzIYLnN1ZG9rdS5nYW1lLnYxLkNlbGxOb3RlIhMKEVNhdmVOb3Rlc1Jlc3BvbnNlIigKEkFiYW5kb25HYW1lUmVxdWVzdBISCgpzZXNzaW9uX2lkGAEgASgJIkQKE0FiYW5kb25HYW1lUmVzcG9uc2USLQoHc2Vzc2lvbhgBIAEoCzIcLnN1ZG9rdS5nYW1lLnYxLlNlc3Npb25TdGF0ZSJuChRHZXRIaWdoU2NvcmVzUmVxdWVzdBIQCghsZXZlbF9pZBgBIAEoCRIvCgtsYXlvdXRfdHlwZRgCIAEoDjIaLnN1ZG9rdS5nYW1lLnYxLkxheW91dFR5cGUSDQoFbGltaXQYAyABKAVKBAgKEAsiZwoOSGlnaFNjb3JlRW50cnkSDAoEcmFuaxgBIAEoBRIPCgd1c2VyX2lkGAIgASgJEhMKC3BsYXllcl9uYW1lGAMgASgJEg0KBXNjb3JlGAQgASgFEhIKCmVsYXBzZWRfbXMYBSABKAMiSAoVR2V0SGlnaFNjb3Jlc1Jlc3BvbnNlEi8KB2VudHJpZXMYASADKAsyHi5zdWRva3UuZ2FtZS52MS5IaWdoU2NvcmVFbnRyeSKdAQocQWNxdWlyZVB1enpsZUZvck1hdGNoUmVxdWVzdBIQCghsZXZlbF9pZBgBIAEoCRIvCgtsYXlvdXRfdHlwZRgCIAEoDjIaLnN1ZG9rdS5nYW1lLnYxLkxheW91dFR5cGUSIAoYcmVxdWlyZV9ldmVuX2VtcHR5X2NlbGxzGAMgASgIEhgKEGV4Y2x1ZGVfdXNlcl9pZHMYBCADKAkizAEKHUFjcXVpcmVQdXp6bGVGb3JNYXRjaFJlc3BvbnNlEhEKCXB1enpsZV9pZBgBIAEoCRIQCghsZXZlbF9pZBgCIAEoCRIvCgtsYXlvdXRfdHlwZRgDIAEoDjIaLnN1ZG9rdS5nYW1lLnYxLkxheW91dFR5cGUSFQoNaW5pdGlhbF9ib2FyZBgEIAEoCRIWCg5zb2x1dGlvbl9ib2FyZBgFIAEoCRISCgpyZWdpb25fbWFwGAYgASgJEhIKCmNsdWVfY291bnQYByABKAUioQIKD0dhbWVIaXN0b3J5SXRlbRISCgpzZXNzaW9uX2lkGAEgASgJEhAKCGxldmVsX2lkGAIgASgJEi8KC2xheW91dF90eXBlGAMgASgOMhouc3Vkb2t1LmdhbWUudjEuTGF5b3V0VHlwZRItCgZzdGF0dXMYBCABKA4yHS5zdWRva3UuZ2FtZS52MS5TZXNzaW9uU3RhdHVzEg0KBXNjb3JlGAUgASgFEhIKCmVsYXBzZWRfbXMYBiABKAMSFgoObWlzdGFrZXNfY291bnQYByABKAUSEgoKaGludHNfdXNlZBgIIAEoBRIQCghhY2N1cmFjeRgJIAEoARISCgpzdGFydGVkX2F0GAogASgJEhMKC2ZpbmlzaGVkX2F0GAsgASgJIjYKFUdldEdhbWVIaXN0b3J5UmVxdWVzdBINCgVsaW1pdBgBIAEoBRIOCgZvZmZzZXQYAiABKAUicQoWR2V0R2FtZUhpc3RvcnlSZXNwb25zZRIuCgVpdGVtcxgBIAMoCzIfLnN1ZG9rdS5nYW1lLnYxLkdhbWVIaXN0b3J5SXRlbRITCgt0b3RhbF9jb3VudBgCIAEoBRISCgp3aW5zX2NvdW50GAMgASgFIpcBCgxHYW1lTW9kZUluZm8SCgoCaWQYASABKAkSDAoEY29kZRgCIAEoCRIMCgRuYW1lGAMgASgJEhMKC2Rlc2NyaXB0aW9uGAQgASgJEhEKCWlzX2FjdGl2ZRgFIAEoCBISCgpzb3J0X29yZGVyGAYgASgFEg8KB3ZlcnNpb24YByABKAUSEgoKdXBkYXRlZF9hdBgIIAEoCSIWChRMaXN0R2FtZU1vZGVzUmVxdWVzdCJJChVMaXN0R2FtZU1vZGVzUmVzcG9uc2USMAoKZ2FtZV9tb2RlcxgBIAMoCzIcLnN1ZG9rdS5nYW1lLnYxLkdhbWVNb2RlSW5mbyIbChlBZG1pbkxpc3RHYW1lTW9kZXNSZXF1ZXN0Ik4KGkFkbWluTGlzdEdhbWVNb2Rlc1Jlc3BvbnNlEjAKCmdhbWVfbW9kZXMYASADKAsyHC5zdWRva3UuZ2FtZS52MS5HYW1lTW9kZUluZm8ipAEKGkFkbWluVXBkYXRlR2FtZU1vZGVSZXF1ZXN0EgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSEQoJaXNfYWN0aXZlGAQgASgIEhYKDm5vdGlmeV9wbGF5ZXJzGAUgASgIEhwKFG5vdGlmaWNhdGlvbl9tZXNzYWdlGAYgASgJEg4KBnJlYXNvbhgHIAEoCSJOChtBZG1pblVwZGF0ZUdhbWVNb2RlUmVzcG9uc2USLwoJZ2FtZV9tb2RlGAEgASgLMhwuc3Vkb2t1LmdhbWUudjEuR2FtZU1vZGVJbmZvIoICCg9MZXZlbENvbmZpZ0luZm8SEAoIbGV2ZWxfaWQYASABKAkSDAoEbmFtZRgCIAEoCRISCgpzb3J0X29yZGVyGAMgASgFEhEKCW1pbl9jbHVlcxgEIAEoBRIRCgltYXhfY2x1ZXMYBSABKAUSFAoMbWF4X21pc3Rha2VzGAYgASgFEhEKCW1heF9oaW50cxgHIAEoBRIRCglpc19hY3RpdmUYCCABKAgSGAoQc2NvcmVfbXVsdGlwbGllchgJIAEoARIaChJ0aW1lX2xpbWl0X3NlY29uZHMYCiABKAUSDwoHdmVyc2lvbhgLIAEoBRISCgp1cGRhdGVkX2F0GAwgASgJIh4KHEFkbWluTGlzdExldmVsQ29uZmlnc1JlcXVlc3QiUAodQWRtaW5MaXN0TGV2ZWxDb25maWdzUmVzcG9uc2USLwoGbGV2ZWxzGAEgAygLMh8uc3Vkb2t1LmdhbWUudjEuTGV2ZWxDb25maWdJbmZvIokCChdBZG1pblVwZGF0ZUxldmVsUmVxdWVzdBIQCghsZXZlbF9pZBgBIAEoCRIRCgltaW5fY2x1ZXMYAiABKAUSEQoJbWF4X2NsdWVzGAMgASgFEhQKDG1heF9taXN0YWtlcxgEIAEoBRIRCgltYXhfaGludHMYBSABKAUSEQoJaXNfYWN0aXZlGAYgASgIEhgKEHNjb3JlX211bHRpcGxpZXIYByABKAESGgoSdGltZV9saW1pdF9zZWNvbmRzGAggASgFEhYKDm5vdGlmeV9wbGF5ZXJzGAkgASgIEhwKFG5vdGlmaWNhdGlvbl9tZXNzYWdlGAogASgJEg4KBnJlYXNvbhgLIAEoCSJKChhBZG1pblVwZGF0ZUxldmVsUmVzcG9uc2USLgoFbGV2ZWwYASABKAsyHy5zdWRva3UuZ2FtZS52MS5MZXZlbENvbmZpZ0luZm8iuAEKC1Rhc2tEZWZJbmZvEgoKAmlkGAEgASgJEgwKBGNvZGUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSFgoOY29uZGl0aW9uX3R5cGUYBCABKAkSDgoGdGFyZ2V0GAUgASgFEhcKD3Byb2dyZXNzX3NvdXJjZRgGIAEoCRIRCglpc19hY3RpdmUYByABKAgSEgoKc29ydF9vcmRlchgIIAEoBRISCgp1cGRhdGVkX2F0GAkgASgJIhoKGEFkbWluTGlzdFRhc2tEZWZzUmVxdWVzdCJLChlBZG1pbkxpc3RUYXNrRGVmc1Jlc3BvbnNlEi4KCXRhc2tfZGVmcxgBIAMoCzIbLnN1ZG9rdS5nYW1lLnYxLlRhc2tEZWZJbmZvIqMBChlBZG1pbkNyZWF0ZVRhc2tEZWZSZXF1ZXN0EgwKBGNvZGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSFgoOY29uZGl0aW9uX3R5cGUYAyABKAkSDgoGdGFyZ2V0GAQgASgFEhcKD3Byb2dyZXNzX3NvdXJjZRgFIAEoCRISCgpzb3J0X29yZGVyGAYgASgFEg4KBnJlYXNvbhgHIAEoCSJLChpBZG1pbkNyZWF0ZVRhc2tEZWZSZXNwb25zZRItCgh0YXNrX2RlZhgBIAEoCzIbLnN1ZG9rdS5nYW1lLnYxLlRhc2tEZWZJbmZvIoMBChlBZG1pblVwZGF0ZVRhc2tEZWZSZXF1ZXN0EgoKAmlkGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEhEKCWlzX2FjdGl2ZRgDIAEoCBIOCgZ0YXJnZXQYBCABKAUSEgoKc29ydF9vcmRlchgFIAEoBRIOCgZyZWFzb24YBiABKAkiSwoaQWRtaW5VcGRhdGVUYXNrRGVmUmVzcG9uc2USLQoIdGFza19kZWYYASABKAsyGy5zdWRva3UuZ2FtZS52MS5UYXNrRGVmSW5mbypeCgpMYXlvdXRUeXBlEhsKF0xBWU9VVF9UWVBFX1VOU1BFQ0lGSUVEEAASGAoUTEFZT1VUX1RZUEVfU1RBTkRBUkQQARIZChVMQVlPVVRfVFlQRV9JUlJFR1VMQVIQAiqmAQoNU2Vzc2lvblN0YXR1cxIeChpTRVNTSU9OX1NUQVRVU19VTlNQRUNJRklFRBAAEh4KGlNFU1NJT05fU1RBVFVTX0lOX1BST0dSRVNTEAESHAoYU0VTU0lPTl9TVEFUVVNfQ09NUExFVEVEEAISGQoVU0VTU0lPTl9TVEFUVVNfRkFJTEVEEAMSHAoYU0VTU0lPTl9TVEFUVVNfQUJBTkRPTkVEEAQqlAEKDkRpZmZpY3VsdHlUaWVyEh8KG0RJRkZJQ1VMVFlfVElFUl9VTlNQRUNJRklFRBAAEiAKHERJRkZJQ1VMVFlfVElFUl9OQUtFRF9TSU5HTEUQARIhCh1ESUZGSUNVTFRZX1RJRVJfSElEREVOX1NJTkdMRRACEhwKGERJRkZJQ1VMVFlfVElFUl9BRFZBTkNFRBADKucBCg1IaW50VGVjaG5pcXVlEh4KGkhJTlRfVEVDSE5JUVVFX1VOU1BFQ0lGSUVEEAASHwobSElOVF9URUNITklRVUVfTkFLRURfU0lOR0xFEAESJAogSElOVF9URUNITklRVUVfSElEREVOX1NJTkdMRV9ST1cQAhIkCiBISU5UX1RFQ0hOSVFVRV9ISURERU5fU0lOR0xFX0NPTBADEicKI0hJTlRfVEVDSE5JUVVFX0hJRERFTl9TSU5HTEVfUkVHSU9OEAQSIAocSElOVF9URUNITklRVUVfRElSRUNUX1JFVkVBTBAFMsYOCgtHYW1lU2VydmljZRJTCgpMaXN0TGV2ZWxzEiEuc3Vkb2t1LmdhbWUudjEuTGlzdExldmVsc1JlcXVlc3QaIi5zdWRva3UuZ2FtZS52MS5MaXN0TGV2ZWxzUmVzcG9uc2USUAoJU3RhcnRHYW1lEiAuc3Vkb2t1LmdhbWUudjEuU3RhcnRHYW1lUmVxdWVzdBohLnN1ZG9rdS5nYW1lLnYxLlN0YXJ0R2FtZVJlc3BvbnNlEmUKEEdldEFjdGl2ZVNlc3Npb24SJy5zdWRva3UuZ2FtZS52MS5HZXRBY3RpdmVTZXNzaW9uUmVxdWVzdBooLnN1ZG9rdS5nYW1lLnYxLkdldEFjdGl2ZVNlc3Npb25SZXNwb25zZRJTCgpHZXRTZXNzaW9uEiEuc3Vkb2t1LmdhbWUudjEuR2V0U2Vzc2lvblJlcXVlc3QaIi5zdWRva3UuZ2FtZS52MS5HZXRTZXNzaW9uUmVzcG9uc2USTQoITWFrZU1vdmUSHy5zdWRva3UuZ2FtZS52MS5NYWtlTW92ZVJlcXVlc3QaIC5zdWRva3UuZ2FtZS52MS5NYWtlTW92ZVJlc3BvbnNlEkoKB1VzZUhpbnQSHi5zdWRva3UuZ2FtZS52MS5Vc2VIaW50UmVxdWVzdBofLnN1ZG9rdS5nYW1lLnYxLlVzZUhpbnRSZXNwb25zZRJQCglTYXZlTm90ZXMSIC5zdWRva3UuZ2FtZS52MS5TYXZlTm90ZXNSZXF1ZXN0GiEuc3Vkb2t1LmdhbWUudjEuU2F2ZU5vdGVzUmVzcG9uc2USVgoLQWJhbmRvbkdhbWUSIi5zdWRva3UuZ2FtZS52MS5BYmFuZG9uR2FtZVJlcXVlc3QaIy5zdWRva3UuZ2FtZS52MS5BYmFuZG9uR2FtZVJlc3BvbnNlElwKDUdldEhpZ2hTY29yZXMSJC5zdWRva3UuZ2FtZS52MS5HZXRIaWdoU2NvcmVzUmVxdWVzdBolLnN1ZG9rdS5nYW1lLnYxLkdldEhpZ2hTY29yZXNSZXNwb25zZRJ0ChVBY3F1aXJlUHV6emxlRm9yTWF0Y2gSLC5zdWRva3UuZ2FtZS52MS5BY3F1aXJlUHV6emxlRm9yTWF0Y2hSZXF1ZXN0Gi0uc3Vkb2t1LmdhbWUudjEuQWNxdWlyZVB1enpsZUZvck1hdGNoUmVzcG9uc2USXwoOR2V0R2FtZUhpc3RvcnkSJS5zdWRva3UuZ2FtZS52MS5HZXRHYW1lSGlzdG9yeVJlcXVlc3QaJi5zdWRva3UuZ2FtZS52MS5HZXRHYW1lSGlzdG9yeVJlc3BvbnNlElwKDUxpc3RHYW1lTW9kZXMSJC5zdWRva3UuZ2FtZS52MS5MaXN0R2FtZU1vZGVzUmVxdWVzdBolLnN1ZG9rdS5nYW1lLnYxLkxpc3RHYW1lTW9kZXNSZXNwb25zZRJrChJBZG1pbkxpc3RHYW1lTW9kZXMSKS5zdWRva3UuZ2FtZS52MS5BZG1pbkxpc3RHYW1lTW9kZXNSZXF1ZXN0Giouc3Vkb2t1LmdhbWUudjEuQWRtaW5MaXN0R2FtZU1vZGVzUmVzcG9uc2USbgoTQWRtaW5VcGRhdGVHYW1lTW9kZRIqLnN1ZG9rdS5nYW1lLnYxLkFkbWluVXBkYXRlR2FtZU1vZGVSZXF1ZXN0Gisuc3Vkb2t1LmdhbWUudjEuQWRtaW5VcGRhdGVHYW1lTW9kZVJlc3BvbnNlEnQKFUFkbWluTGlzdExldmVsQ29uZmlncxIsLnN1ZG9rdS5nYW1lLnYxLkFkbWluTGlzdExldmVsQ29uZmlnc1JlcXVlc3QaLS5zdWRva3UuZ2FtZS52MS5BZG1pbkxpc3RMZXZlbENvbmZpZ3NSZXNwb25zZRJlChBBZG1pblVwZGF0ZUxldmVsEicuc3Vkb2t1LmdhbWUudjEuQWRtaW5VcGRhdGVMZXZlbFJlcXVlc3QaKC5zdWRva3UuZ2FtZS52MS5BZG1pblVwZGF0ZUxldmVsUmVzcG9uc2USaAoRQWRtaW5MaXN0VGFza0RlZnMSKC5zdWRva3UuZ2FtZS52MS5BZG1pbkxpc3RUYXNrRGVmc1JlcXVlc3QaKS5zdWRva3UuZ2FtZS52MS5BZG1pbkxpc3RUYXNrRGVmc1Jlc3BvbnNlEmsKEkFkbWluQ3JlYXRlVGFza0RlZhIpLnN1ZG9rdS5nYW1lLnYxLkFkbWluQ3JlYXRlVGFza0RlZlJlcXVlc3QaKi5zdWRva3UuZ2FtZS52MS5BZG1pbkNyZWF0ZVRhc2tEZWZSZXNwb25zZRJrChJBZG1pblVwZGF0ZVRhc2tEZWYSKS5zdWRva3UuZ2FtZS52MS5BZG1pblVwZGF0ZVRhc2tEZWZSZXF1ZXN0Giouc3Vkb2t1LmdhbWUudjEuQWRtaW5VcGRhdGVUYXNrRGVmUmVzcG9uc2VCEaoCDlN1ZG9rdS5HYW1lLlYxYgZwcm90bzM");
 
 /**
  * @generated from message sudoku.game.v1.LevelInfo
@@ -790,6 +790,578 @@ export const GetGameHistoryResponseSchema: GenMessage<GetGameHistoryResponse> = 
   messageDesc(file_sudoku_game_v1_game, 26);
 
 /**
+ * @generated from message sudoku.game.v1.GameModeInfo
+ */
+export type GameModeInfo = Message<"sudoku.game.v1.GameModeInfo"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string code = 2;
+   */
+  code: string;
+
+  /**
+   * @generated from field: string name = 3;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string description = 4;
+   */
+  description: string;
+
+  /**
+   * @generated from field: bool is_active = 5;
+   */
+  isActive: boolean;
+
+  /**
+   * @generated from field: int32 sort_order = 6;
+   */
+  sortOrder: number;
+
+  /**
+   * @generated from field: int32 version = 7;
+   */
+  version: number;
+
+  /**
+   * @generated from field: string updated_at = 8;
+   */
+  updatedAt: string;
+};
+
+/**
+ * Describes the message sudoku.game.v1.GameModeInfo.
+ * Use `create(GameModeInfoSchema)` to create a new message.
+ */
+export const GameModeInfoSchema: GenMessage<GameModeInfo> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 27);
+
+/**
+ * @generated from message sudoku.game.v1.ListGameModesRequest
+ */
+export type ListGameModesRequest = Message<"sudoku.game.v1.ListGameModesRequest"> & {
+};
+
+/**
+ * Describes the message sudoku.game.v1.ListGameModesRequest.
+ * Use `create(ListGameModesRequestSchema)` to create a new message.
+ */
+export const ListGameModesRequestSchema: GenMessage<ListGameModesRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 28);
+
+/**
+ * @generated from message sudoku.game.v1.ListGameModesResponse
+ */
+export type ListGameModesResponse = Message<"sudoku.game.v1.ListGameModesResponse"> & {
+  /**
+   * @generated from field: repeated sudoku.game.v1.GameModeInfo game_modes = 1;
+   */
+  gameModes: GameModeInfo[];
+};
+
+/**
+ * Describes the message sudoku.game.v1.ListGameModesResponse.
+ * Use `create(ListGameModesResponseSchema)` to create a new message.
+ */
+export const ListGameModesResponseSchema: GenMessage<ListGameModesResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 29);
+
+/**
+ * @generated from message sudoku.game.v1.AdminListGameModesRequest
+ */
+export type AdminListGameModesRequest = Message<"sudoku.game.v1.AdminListGameModesRequest"> & {
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminListGameModesRequest.
+ * Use `create(AdminListGameModesRequestSchema)` to create a new message.
+ */
+export const AdminListGameModesRequestSchema: GenMessage<AdminListGameModesRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 30);
+
+/**
+ * @generated from message sudoku.game.v1.AdminListGameModesResponse
+ */
+export type AdminListGameModesResponse = Message<"sudoku.game.v1.AdminListGameModesResponse"> & {
+  /**
+   * @generated from field: repeated sudoku.game.v1.GameModeInfo game_modes = 1;
+   */
+  gameModes: GameModeInfo[];
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminListGameModesResponse.
+ * Use `create(AdminListGameModesResponseSchema)` to create a new message.
+ */
+export const AdminListGameModesResponseSchema: GenMessage<AdminListGameModesResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 31);
+
+/**
+ * @generated from message sudoku.game.v1.AdminUpdateGameModeRequest
+ */
+export type AdminUpdateGameModeRequest = Message<"sudoku.game.v1.AdminUpdateGameModeRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string description = 3;
+   */
+  description: string;
+
+  /**
+   * @generated from field: bool is_active = 4;
+   */
+  isActive: boolean;
+
+  /**
+   * @generated from field: bool notify_players = 5;
+   */
+  notifyPlayers: boolean;
+
+  /**
+   * @generated from field: string notification_message = 6;
+   */
+  notificationMessage: string;
+
+  /**
+   * @generated from field: string reason = 7;
+   */
+  reason: string;
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminUpdateGameModeRequest.
+ * Use `create(AdminUpdateGameModeRequestSchema)` to create a new message.
+ */
+export const AdminUpdateGameModeRequestSchema: GenMessage<AdminUpdateGameModeRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 32);
+
+/**
+ * @generated from message sudoku.game.v1.AdminUpdateGameModeResponse
+ */
+export type AdminUpdateGameModeResponse = Message<"sudoku.game.v1.AdminUpdateGameModeResponse"> & {
+  /**
+   * @generated from field: sudoku.game.v1.GameModeInfo game_mode = 1;
+   */
+  gameMode?: GameModeInfo | undefined;
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminUpdateGameModeResponse.
+ * Use `create(AdminUpdateGameModeResponseSchema)` to create a new message.
+ */
+export const AdminUpdateGameModeResponseSchema: GenMessage<AdminUpdateGameModeResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 33);
+
+/**
+ * @generated from message sudoku.game.v1.LevelConfigInfo
+ */
+export type LevelConfigInfo = Message<"sudoku.game.v1.LevelConfigInfo"> & {
+  /**
+   * @generated from field: string level_id = 1;
+   */
+  levelId: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: int32 sort_order = 3;
+   */
+  sortOrder: number;
+
+  /**
+   * @generated from field: int32 min_clues = 4;
+   */
+  minClues: number;
+
+  /**
+   * @generated from field: int32 max_clues = 5;
+   */
+  maxClues: number;
+
+  /**
+   * @generated from field: int32 max_mistakes = 6;
+   */
+  maxMistakes: number;
+
+  /**
+   * @generated from field: int32 max_hints = 7;
+   */
+  maxHints: number;
+
+  /**
+   * @generated from field: bool is_active = 8;
+   */
+  isActive: boolean;
+
+  /**
+   * @generated from field: double score_multiplier = 9;
+   */
+  scoreMultiplier: number;
+
+  /**
+   * @generated from field: int32 time_limit_seconds = 10;
+   */
+  timeLimitSeconds: number;
+
+  /**
+   * @generated from field: int32 version = 11;
+   */
+  version: number;
+
+  /**
+   * @generated from field: string updated_at = 12;
+   */
+  updatedAt: string;
+};
+
+/**
+ * Describes the message sudoku.game.v1.LevelConfigInfo.
+ * Use `create(LevelConfigInfoSchema)` to create a new message.
+ */
+export const LevelConfigInfoSchema: GenMessage<LevelConfigInfo> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 34);
+
+/**
+ * @generated from message sudoku.game.v1.AdminListLevelConfigsRequest
+ */
+export type AdminListLevelConfigsRequest = Message<"sudoku.game.v1.AdminListLevelConfigsRequest"> & {
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminListLevelConfigsRequest.
+ * Use `create(AdminListLevelConfigsRequestSchema)` to create a new message.
+ */
+export const AdminListLevelConfigsRequestSchema: GenMessage<AdminListLevelConfigsRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 35);
+
+/**
+ * @generated from message sudoku.game.v1.AdminListLevelConfigsResponse
+ */
+export type AdminListLevelConfigsResponse = Message<"sudoku.game.v1.AdminListLevelConfigsResponse"> & {
+  /**
+   * @generated from field: repeated sudoku.game.v1.LevelConfigInfo levels = 1;
+   */
+  levels: LevelConfigInfo[];
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminListLevelConfigsResponse.
+ * Use `create(AdminListLevelConfigsResponseSchema)` to create a new message.
+ */
+export const AdminListLevelConfigsResponseSchema: GenMessage<AdminListLevelConfigsResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 36);
+
+/**
+ * @generated from message sudoku.game.v1.AdminUpdateLevelRequest
+ */
+export type AdminUpdateLevelRequest = Message<"sudoku.game.v1.AdminUpdateLevelRequest"> & {
+  /**
+   * @generated from field: string level_id = 1;
+   */
+  levelId: string;
+
+  /**
+   * @generated from field: int32 min_clues = 2;
+   */
+  minClues: number;
+
+  /**
+   * @generated from field: int32 max_clues = 3;
+   */
+  maxClues: number;
+
+  /**
+   * @generated from field: int32 max_mistakes = 4;
+   */
+  maxMistakes: number;
+
+  /**
+   * @generated from field: int32 max_hints = 5;
+   */
+  maxHints: number;
+
+  /**
+   * @generated from field: bool is_active = 6;
+   */
+  isActive: boolean;
+
+  /**
+   * @generated from field: double score_multiplier = 7;
+   */
+  scoreMultiplier: number;
+
+  /**
+   * @generated from field: int32 time_limit_seconds = 8;
+   */
+  timeLimitSeconds: number;
+
+  /**
+   * @generated from field: bool notify_players = 9;
+   */
+  notifyPlayers: boolean;
+
+  /**
+   * @generated from field: string notification_message = 10;
+   */
+  notificationMessage: string;
+
+  /**
+   * @generated from field: string reason = 11;
+   */
+  reason: string;
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminUpdateLevelRequest.
+ * Use `create(AdminUpdateLevelRequestSchema)` to create a new message.
+ */
+export const AdminUpdateLevelRequestSchema: GenMessage<AdminUpdateLevelRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 37);
+
+/**
+ * @generated from message sudoku.game.v1.AdminUpdateLevelResponse
+ */
+export type AdminUpdateLevelResponse = Message<"sudoku.game.v1.AdminUpdateLevelResponse"> & {
+  /**
+   * @generated from field: sudoku.game.v1.LevelConfigInfo level = 1;
+   */
+  level?: LevelConfigInfo | undefined;
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminUpdateLevelResponse.
+ * Use `create(AdminUpdateLevelResponseSchema)` to create a new message.
+ */
+export const AdminUpdateLevelResponseSchema: GenMessage<AdminUpdateLevelResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 38);
+
+/**
+ * @generated from message sudoku.game.v1.TaskDefInfo
+ */
+export type TaskDefInfo = Message<"sudoku.game.v1.TaskDefInfo"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string code = 2;
+   */
+  code: string;
+
+  /**
+   * @generated from field: string description = 3;
+   */
+  description: string;
+
+  /**
+   * @generated from field: string condition_type = 4;
+   */
+  conditionType: string;
+
+  /**
+   * @generated from field: int32 target = 5;
+   */
+  target: number;
+
+  /**
+   * @generated from field: string progress_source = 6;
+   */
+  progressSource: string;
+
+  /**
+   * @generated from field: bool is_active = 7;
+   */
+  isActive: boolean;
+
+  /**
+   * @generated from field: int32 sort_order = 8;
+   */
+  sortOrder: number;
+
+  /**
+   * @generated from field: string updated_at = 9;
+   */
+  updatedAt: string;
+};
+
+/**
+ * Describes the message sudoku.game.v1.TaskDefInfo.
+ * Use `create(TaskDefInfoSchema)` to create a new message.
+ */
+export const TaskDefInfoSchema: GenMessage<TaskDefInfo> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 39);
+
+/**
+ * @generated from message sudoku.game.v1.AdminListTaskDefsRequest
+ */
+export type AdminListTaskDefsRequest = Message<"sudoku.game.v1.AdminListTaskDefsRequest"> & {
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminListTaskDefsRequest.
+ * Use `create(AdminListTaskDefsRequestSchema)` to create a new message.
+ */
+export const AdminListTaskDefsRequestSchema: GenMessage<AdminListTaskDefsRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 40);
+
+/**
+ * @generated from message sudoku.game.v1.AdminListTaskDefsResponse
+ */
+export type AdminListTaskDefsResponse = Message<"sudoku.game.v1.AdminListTaskDefsResponse"> & {
+  /**
+   * @generated from field: repeated sudoku.game.v1.TaskDefInfo task_defs = 1;
+   */
+  taskDefs: TaskDefInfo[];
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminListTaskDefsResponse.
+ * Use `create(AdminListTaskDefsResponseSchema)` to create a new message.
+ */
+export const AdminListTaskDefsResponseSchema: GenMessage<AdminListTaskDefsResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 41);
+
+/**
+ * @generated from message sudoku.game.v1.AdminCreateTaskDefRequest
+ */
+export type AdminCreateTaskDefRequest = Message<"sudoku.game.v1.AdminCreateTaskDefRequest"> & {
+  /**
+   * @generated from field: string code = 1;
+   */
+  code: string;
+
+  /**
+   * @generated from field: string description = 2;
+   */
+  description: string;
+
+  /**
+   * @generated from field: string condition_type = 3;
+   */
+  conditionType: string;
+
+  /**
+   * @generated from field: int32 target = 4;
+   */
+  target: number;
+
+  /**
+   * @generated from field: string progress_source = 5;
+   */
+  progressSource: string;
+
+  /**
+   * @generated from field: int32 sort_order = 6;
+   */
+  sortOrder: number;
+
+  /**
+   * @generated from field: string reason = 7;
+   */
+  reason: string;
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminCreateTaskDefRequest.
+ * Use `create(AdminCreateTaskDefRequestSchema)` to create a new message.
+ */
+export const AdminCreateTaskDefRequestSchema: GenMessage<AdminCreateTaskDefRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 42);
+
+/**
+ * @generated from message sudoku.game.v1.AdminCreateTaskDefResponse
+ */
+export type AdminCreateTaskDefResponse = Message<"sudoku.game.v1.AdminCreateTaskDefResponse"> & {
+  /**
+   * @generated from field: sudoku.game.v1.TaskDefInfo task_def = 1;
+   */
+  taskDef?: TaskDefInfo | undefined;
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminCreateTaskDefResponse.
+ * Use `create(AdminCreateTaskDefResponseSchema)` to create a new message.
+ */
+export const AdminCreateTaskDefResponseSchema: GenMessage<AdminCreateTaskDefResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 43);
+
+/**
+ * @generated from message sudoku.game.v1.AdminUpdateTaskDefRequest
+ */
+export type AdminUpdateTaskDefRequest = Message<"sudoku.game.v1.AdminUpdateTaskDefRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string description = 2;
+   */
+  description: string;
+
+  /**
+   * @generated from field: bool is_active = 3;
+   */
+  isActive: boolean;
+
+  /**
+   * @generated from field: int32 target = 4;
+   */
+  target: number;
+
+  /**
+   * @generated from field: int32 sort_order = 5;
+   */
+  sortOrder: number;
+
+  /**
+   * @generated from field: string reason = 6;
+   */
+  reason: string;
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminUpdateTaskDefRequest.
+ * Use `create(AdminUpdateTaskDefRequestSchema)` to create a new message.
+ */
+export const AdminUpdateTaskDefRequestSchema: GenMessage<AdminUpdateTaskDefRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 44);
+
+/**
+ * @generated from message sudoku.game.v1.AdminUpdateTaskDefResponse
+ */
+export type AdminUpdateTaskDefResponse = Message<"sudoku.game.v1.AdminUpdateTaskDefResponse"> & {
+  /**
+   * @generated from field: sudoku.game.v1.TaskDefInfo task_def = 1;
+   */
+  taskDef?: TaskDefInfo | undefined;
+};
+
+/**
+ * Describes the message sudoku.game.v1.AdminUpdateTaskDefResponse.
+ * Use `create(AdminUpdateTaskDefResponseSchema)` to create a new message.
+ */
+export const AdminUpdateTaskDefResponseSchema: GenMessage<AdminUpdateTaskDefResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_game_v1_game, 45);
+
+/**
  * @generated from enum sudoku.game.v1.LayoutType
  */
 export enum LayoutType {
@@ -1014,6 +1586,74 @@ export const GameService: GenService<{
     methodKind: "unary";
     input: typeof GetGameHistoryRequestSchema;
     output: typeof GetGameHistoryResponseSchema;
+  },
+  /**
+   * Game Modes & Rules
+   *
+   * @generated from rpc sudoku.game.v1.GameService.ListGameModes
+   */
+  listGameModes: {
+    methodKind: "unary";
+    input: typeof ListGameModesRequestSchema;
+    output: typeof ListGameModesResponseSchema;
+  },
+  /**
+   * Admin Game Rules Management
+   *
+   * @generated from rpc sudoku.game.v1.GameService.AdminListGameModes
+   */
+  adminListGameModes: {
+    methodKind: "unary";
+    input: typeof AdminListGameModesRequestSchema;
+    output: typeof AdminListGameModesResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.game.v1.GameService.AdminUpdateGameMode
+   */
+  adminUpdateGameMode: {
+    methodKind: "unary";
+    input: typeof AdminUpdateGameModeRequestSchema;
+    output: typeof AdminUpdateGameModeResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.game.v1.GameService.AdminListLevelConfigs
+   */
+  adminListLevelConfigs: {
+    methodKind: "unary";
+    input: typeof AdminListLevelConfigsRequestSchema;
+    output: typeof AdminListLevelConfigsResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.game.v1.GameService.AdminUpdateLevel
+   */
+  adminUpdateLevel: {
+    methodKind: "unary";
+    input: typeof AdminUpdateLevelRequestSchema;
+    output: typeof AdminUpdateLevelResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.game.v1.GameService.AdminListTaskDefs
+   */
+  adminListTaskDefs: {
+    methodKind: "unary";
+    input: typeof AdminListTaskDefsRequestSchema;
+    output: typeof AdminListTaskDefsResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.game.v1.GameService.AdminCreateTaskDef
+   */
+  adminCreateTaskDef: {
+    methodKind: "unary";
+    input: typeof AdminCreateTaskDefRequestSchema;
+    output: typeof AdminCreateTaskDefResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.game.v1.GameService.AdminUpdateTaskDef
+   */
+  adminUpdateTaskDef: {
+    methodKind: "unary";
+    input: typeof AdminUpdateTaskDefRequestSchema;
+    output: typeof AdminUpdateTaskDefResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_sudoku_game_v1_game, 0);

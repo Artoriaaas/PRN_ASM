@@ -9,6 +9,17 @@ service UserService {
   rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
   rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
   rpc GetProfiles(GetProfilesRequest) returns (GetProfilesResponse);
+
+  // Admin User Management
+  rpc AdminListUsers(AdminListUsersRequest) returns (AdminListUsersResponse);
+  rpc AdminGetUser(AdminGetUserRequest) returns (AdminGetUserResponse);
+  rpc AdminBanUser(AdminBanUserRequest) returns (AdminBanUserResponse);
+  rpc AdminUnbanUser(AdminUnbanUserRequest) returns (AdminUnbanUserResponse);
+  rpc AdminSoftDeleteUser(AdminSoftDeleteUserRequest) returns (AdminSoftDeleteUserResponse);
+  rpc AdminAdjustElo(AdminAdjustEloRequest) returns (AdminAdjustEloResponse);
+  rpc AdminGrantRole(AdminGrantRoleRequest) returns (AdminGrantRoleResponse);
+  rpc AdminRevokeRole(AdminRevokeRoleRequest) returns (AdminRevokeRoleResponse);
+  rpc AdminListAuditLogs(AdminListAuditLogsRequest) returns (AdminListAuditLogsResponse);
 }
 
 message UserProfile {
@@ -68,4 +79,155 @@ message UserProfileSummary {
 
 message GetProfilesResponse {
   repeated UserProfileSummary profiles = 1;
+}
+
+message AdminUserSummary {
+  string id = 1;
+  string firebase_uid = 2;
+  string display_name = 3;
+  string email = 4;
+  string role = 5;
+  string status = 6;
+  int32 elo = 7;
+  int32 player_level = 8;
+  string created_at = 9;
+  string banned_until = 10;
+  string last_login_at = 11;
+  string avatar_url = 12;
+}
+
+message AdminListUsersRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string search = 3;
+  string status_filter = 4;
+  string sort_by = 5; // "elo", "created_at"
+}
+
+message AdminListUsersResponse {
+  repeated AdminUserSummary users = 1;
+  int32 total_count = 2;
+}
+
+message EloHistoryEntry {
+  string id = 1;
+  int32 delta = 2;
+  int32 new_elo = 3;
+  string source_type = 4;
+  string reason = 5;
+  string created_at = 6;
+}
+
+message AdminUserDetail {
+  string id = 1;
+  string firebase_uid = 2;
+  string display_name = 3;
+  string email = 4;
+  string avatar_url = 5;
+  string country = 6;
+  string role = 7;
+  string status = 8;
+  int32 elo = 9;
+  int32 player_level = 10;
+  int32 total_games = 11;
+  int32 wins = 12;
+  string ban_reason = 13;
+  string banned_until = 14;
+  string last_login_at = 15;
+  string created_at = 16;
+  string updated_at = 17;
+  repeated EloHistoryEntry recent_elo_history = 18;
+}
+
+message AdminGetUserRequest {
+  string user_id = 1;
+}
+
+message AdminGetUserResponse {
+  AdminUserDetail user = 1;
+}
+
+message AdminBanUserRequest {
+  string user_id = 1;
+  string reason = 2;
+  string banned_until = 3; // RFC3339, or empty for permanent
+}
+
+message AdminBanUserResponse {
+  bool success = 1;
+  string user_id = 2;
+}
+
+message AdminUnbanUserRequest {
+  string user_id = 1;
+  string reason = 2;
+}
+
+message AdminUnbanUserResponse {
+  bool success = 1;
+}
+
+message AdminSoftDeleteUserRequest {
+  string user_id = 1;
+  string reason = 2;
+}
+
+message AdminSoftDeleteUserResponse {
+  bool success = 1;
+}
+
+message AdminAdjustEloRequest {
+  string user_id = 1;
+  int32 delta = 2;
+  string reason = 3;
+  string operation = 4; // "ADD", "SUBTRACT", "SET"
+}
+
+message AdminAdjustEloResponse {
+  int32 new_elo = 1;
+  int32 old_elo = 2;
+}
+
+message AdminGrantRoleRequest {
+  string user_id = 1;
+  string reason = 2;
+}
+
+message AdminGrantRoleResponse {
+  bool success = 1;
+}
+
+message AdminRevokeRoleRequest {
+  string user_id = 1;
+  string reason = 2;
+}
+
+message AdminRevokeRoleResponse {
+  bool success = 1;
+}
+
+message AuditLogEntry {
+  string id = 1;
+  string actor_id = 2;
+  string action = 3;
+  string target_type = 4;
+  string target_id = 5;
+  string before_json = 6;
+  string after_json = 7;
+  string reason = 8;
+  string created_at = 9;
+}
+
+message AdminListAuditLogsRequest {
+  string actor_id = 1;
+  string target_id = 2;
+  string from_date = 3;
+  string to_date = 4;
+  int32 page = 5;
+  int32 page_size = 6;
+}
+
+message AdminListAuditLogsResponse {
+  repeated AuditLogEntry logs = 1;
+  int32 total_count = 2;
 }

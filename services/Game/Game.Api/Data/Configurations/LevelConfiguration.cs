@@ -12,5 +12,6 @@ public class LevelConfiguration : IEntityTypeConfiguration<Level>
         builder.HasKey(x => x.LevelId);
         builder.Property(x => x.LevelId).HasMaxLength(32);
         builder.Property(x => x.Name).HasMaxLength(64).IsRequired();
+        builder.Property(x => x.ScoreMultiplier).HasPrecision(5, 2);
     }
 }

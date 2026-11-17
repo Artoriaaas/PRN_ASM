@@ -9,6 +9,7 @@
   <ItemGroup>
     <Protobuf Include="../../../proto/sudoku/game/v1/game.proto" ProtoRoot="../../../proto" GrpcServices="Client" />
     <Protobuf Include="../../../proto/sudoku/user/v1/user.proto" ProtoRoot="../../../proto" GrpcServices="Client" />
+    <Protobuf Include="../../../proto/sudoku/events/v1/events.proto" ProtoRoot="../../../proto" GrpcServices="None" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +28,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\building-block\Sudoku.Auth\Sudoku.Auth.csproj" />
     <ProjectReference Include="..\..\..\building-block\Sudoku.Observability\Sudoku.Observability.csproj" />
+    <ProjectReference Include="..\..\..\building-block\Sudoku.Messaging\Sudoku.Messaging.csproj" />
   </ItemGroup>
 
 </Project>

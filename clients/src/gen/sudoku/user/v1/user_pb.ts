@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file sudoku/user/v1/user.proto.
  */
 export const file_sudoku_user_v1_user: GenFile = /*@__PURE__*/
-  fileDesc("ChlzdWRva3UvdXNlci92MS91c2VyLnByb3RvEg5zdWRva3UudXNlci52MSLBAQoLVXNlclByb2ZpbGUSCgoCaWQYASABKAkSFAoMZGlzcGxheV9uYW1lGAIgASgJEg0KBWVtYWlsGAMgASgJEhIKCmF2YXRhcl91cmwYBCABKAkSEwoLdG90YWxfZ2FtZXMYBSABKAUSDAoEd2lucxgGIAEoBRIPCgdjb3VudHJ5GAcgASgJEhEKCXRvdGFsX2V4cBgIIAEoBRIUCgxwbGF5ZXJfbGV2ZWwYCSABKAUSEAoIdHJvcGhpZXMYCiABKAUiVAoZR2V0T3JDcmVhdGVQcm9maWxlUmVxdWVzdBIUCgxkaXNwbGF5X25hbWUYASABKAkSDQoFZW1haWwYAiABKAkSEgoKYXZhdGFyX3VybBgDIAEoCSJfChpHZXRPckNyZWF0ZVByb2ZpbGVSZXNwb25zZRIsCgdwcm9maWxlGAEgASgLMhsuc3Vkb2t1LnVzZXIudjEuVXNlclByb2ZpbGUSEwoLaXNfbmV3X3VzZXIYAiABKAgiEwoRR2V0UHJvZmlsZVJlcXVlc3QiQgoSR2V0UHJvZmlsZVJlc3BvbnNlEiwKB3Byb2ZpbGUYASABKAsyGy5zdWRva3UudXNlci52MS5Vc2VyUHJvZmlsZSJRChRVcGRhdGVQcm9maWxlUmVxdWVzdBIUCgxkaXNwbGF5X25hbWUYASABKAkSEgoKYXZhdGFyX3VybBgCIAEoCRIPCgdjb3VudHJ5GAMgASgJIkUKFVVwZGF0ZVByb2ZpbGVSZXNwb25zZRIsCgdwcm9maWxlGAEgASgLMhsuc3Vkb2t1LnVzZXIudjEuVXNlclByb2ZpbGUiKwoSR2V0UHJvZmlsZXNSZXF1ZXN0EhUKDWZpcmViYXNlX3VpZHMYASADKAkingEKElVzZXJQcm9maWxlU3VtbWFyeRIUCgxmaXJlYmFzZV91aWQYASABKAkSDwoHdXNlcl9pZBgCIAEoCRIUCgxkaXNwbGF5X25hbWUYAyABKAkSEgoKYXZhdGFyX3VybBgEIAEoCRIPCgdjb3VudHJ5GAUgASgJEhQKDHBsYXllcl9sZXZlbBgGIAEoBRIQCgh0cm9waGllcxgHIAEoBSJLChNHZXRQcm9maWxlc1Jlc3BvbnNlEjQKCHByb2ZpbGVzGAEgAygLMiIuc3Vkb2t1LnVzZXIudjEuVXNlclByb2ZpbGVTdW1tYXJ5MoUDCgtVc2VyU2VydmljZRJrChJHZXRPckNyZWF0ZVByb2ZpbGUSKS5zdWRva3UudXNlci52MS5HZXRPckNyZWF0ZVByb2ZpbGVSZXF1ZXN0Giouc3Vkb2t1LnVzZXIudjEuR2V0T3JDcmVhdGVQcm9maWxlUmVzcG9uc2USUwoKR2V0UHJvZmlsZRIhLnN1ZG9rdS51c2VyLnYxLkdldFByb2ZpbGVSZXF1ZXN0GiIuc3Vkb2t1LnVzZXIudjEuR2V0UHJvZmlsZVJlc3BvbnNlElwKDVVwZGF0ZVByb2ZpbGUSJC5zdWRva3UudXNlci52MS5VcGRhdGVQcm9maWxlUmVxdWVzdBolLnN1ZG9rdS51c2VyLnYxLlVwZGF0ZVByb2ZpbGVSZXNwb25zZRJWCgtHZXRQcm9maWxlcxIiLnN1ZG9rdS51c2VyLnYxLkdldFByb2ZpbGVzUmVxdWVzdBojLnN1ZG9rdS51c2VyLnYxLkdldFByb2ZpbGVzUmVzcG9uc2VCEaoCDlN1ZG9rdS5Vc2VyLlYxYgZwcm90bzM");
+  fileDesc("ChlzdWRva3UvdXNlci92MS91c2VyLnByb3RvEg5zdWRva3UudXNlci52MSLBAQoLVXNlclByb2ZpbGUSCgoCaWQYASABKAkSFAoMZGlzcGxheV9uYW1lGAIgASgJEg0KBWVtYWlsGAMgASgJEhIKCmF2YXRhcl91cmwYBCABKAkSEwoLdG90YWxfZ2FtZXMYBSABKAUSDAoEd2lucxgGIAEoBRIPCgdjb3VudHJ5GAcgASgJEhEKCXRvdGFsX2V4cBgIIAEoBRIUCgxwbGF5ZXJfbGV2ZWwYCSABKAUSEAoIdHJvcGhpZXMYCiABKAUiVAoZR2V0T3JDcmVhdGVQcm9maWxlUmVxdWVzdBIUCgxkaXNwbGF5X25hbWUYASABKAkSDQoFZW1haWwYAiABKAkSEgoKYXZhdGFyX3VybBgDIAEoCSJfChpHZXRPckNyZWF0ZVByb2ZpbGVSZXNwb25zZRIsCgdwcm9maWxlGAEgASgLMhsuc3Vkb2t1LnVzZXIudjEuVXNlclByb2ZpbGUSEwoLaXNfbmV3X3VzZXIYAiABKAgiEwoRR2V0UHJvZmlsZVJlcXVlc3QiQgoSR2V0UHJvZmlsZVJlc3BvbnNlEiwKB3Byb2ZpbGUYASABKAsyGy5zdWRva3UudXNlci52MS5Vc2VyUHJvZmlsZSJRChRVcGRhdGVQcm9maWxlUmVxdWVzdBIUCgxkaXNwbGF5X25hbWUYASABKAkSEgoKYXZhdGFyX3VybBgCIAEoCRIPCgdjb3VudHJ5GAMgASgJIkUKFVVwZGF0ZVByb2ZpbGVSZXNwb25zZRIsCgdwcm9maWxlGAEgASgLMhsuc3Vkb2t1LnVzZXIudjEuVXNlclByb2ZpbGUiKwoSR2V0UHJvZmlsZXNSZXF1ZXN0EhUKDWZpcmViYXNlX3VpZHMYASADKAkingEKElVzZXJQcm9maWxlU3VtbWFyeRIUCgxmaXJlYmFzZV91aWQYASABKAkSDwoHdXNlcl9pZBgCIAEoCRIUCgxkaXNwbGF5X25hbWUYAyABKAkSEgoKYXZhdGFyX3VybBgEIAEoCRIPCgdjb3VudHJ5GAUgASgJEhQKDHBsYXllcl9sZXZlbBgGIAEoBRIQCgh0cm9waGllcxgHIAEoBSJLChNHZXRQcm9maWxlc1Jlc3BvbnNlEjQKCHByb2ZpbGVzGAEgAygLMiIuc3Vkb2t1LnVzZXIudjEuVXNlclByb2ZpbGVTdW1tYXJ5Iu8BChBBZG1pblVzZXJTdW1tYXJ5EgoKAmlkGAEgASgJEhQKDGZpcmViYXNlX3VpZBgCIAEoCRIUCgxkaXNwbGF5X25hbWUYAyABKAkSDQoFZW1haWwYBCABKAkSDAoEcm9sZRgFIAEoCRIOCgZzdGF0dXMYBiABKAkSCwoDZWxvGAcgASgFEhQKDHBsYXllcl9sZXZlbBgIIAEoBRISCgpjcmVhdGVkX2F0GAkgASgJEhQKDGJhbm5lZF91bnRpbBgKIAEoCRIVCg1sYXN0X2xvZ2luX2F0GAsgASgJEhIKCmF2YXRhcl91cmwYDCABKAkicAoVQWRtaW5MaXN0VXNlcnNSZXF1ZXN0EgwKBHBhZ2UYASABKAUSEQoJcGFnZV9zaXplGAIgASgFEg4KBnNlYXJjaBgDIAEoCRIVCg1zdGF0dXNfZmlsdGVyGAQgASgJEg8KB3NvcnRfYnkYBSABKAkiXgoWQWRtaW5MaXN0VXNlcnNSZXNwb25zZRIvCgV1c2VycxgBIAMoCzIgLnN1ZG9rdS51c2VyLnYxLkFkbWluVXNlclN1bW1hcnkSEwoLdG90YWxfY291bnQYAiABKAUidgoPRWxvSGlzdG9yeUVudHJ5EgoKAmlkGAEgASgJEg0KBWRlbHRhGAIgASgFEg8KB25ld19lbG8YAyABKAUSEwoLc291cmNlX3R5cGUYBCABKAkSDgoGcmVhc29uGAUgASgJEhIKCmNyZWF0ZWRfYXQYBiABKAkihwMKD0FkbWluVXNlckRldGFpbBIKCgJpZBgBIAEoCRIUCgxmaXJlYmFzZV91aWQYAiABKAkSFAoMZGlzcGxheV9uYW1lGAMgASgJEg0KBWVtYWlsGAQgASgJEhIKCmF2YXRhcl91cmwYBSABKAkSDwoHY291bnRyeRgGIAEoCRIMCgRyb2xlGAcgASgJEg4KBnN0YXR1cxgIIAEoCRILCgNlbG8YCSABKAUSFAoMcGxheWVyX2xldmVsGAogASgFEhMKC3RvdGFsX2dhbWVzGAsgASgFEgwKBHdpbnMYDCABKAUSEgoKYmFuX3JlYXNvbhgNIAEoCRIUCgxiYW5uZWRfdW50aWwYDiABKAkSFQoNbGFzdF9sb2dpbl9hdBgPIAEoCRISCgpjcmVhdGVkX2F0GBAgASgJEhIKCnVwZGF0ZWRfYXQYESABKAkSOwoScmVjZW50X2Vsb19oaXN0b3J5GBIgAygLMh8uc3Vkb2t1LnVzZXIudjEuRWxvSGlzdG9yeUVudHJ5IiYKE0FkbWluR2V0VXNlclJlcXVlc3QSDwoHdXNlcl9pZBgBIAEoCSJFChRBZG1pbkdldFVzZXJSZXNwb25zZRItCgR1c2VyGAEgASgLMh8uc3Vkb2t1LnVzZXIudjEuQWRtaW5Vc2VyRGV0YWlsIkwKE0FkbWluQmFuVXNlclJlcXVlc3QSDwoHdXNlcl9pZBgBIAEoCRIOCgZyZWFzb24YAiABKAkSFAoMYmFubmVkX3VudGlsGAMgASgJIjgKFEFkbWluQmFuVXNlclJlc3BvbnNlEg8KB3N1Y2Nlc3MYASABKAgSDwoHdXNlcl9pZBgCIAEoCSI4ChVBZG1pblVuYmFuVXNlclJlcXVlc3QSDwoHdXNlcl9pZBgBIAEoCRIOCgZyZWFzb24YAiABKAkiKQoWQWRtaW5VbmJhblVzZXJSZXNwb25zZRIPCgdzdWNjZXNzGAEgASgIIj0KGkFkbWluU29mdERlbGV0ZVVzZXJSZXF1ZXN0Eg8KB3VzZXJfaWQYASABKAkSDgoGcmVhc29uGAIgASgJIi4KG0FkbWluU29mdERlbGV0ZVVzZXJSZXNwb25zZRIPCgdzdWNjZXNzGAEgASgIIloKFUFkbWluQWRqdXN0RWxvUmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJEg0KBWRlbHRhGAIgASgFEg4KBnJlYXNvbhgDIAEoCRIRCglvcGVyYXRpb24YBCABKAkiOgoWQWRtaW5BZGp1c3RFbG9SZXNwb25zZRIPCgduZXdfZWxvGAEgASgFEg8KB29sZF9lbG8YAiABKAUiOAoVQWRtaW5HcmFudFJvbGVSZXF1ZXN0Eg8KB3VzZXJfaWQYASABKAkSDgoGcmVhc29uGAIgASgJIikKFkFkbWluR3JhbnRSb2xlUmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoCCI5ChZBZG1pblJldm9rZVJvbGVSZXF1ZXN0Eg8KB3VzZXJfaWQYASABKAkSDgoGcmVhc29uGAIgASgJIioKF0FkbWluUmV2b2tlUm9sZVJlc3BvbnNlEg8KB3N1Y2Nlc3MYASABKAgisgEKDUF1ZGl0TG9nRW50cnkSCgoCaWQYASABKAkSEAoIYWN0b3JfaWQYAiABKAkSDgoGYWN0aW9uGAMgASgJEhMKC3RhcmdldF90eXBlGAQgASgJEhEKCXRhcmdldF9pZBgFIAEoCRITCgtiZWZvcmVfanNvbhgGIAEoCRISCgphZnRlcl9qc29uGAcgASgJEg4KBnJlYXNvbhgIIAEoCRISCgpjcmVhdGVkX2F0GAkgASgJIoUBChlBZG1pbkxpc3RBdWRpdExvZ3NSZXF1ZXN0EhAKCGFjdG9yX2lkGAEgASgJEhEKCXRhcmdldF9pZBgCIAEoCRIRCglmcm9tX2RhdGUYAyABKAkSDwoHdG9fZGF0ZRgEIAEoCRIMCgRwYWdlGAUgASgFEhEKCXBhZ2Vfc2l6ZRgGIAEoBSJeChpBZG1pbkxpc3RBdWRpdExvZ3NSZXNwb25zZRIrCgRsb2dzGAEgAygLMh0uc3Vkb2t1LnVzZXIudjEuQXVkaXRMb2dFbnRyeRITCgt0b3RhbF9jb3VudBgCIAEoBTKACgoLVXNlclNlcnZpY2USawoSR2V0T3JDcmVhdGVQcm9maWxlEikuc3Vkb2t1LnVzZXIudjEuR2V0T3JDcmVhdGVQcm9maWxlUmVxdWVzdBoqLnN1ZG9rdS51c2VyLnYxLkdldE9yQ3JlYXRlUHJvZmlsZVJlc3BvbnNlElMKCkdldFByb2ZpbGUSIS5zdWRva3UudXNlci52MS5HZXRQcm9maWxlUmVxdWVzdBoiLnN1ZG9rdS51c2VyLnYxLkdldFByb2ZpbGVSZXNwb25zZRJcCg1VcGRhdGVQcm9maWxlEiQuc3Vkb2t1LnVzZXIudjEuVXBkYXRlUHJvZmlsZVJlcXVlc3QaJS5zdWRva3UudXNlci52MS5VcGRhdGVQcm9maWxlUmVzcG9uc2USVgoLR2V0UHJvZmlsZXMSIi5zdWRva3UudXNlci52MS5HZXRQcm9maWxlc1JlcXVlc3QaIy5zdWRva3UudXNlci52MS5HZXRQcm9maWxlc1Jlc3BvbnNlEl8KDkFkbWluTGlzdFVzZXJzEiUuc3Vkb2t1LnVzZXIudjEuQWRtaW5MaXN0VXNlcnNSZXF1ZXN0GiYuc3Vkb2t1LnVzZXIudjEuQWRtaW5MaXN0VXNlcnNSZXNwb25zZRJZCgxBZG1pbkdldFVzZXISIy5zdWRva3UudXNlci52MS5BZG1pbkdldFVzZXJSZXF1ZXN0GiQuc3Vkb2t1LnVzZXIudjEuQWRtaW5HZXRVc2VyUmVzcG9uc2USWQoMQWRtaW5CYW5Vc2VyEiMuc3Vkb2t1LnVzZXIudjEuQWRtaW5CYW5Vc2VyUmVxdWVzdBokLnN1ZG9rdS51c2VyLnYxLkFkbWluQmFuVXNlclJlc3BvbnNlEl8KDkFkbWluVW5iYW5Vc2VyEiUuc3Vkb2t1LnVzZXIudjEuQWRtaW5VbmJhblVzZXJSZXF1ZXN0GiYuc3Vkb2t1LnVzZXIudjEuQWRtaW5VbmJhblVzZXJSZXNwb25zZRJuChNBZG1pblNvZnREZWxldGVVc2VyEiouc3Vkb2t1LnVzZXIudjEuQWRtaW5Tb2Z0RGVsZXRlVXNlclJlcXVlc3QaKy5zdWRva3UudXNlci52MS5BZG1pblNvZnREZWxldGVVc2VyUmVzcG9uc2USXwoOQWRtaW5BZGp1c3RFbG8SJS5zdWRva3UudXNlci52MS5BZG1pbkFkanVzdEVsb1JlcXVlc3QaJi5zdWRva3UudXNlci52MS5BZG1pbkFkanVzdEVsb1Jlc3BvbnNlEl8KDkFkbWluR3JhbnRSb2xlEiUuc3Vkb2t1LnVzZXIudjEuQWRtaW5HcmFudFJvbGVSZXF1ZXN0GiYuc3Vkb2t1LnVzZXIudjEuQWRtaW5HcmFudFJvbGVSZXNwb25zZRJiCg9BZG1pblJldm9rZVJvbGUSJi5zdWRva3UudXNlci52MS5BZG1pblJldm9rZVJvbGVSZXF1ZXN0Gicuc3Vkb2t1LnVzZXIudjEuQWRtaW5SZXZva2VSb2xlUmVzcG9uc2USawoSQWRtaW5MaXN0QXVkaXRMb2dzEikuc3Vkb2t1LnVzZXIudjEuQWRtaW5MaXN0QXVkaXRMb2dzUmVxdWVzdBoqLnN1ZG9rdS51c2VyLnYxLkFkbWluTGlzdEF1ZGl0TG9nc1Jlc3BvbnNlQhGqAg5TdWRva3UuVXNlci5WMWIGcHJvdG8z");
 
 /**
  * @generated from message sudoku.user.v1.UserProfile
@@ -279,6 +279,701 @@ export const GetProfilesResponseSchema: GenMessage<GetProfilesResponse> = /*@__P
   messageDesc(file_sudoku_user_v1_user, 9);
 
 /**
+ * @generated from message sudoku.user.v1.AdminUserSummary
+ */
+export type AdminUserSummary = Message<"sudoku.user.v1.AdminUserSummary"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string firebase_uid = 2;
+   */
+  firebaseUid: string;
+
+  /**
+   * @generated from field: string display_name = 3;
+   */
+  displayName: string;
+
+  /**
+   * @generated from field: string email = 4;
+   */
+  email: string;
+
+  /**
+   * @generated from field: string role = 5;
+   */
+  role: string;
+
+  /**
+   * @generated from field: string status = 6;
+   */
+  status: string;
+
+  /**
+   * @generated from field: int32 elo = 7;
+   */
+  elo: number;
+
+  /**
+   * @generated from field: int32 player_level = 8;
+   */
+  playerLevel: number;
+
+  /**
+   * @generated from field: string created_at = 9;
+   */
+  createdAt: string;
+
+  /**
+   * @generated from field: string banned_until = 10;
+   */
+  bannedUntil: string;
+
+  /**
+   * @generated from field: string last_login_at = 11;
+   */
+  lastLoginAt: string;
+
+  /**
+   * @generated from field: string avatar_url = 12;
+   */
+  avatarUrl: string;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminUserSummary.
+ * Use `create(AdminUserSummarySchema)` to create a new message.
+ */
+export const AdminUserSummarySchema: GenMessage<AdminUserSummary> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 10);
+
+/**
+ * @generated from message sudoku.user.v1.AdminListUsersRequest
+ */
+export type AdminListUsersRequest = Message<"sudoku.user.v1.AdminListUsersRequest"> & {
+  /**
+   * @generated from field: int32 page = 1;
+   */
+  page: number;
+
+  /**
+   * @generated from field: int32 page_size = 2;
+   */
+  pageSize: number;
+
+  /**
+   * @generated from field: string search = 3;
+   */
+  search: string;
+
+  /**
+   * @generated from field: string status_filter = 4;
+   */
+  statusFilter: string;
+
+  /**
+   * "elo", "created_at"
+   *
+   * @generated from field: string sort_by = 5;
+   */
+  sortBy: string;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminListUsersRequest.
+ * Use `create(AdminListUsersRequestSchema)` to create a new message.
+ */
+export const AdminListUsersRequestSchema: GenMessage<AdminListUsersRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 11);
+
+/**
+ * @generated from message sudoku.user.v1.AdminListUsersResponse
+ */
+export type AdminListUsersResponse = Message<"sudoku.user.v1.AdminListUsersResponse"> & {
+  /**
+   * @generated from field: repeated sudoku.user.v1.AdminUserSummary users = 1;
+   */
+  users: AdminUserSummary[];
+
+  /**
+   * @generated from field: int32 total_count = 2;
+   */
+  totalCount: number;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminListUsersResponse.
+ * Use `create(AdminListUsersResponseSchema)` to create a new message.
+ */
+export const AdminListUsersResponseSchema: GenMessage<AdminListUsersResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 12);
+
+/**
+ * @generated from message sudoku.user.v1.EloHistoryEntry
+ */
+export type EloHistoryEntry = Message<"sudoku.user.v1.EloHistoryEntry"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: int32 delta = 2;
+   */
+  delta: number;
+
+  /**
+   * @generated from field: int32 new_elo = 3;
+   */
+  newElo: number;
+
+  /**
+   * @generated from field: string source_type = 4;
+   */
+  sourceType: string;
+
+  /**
+   * @generated from field: string reason = 5;
+   */
+  reason: string;
+
+  /**
+   * @generated from field: string created_at = 6;
+   */
+  createdAt: string;
+};
+
+/**
+ * Describes the message sudoku.user.v1.EloHistoryEntry.
+ * Use `create(EloHistoryEntrySchema)` to create a new message.
+ */
+export const EloHistoryEntrySchema: GenMessage<EloHistoryEntry> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 13);
+
+/**
+ * @generated from message sudoku.user.v1.AdminUserDetail
+ */
+export type AdminUserDetail = Message<"sudoku.user.v1.AdminUserDetail"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string firebase_uid = 2;
+   */
+  firebaseUid: string;
+
+  /**
+   * @generated from field: string display_name = 3;
+   */
+  displayName: string;
+
+  /**
+   * @generated from field: string email = 4;
+   */
+  email: string;
+
+  /**
+   * @generated from field: string avatar_url = 5;
+   */
+  avatarUrl: string;
+
+  /**
+   * @generated from field: string country = 6;
+   */
+  country: string;
+
+  /**
+   * @generated from field: string role = 7;
+   */
+  role: string;
+
+  /**
+   * @generated from field: string status = 8;
+   */
+  status: string;
+
+  /**
+   * @generated from field: int32 elo = 9;
+   */
+  elo: number;
+
+  /**
+   * @generated from field: int32 player_level = 10;
+   */
+  playerLevel: number;
+
+  /**
+   * @generated from field: int32 total_games = 11;
+   */
+  totalGames: number;
+
+  /**
+   * @generated from field: int32 wins = 12;
+   */
+  wins: number;
+
+  /**
+   * @generated from field: string ban_reason = 13;
+   */
+  banReason: string;
+
+  /**
+   * @generated from field: string banned_until = 14;
+   */
+  bannedUntil: string;
+
+  /**
+   * @generated from field: string last_login_at = 15;
+   */
+  lastLoginAt: string;
+
+  /**
+   * @generated from field: string created_at = 16;
+   */
+  createdAt: string;
+
+  /**
+   * @generated from field: string updated_at = 17;
+   */
+  updatedAt: string;
+
+  /**
+   * @generated from field: repeated sudoku.user.v1.EloHistoryEntry recent_elo_history = 18;
+   */
+  recentEloHistory: EloHistoryEntry[];
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminUserDetail.
+ * Use `create(AdminUserDetailSchema)` to create a new message.
+ */
+export const AdminUserDetailSchema: GenMessage<AdminUserDetail> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 14);
+
+/**
+ * @generated from message sudoku.user.v1.AdminGetUserRequest
+ */
+export type AdminGetUserRequest = Message<"sudoku.user.v1.AdminGetUserRequest"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminGetUserRequest.
+ * Use `create(AdminGetUserRequestSchema)` to create a new message.
+ */
+export const AdminGetUserRequestSchema: GenMessage<AdminGetUserRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 15);
+
+/**
+ * @generated from message sudoku.user.v1.AdminGetUserResponse
+ */
+export type AdminGetUserResponse = Message<"sudoku.user.v1.AdminGetUserResponse"> & {
+  /**
+   * @generated from field: sudoku.user.v1.AdminUserDetail user = 1;
+   */
+  user?: AdminUserDetail | undefined;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminGetUserResponse.
+ * Use `create(AdminGetUserResponseSchema)` to create a new message.
+ */
+export const AdminGetUserResponseSchema: GenMessage<AdminGetUserResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 16);
+
+/**
+ * @generated from message sudoku.user.v1.AdminBanUserRequest
+ */
+export type AdminBanUserRequest = Message<"sudoku.user.v1.AdminBanUserRequest"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+
+  /**
+   * @generated from field: string reason = 2;
+   */
+  reason: string;
+
+  /**
+   * RFC3339, or empty for permanent
+   *
+   * @generated from field: string banned_until = 3;
+   */
+  bannedUntil: string;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminBanUserRequest.
+ * Use `create(AdminBanUserRequestSchema)` to create a new message.
+ */
+export const AdminBanUserRequestSchema: GenMessage<AdminBanUserRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 17);
+
+/**
+ * @generated from message sudoku.user.v1.AdminBanUserResponse
+ */
+export type AdminBanUserResponse = Message<"sudoku.user.v1.AdminBanUserResponse"> & {
+  /**
+   * @generated from field: bool success = 1;
+   */
+  success: boolean;
+
+  /**
+   * @generated from field: string user_id = 2;
+   */
+  userId: string;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminBanUserResponse.
+ * Use `create(AdminBanUserResponseSchema)` to create a new message.
+ */
+export const AdminBanUserResponseSchema: GenMessage<AdminBanUserResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 18);
+
+/**
+ * @generated from message sudoku.user.v1.AdminUnbanUserRequest
+ */
+export type AdminUnbanUserRequest = Message<"sudoku.user.v1.AdminUnbanUserRequest"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+
+  /**
+   * @generated from field: string reason = 2;
+   */
+  reason: string;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminUnbanUserRequest.
+ * Use `create(AdminUnbanUserRequestSchema)` to create a new message.
+ */
+export const AdminUnbanUserRequestSchema: GenMessage<AdminUnbanUserRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 19);
+
+/**
+ * @generated from message sudoku.user.v1.AdminUnbanUserResponse
+ */
+export type AdminUnbanUserResponse = Message<"sudoku.user.v1.AdminUnbanUserResponse"> & {
+  /**
+   * @generated from field: bool success = 1;
+   */
+  success: boolean;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminUnbanUserResponse.
+ * Use `create(AdminUnbanUserResponseSchema)` to create a new message.
+ */
+export const AdminUnbanUserResponseSchema: GenMessage<AdminUnbanUserResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 20);
+
+/**
+ * @generated from message sudoku.user.v1.AdminSoftDeleteUserRequest
+ */
+export type AdminSoftDeleteUserRequest = Message<"sudoku.user.v1.AdminSoftDeleteUserRequest"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+
+  /**
+   * @generated from field: string reason = 2;
+   */
+  reason: string;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminSoftDeleteUserRequest.
+ * Use `create(AdminSoftDeleteUserRequestSchema)` to create a new message.
+ */
+export const AdminSoftDeleteUserRequestSchema: GenMessage<AdminSoftDeleteUserRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 21);
+
+/**
+ * @generated from message sudoku.user.v1.AdminSoftDeleteUserResponse
+ */
+export type AdminSoftDeleteUserResponse = Message<"sudoku.user.v1.AdminSoftDeleteUserResponse"> & {
+  /**
+   * @generated from field: bool success = 1;
+   */
+  success: boolean;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminSoftDeleteUserResponse.
+ * Use `create(AdminSoftDeleteUserResponseSchema)` to create a new message.
+ */
+export const AdminSoftDeleteUserResponseSchema: GenMessage<AdminSoftDeleteUserResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 22);
+
+/**
+ * @generated from message sudoku.user.v1.AdminAdjustEloRequest
+ */
+export type AdminAdjustEloRequest = Message<"sudoku.user.v1.AdminAdjustEloRequest"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+
+  /**
+   * @generated from field: int32 delta = 2;
+   */
+  delta: number;
+
+  /**
+   * @generated from field: string reason = 3;
+   */
+  reason: string;
+
+  /**
+   * "ADD", "SUBTRACT", "SET"
+   *
+   * @generated from field: string operation = 4;
+   */
+  operation: string;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminAdjustEloRequest.
+ * Use `create(AdminAdjustEloRequestSchema)` to create a new message.
+ */
+export const AdminAdjustEloRequestSchema: GenMessage<AdminAdjustEloRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 23);
+
+/**
+ * @generated from message sudoku.user.v1.AdminAdjustEloResponse
+ */
+export type AdminAdjustEloResponse = Message<"sudoku.user.v1.AdminAdjustEloResponse"> & {
+  /**
+   * @generated from field: int32 new_elo = 1;
+   */
+  newElo: number;
+
+  /**
+   * @generated from field: int32 old_elo = 2;
+   */
+  oldElo: number;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminAdjustEloResponse.
+ * Use `create(AdminAdjustEloResponseSchema)` to create a new message.
+ */
+export const AdminAdjustEloResponseSchema: GenMessage<AdminAdjustEloResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 24);
+
+/**
+ * @generated from message sudoku.user.v1.AdminGrantRoleRequest
+ */
+export type AdminGrantRoleRequest = Message<"sudoku.user.v1.AdminGrantRoleRequest"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+
+  /**
+   * @generated from field: string reason = 2;
+   */
+  reason: string;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminGrantRoleRequest.
+ * Use `create(AdminGrantRoleRequestSchema)` to create a new message.
+ */
+export const AdminGrantRoleRequestSchema: GenMessage<AdminGrantRoleRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 25);
+
+/**
+ * @generated from message sudoku.user.v1.AdminGrantRoleResponse
+ */
+export type AdminGrantRoleResponse = Message<"sudoku.user.v1.AdminGrantRoleResponse"> & {
+  /**
+   * @generated from field: bool success = 1;
+   */
+  success: boolean;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminGrantRoleResponse.
+ * Use `create(AdminGrantRoleResponseSchema)` to create a new message.
+ */
+export const AdminGrantRoleResponseSchema: GenMessage<AdminGrantRoleResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 26);
+
+/**
+ * @generated from message sudoku.user.v1.AdminRevokeRoleRequest
+ */
+export type AdminRevokeRoleRequest = Message<"sudoku.user.v1.AdminRevokeRoleRequest"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+
+  /**
+   * @generated from field: string reason = 2;
+   */
+  reason: string;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminRevokeRoleRequest.
+ * Use `create(AdminRevokeRoleRequestSchema)` to create a new message.
+ */
+export const AdminRevokeRoleRequestSchema: GenMessage<AdminRevokeRoleRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 27);
+
+/**
+ * @generated from message sudoku.user.v1.AdminRevokeRoleResponse
+ */
+export type AdminRevokeRoleResponse = Message<"sudoku.user.v1.AdminRevokeRoleResponse"> & {
+  /**
+   * @generated from field: bool success = 1;
+   */
+  success: boolean;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminRevokeRoleResponse.
+ * Use `create(AdminRevokeRoleResponseSchema)` to create a new message.
+ */
+export const AdminRevokeRoleResponseSchema: GenMessage<AdminRevokeRoleResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 28);
+
+/**
+ * @generated from message sudoku.user.v1.AuditLogEntry
+ */
+export type AuditLogEntry = Message<"sudoku.user.v1.AuditLogEntry"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string actor_id = 2;
+   */
+  actorId: string;
+
+  /**
+   * @generated from field: string action = 3;
+   */
+  action: string;
+
+  /**
+   * @generated from field: string target_type = 4;
+   */
+  targetType: string;
+
+  /**
+   * @generated from field: string target_id = 5;
+   */
+  targetId: string;
+
+  /**
+   * @generated from field: string before_json = 6;
+   */
+  beforeJson: string;
+
+  /**
+   * @generated from field: string after_json = 7;
+   */
+  afterJson: string;
+
+  /**
+   * @generated from field: string reason = 8;
+   */
+  reason: string;
+
+  /**
+   * @generated from field: string created_at = 9;
+   */
+  createdAt: string;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AuditLogEntry.
+ * Use `create(AuditLogEntrySchema)` to create a new message.
+ */
+export const AuditLogEntrySchema: GenMessage<AuditLogEntry> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 29);
+
+/**
+ * @generated from message sudoku.user.v1.AdminListAuditLogsRequest
+ */
+export type AdminListAuditLogsRequest = Message<"sudoku.user.v1.AdminListAuditLogsRequest"> & {
+  /**
+   * @generated from field: string actor_id = 1;
+   */
+  actorId: string;
+
+  /**
+   * @generated from field: string target_id = 2;
+   */
+  targetId: string;
+
+  /**
+   * @generated from field: string from_date = 3;
+   */
+  fromDate: string;
+
+  /**
+   * @generated from field: string to_date = 4;
+   */
+  toDate: string;
+
+  /**
+   * @generated from field: int32 page = 5;
+   */
+  page: number;
+
+  /**
+   * @generated from field: int32 page_size = 6;
+   */
+  pageSize: number;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminListAuditLogsRequest.
+ * Use `create(AdminListAuditLogsRequestSchema)` to create a new message.
+ */
+export const AdminListAuditLogsRequestSchema: GenMessage<AdminListAuditLogsRequest> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 30);
+
+/**
+ * @generated from message sudoku.user.v1.AdminListAuditLogsResponse
+ */
+export type AdminListAuditLogsResponse = Message<"sudoku.user.v1.AdminListAuditLogsResponse"> & {
+  /**
+   * @generated from field: repeated sudoku.user.v1.AuditLogEntry logs = 1;
+   */
+  logs: AuditLogEntry[];
+
+  /**
+   * @generated from field: int32 total_count = 2;
+   */
+  totalCount: number;
+};
+
+/**
+ * Describes the message sudoku.user.v1.AdminListAuditLogsResponse.
+ * Use `create(AdminListAuditLogsResponseSchema)` to create a new message.
+ */
+export const AdminListAuditLogsResponseSchema: GenMessage<AdminListAuditLogsResponse> = /*@__PURE__*/
+  messageDesc(file_sudoku_user_v1_user, 31);
+
+/**
  * @generated from service sudoku.user.v1.UserService
  */
 export const UserService: GenService<{
@@ -313,6 +1008,80 @@ export const UserService: GenService<{
     methodKind: "unary";
     input: typeof GetProfilesRequestSchema;
     output: typeof GetProfilesResponseSchema;
+  },
+  /**
+   * Admin User Management
+   *
+   * @generated from rpc sudoku.user.v1.UserService.AdminListUsers
+   */
+  adminListUsers: {
+    methodKind: "unary";
+    input: typeof AdminListUsersRequestSchema;
+    output: typeof AdminListUsersResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.user.v1.UserService.AdminGetUser
+   */
+  adminGetUser: {
+    methodKind: "unary";
+    input: typeof AdminGetUserRequestSchema;
+    output: typeof AdminGetUserResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.user.v1.UserService.AdminBanUser
+   */
+  adminBanUser: {
+    methodKind: "unary";
+    input: typeof AdminBanUserRequestSchema;
+    output: typeof AdminBanUserResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.user.v1.UserService.AdminUnbanUser
+   */
+  adminUnbanUser: {
+    methodKind: "unary";
+    input: typeof AdminUnbanUserRequestSchema;
+    output: typeof AdminUnbanUserResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.user.v1.UserService.AdminSoftDeleteUser
+   */
+  adminSoftDeleteUser: {
+    methodKind: "unary";
+    input: typeof AdminSoftDeleteUserRequestSchema;
+    output: typeof AdminSoftDeleteUserResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.user.v1.UserService.AdminAdjustElo
+   */
+  adminAdjustElo: {
+    methodKind: "unary";
+    input: typeof AdminAdjustEloRequestSchema;
+    output: typeof AdminAdjustEloResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.user.v1.UserService.AdminGrantRole
+   */
+  adminGrantRole: {
+    methodKind: "unary";
+    input: typeof AdminGrantRoleRequestSchema;
+    output: typeof AdminGrantRoleResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.user.v1.UserService.AdminRevokeRole
+   */
+  adminRevokeRole: {
+    methodKind: "unary";
+    input: typeof AdminRevokeRoleRequestSchema;
+    output: typeof AdminRevokeRoleResponseSchema;
+  },
+  /**
+   * @generated from rpc sudoku.user.v1.UserService.AdminListAuditLogs
+   */
+  adminListAuditLogs: {
+    methodKind: "unary";
+    input: typeof AdminListAuditLogsRequestSchema;
+    output: typeof AdminListAuditLogsResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_sudoku_user_v1_user, 0);

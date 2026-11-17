@@ -13,6 +13,8 @@ using Support.Api.Data;
 using Support.Api.Data.Repositories;
 using Support.Api.Domain.Repositories;
 using Support.Api.Domain.Services;
+using Support.Api.Messaging;
+using Sudoku.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +70,9 @@ builder.Services.AddScoped<ITutorialRepository, TutorialRepository>();
 builder.Services.AddScoped<INoticeRepository, NoticeRepository>();
 builder.Services.AddScoped<ITutorialService, TutorialService>();
 builder.Services.AddScoped<INoticeService, NoticeService>();
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+builder.Services.AddSudokuKafkaPublisher();
+builder.Services.AddHostedService<SupportEventsConsumerWorker>();
 
 builder.Services.AddGrpcClient<GameService.GameServiceClient>(options =>
 {
@@ -108,5 +113,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<SupportDbContext>();
+    await db.Database.MigrateAsync();
+}
 
 app.Run();

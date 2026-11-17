@@ -18,11 +18,16 @@ public class GameGrpcService : GameService.GameServiceBase
 {
     private readonly IGamePlayService _gamePlayService;
     private readonly ILeaderboardService _leaderboardService;
+    private readonly IAdminGameService? _adminGameService;
 
-    public GameGrpcService(IGamePlayService gamePlayService, ILeaderboardService leaderboardService)
+    public GameGrpcService(
+        IGamePlayService gamePlayService,
+        ILeaderboardService leaderboardService,
+        IAdminGameService? adminGameService = null)
     {
         _gamePlayService = gamePlayService;
         _leaderboardService = leaderboardService;
+        _adminGameService = adminGameService;
     }
 
     [AllowAnonymous]
@@ -31,7 +36,7 @@ public class GameGrpcService : GameService.GameServiceBase
         var levels = await _leaderboardService.ListLevelsAsync(context.CancellationToken);
         var response = new ListLevelsResponse();
 
-        foreach (var l in levels)
+        foreach (var l in levels.Where(x => x.IsActive))
         {
             response.Levels.Add(new LevelInfo
             {
@@ -308,5 +313,249 @@ public class GameGrpcService : GameService.GameServiceBase
         }
 
         return state;
+    }
+
+    [AllowAnonymous]
+    public override async Task<ListGameModesResponse> ListGameModes(ListGameModesRequest request, ServerCallContext context)
+    {
+        if (_adminGameService == null) return new ListGameModesResponse();
+        var modes = await _adminGameService.ListGameModesAsync(onlyActive: true, context.CancellationToken);
+        var response = new ListGameModesResponse();
+        foreach (var m in modes)
+        {
+            response.GameModes.Add(new GameModeInfo
+            {
+                Id = m.Id.ToString(),
+                Code = m.Code,
+                Name = m.Name,
+                Description = m.Description,
+                IsActive = m.IsActive,
+                SortOrder = m.SortOrder,
+                Version = m.Version,
+                UpdatedAt = m.UpdatedAt.ToString("o")
+            });
+        }
+        return response;
+    }
+
+    [Authorize(Policy = "Admin")]
+    public override async Task<AdminListGameModesResponse> AdminListGameModes(AdminListGameModesRequest request, ServerCallContext context)
+    {
+        if (_adminGameService == null) return new AdminListGameModesResponse();
+        var modes = await _adminGameService.ListGameModesAsync(onlyActive: false, context.CancellationToken);
+        var response = new AdminListGameModesResponse();
+        foreach (var m in modes)
+        {
+            response.GameModes.Add(new GameModeInfo
+            {
+                Id = m.Id.ToString(),
+                Code = m.Code,
+                Name = m.Name,
+                Description = m.Description,
+                IsActive = m.IsActive,
+                SortOrder = m.SortOrder,
+                Version = m.Version,
+                UpdatedAt = m.UpdatedAt.ToString("o")
+            });
+        }
+        return response;
+    }
+
+    [Authorize(Policy = "Admin")]
+    public override async Task<AdminUpdateGameModeResponse> AdminUpdateGameMode(AdminUpdateGameModeRequest request, ServerCallContext context)
+    {
+        if (_adminGameService == null) throw new RpcException(new Status(StatusCode.Unimplemented, "AdminService not configured"));
+        if (!Guid.TryParse(request.Id, out var id))
+        {
+            throw new RpcException(new Status(StatusCode.InvalidArgument, "ID biến thể không hợp lệ."));
+        }
+
+        string actorUid = GetCallerUserId(context);
+        var updated = await _adminGameService.UpdateGameModeAsync(
+            actorUid,
+            id,
+            request.Name,
+            request.Description,
+            request.IsActive,
+            request.NotifyPlayers,
+            request.NotificationMessage,
+            request.Reason,
+            context.CancellationToken);
+
+        return new AdminUpdateGameModeResponse
+        {
+            GameMode = new GameModeInfo
+            {
+                Id = updated.Id.ToString(),
+                Code = updated.Code,
+                Name = updated.Name,
+                Description = updated.Description,
+                IsActive = updated.IsActive,
+                SortOrder = updated.SortOrder,
+                Version = updated.Version,
+                UpdatedAt = updated.UpdatedAt.ToString("o")
+            }
+        };
+    }
+
+    [Authorize(Policy = "Admin")]
+    public override async Task<AdminListLevelConfigsResponse> AdminListLevelConfigs(AdminListLevelConfigsRequest request, ServerCallContext context)
+    {
+        if (_adminGameService == null) return new AdminListLevelConfigsResponse();
+        var levels = await _adminGameService.ListLevelConfigsAsync(context.CancellationToken);
+        var response = new AdminListLevelConfigsResponse();
+        foreach (var l in levels)
+        {
+            response.Levels.Add(new LevelConfigInfo
+            {
+                LevelId = l.LevelId,
+                Name = l.Name,
+                SortOrder = l.SortOrder,
+                MinClues = l.MinClues,
+                MaxClues = l.MaxClues,
+                MaxMistakes = l.MaxMistakes,
+                MaxHints = l.MaxHints,
+                IsActive = l.IsActive,
+                ScoreMultiplier = l.ScoreMultiplier,
+                TimeLimitSeconds = l.TimeLimitSeconds ?? 0,
+                Version = l.Version,
+                UpdatedAt = l.UpdatedAt.ToString("o")
+            });
+        }
+        return response;
+    }
+
+    [Authorize(Policy = "Admin")]
+    public override async Task<AdminUpdateLevelResponse> AdminUpdateLevel(AdminUpdateLevelRequest request, ServerCallContext context)
+    {
+        if (_adminGameService == null) throw new RpcException(new Status(StatusCode.Unimplemented, "AdminService not configured"));
+        string actorUid = GetCallerUserId(context);
+        var updated = await _adminGameService.UpdateLevelAsync(
+            actorUid,
+            request.LevelId,
+            request.MinClues,
+            request.MaxClues,
+            request.MaxMistakes,
+            request.MaxHints,
+            request.IsActive,
+            request.ScoreMultiplier,
+            request.TimeLimitSeconds,
+            request.NotifyPlayers,
+            request.NotificationMessage,
+            request.Reason,
+            context.CancellationToken);
+
+        return new AdminUpdateLevelResponse
+        {
+            Level = new LevelConfigInfo
+            {
+                LevelId = updated.LevelId,
+                Name = updated.Name,
+                SortOrder = updated.SortOrder,
+                MinClues = updated.MinClues,
+                MaxClues = updated.MaxClues,
+                MaxMistakes = updated.MaxMistakes,
+                MaxHints = updated.MaxHints,
+                IsActive = updated.IsActive,
+                ScoreMultiplier = updated.ScoreMultiplier,
+                TimeLimitSeconds = updated.TimeLimitSeconds ?? 0,
+                Version = updated.Version,
+                UpdatedAt = updated.UpdatedAt.ToString("o")
+            }
+        };
+    }
+
+    [Authorize(Policy = "Admin")]
+    public override async Task<AdminListTaskDefsResponse> AdminListTaskDefs(AdminListTaskDefsRequest request, ServerCallContext context)
+    {
+        if (_adminGameService == null) return new AdminListTaskDefsResponse();
+        var tasks = await _adminGameService.ListTaskDefsAsync(context.CancellationToken);
+        var response = new AdminListTaskDefsResponse();
+        foreach (var t in tasks)
+        {
+            response.TaskDefs.Add(new TaskDefInfo
+            {
+                Id = t.Id.ToString(),
+                Code = t.Code,
+                Description = t.Description,
+                ConditionType = t.ConditionType,
+                Target = t.Target,
+                ProgressSource = t.ProgressSource,
+                IsActive = t.IsActive,
+                SortOrder = t.SortOrder,
+                UpdatedAt = t.UpdatedAt.ToString("o")
+            });
+        }
+        return response;
+    }
+
+    [Authorize(Policy = "Admin")]
+    public override async Task<AdminCreateTaskDefResponse> AdminCreateTaskDef(AdminCreateTaskDefRequest request, ServerCallContext context)
+    {
+        if (_adminGameService == null) throw new RpcException(new Status(StatusCode.Unimplemented, "AdminService not configured"));
+        string actorUid = GetCallerUserId(context);
+        var created = await _adminGameService.CreateTaskDefAsync(
+            actorUid,
+            request.Code,
+            request.Description,
+            request.ConditionType,
+            request.Target,
+            request.ProgressSource,
+            request.SortOrder,
+            request.Reason,
+            context.CancellationToken);
+
+        return new AdminCreateTaskDefResponse
+        {
+            TaskDef = new TaskDefInfo
+            {
+                Id = created.Id.ToString(),
+                Code = created.Code,
+                Description = created.Description,
+                ConditionType = created.ConditionType,
+                Target = created.Target,
+                ProgressSource = created.ProgressSource,
+                IsActive = created.IsActive,
+                SortOrder = created.SortOrder,
+                UpdatedAt = created.UpdatedAt.ToString("o")
+            }
+        };
+    }
+
+    [Authorize(Policy = "Admin")]
+    public override async Task<AdminUpdateTaskDefResponse> AdminUpdateTaskDef(AdminUpdateTaskDefRequest request, ServerCallContext context)
+    {
+        if (_adminGameService == null) throw new RpcException(new Status(StatusCode.Unimplemented, "AdminService not configured"));
+        if (!Guid.TryParse(request.Id, out var id))
+        {
+            throw new RpcException(new Status(StatusCode.InvalidArgument, "ID nhiệm vụ không hợp lệ."));
+        }
+
+        string actorUid = GetCallerUserId(context);
+        var updated = await _adminGameService.UpdateTaskDefAsync(
+            actorUid,
+            id,
+            request.Description,
+            request.IsActive,
+            request.Target,
+            request.SortOrder,
+            request.Reason,
+            context.CancellationToken);
+
+        return new AdminUpdateTaskDefResponse
+        {
+            TaskDef = new TaskDefInfo
+            {
+                Id = updated.Id.ToString(),
+                Code = updated.Code,
+                Description = updated.Description,
+                ConditionType = updated.ConditionType,
+                Target = updated.Target,
+                ProgressSource = updated.ProgressSource,
+                IsActive = updated.IsActive,
+                SortOrder = updated.SortOrder,
+                UpdatedAt = updated.UpdatedAt.ToString("o")
+            }
+        };
     }
 }

@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file sudoku/events/v1/events.proto.
  */
 export const file_sudoku_events_v1_events: GenFile = /*@__PURE__*/
-  fileDesc("Ch1zdWRva3UvZXZlbnRzL3YxL2V2ZW50cy5wcm90bxIQc3Vkb2t1LmV2ZW50cy52MSJmCg1FdmVudEVudmVsb3BlEhAKCGV2ZW50X2lkGAEgASgJEgwKBHR5cGUYAiABKAkSEwoLb2NjdXJyZWRfYXQYAyABKAkSDwoHdXNlcl9pZBgEIAEoCRIPCgdwYXlsb2FkGAUgASgMIusBCgxHYW1lRmluaXNoZWQSEgoKc2Vzc2lvbl9pZBgBIAEoCRIPCgd1c2VyX2lkGAIgASgJEhIKCmRpZmZpY3VsdHkYAyABKAkSDgoGaXNfd2luGAQgASgIEhgKEGR1cmF0aW9uX3NlY29uZHMYBSABKAUSFAoMcmV3YXJkX2NvaW5zGAYgASgFEg0KBXNjb3JlGAcgASgFEhIKCmVsYXBzZWRfbXMYCCABKAMSEwoLbGF5b3V0X3R5cGUYCSABKAUSFgoObWlzdGFrZXNfY291bnQYCiABKAUSEgoKaGludHNfdXNlZBgLIAEoBSL+AQoOTWF0Y2hDb21wbGV0ZWQSEAoIbWF0Y2hfaWQYASABKAkSFgoOd2lubmVyX3VzZXJfaWQYAiABKAkSFQoNbG9zZXJfdXNlcl9pZBgDIAEoCRIbChN3aW5uZXJfcmV3YXJkX2NvaW5zGAQgASgFEhQKDHJhdGluZ19kZWx0YRgFIAEoBRITCgtwbGF5X2Zvcm1hdBgGIAEoBRIUCgxib2FyZF9sYXlvdXQYByABKAUSEAoIbGV2ZWxfaWQYCCABKAkSDwoHaXNfZHJhdxgJIAEoCBITCgtkdXJhdGlvbl9tcxgKIAEoAxIVCg10b3VybmFtZW50X2lkGAsgASgJQhOqAhBTdWRva3UuRXZlbnRzLlYxYgZwcm90bzM");
+  fileDesc("Ch1zdWRva3UvZXZlbnRzL3YxL2V2ZW50cy5wcm90bxIQc3Vkb2t1LmV2ZW50cy52MSJmCg1FdmVudEVudmVsb3BlEhAKCGV2ZW50X2lkGAEgASgJEgwKBHR5cGUYAiABKAkSEwoLb2NjdXJyZWRfYXQYAyABKAkSDwoHdXNlcl9pZBgEIAEoCRIPCgdwYXlsb2FkGAUgASgMIusBCgxHYW1lRmluaXNoZWQSEgoKc2Vzc2lvbl9pZBgBIAEoCRIPCgd1c2VyX2lkGAIgASgJEhIKCmRpZmZpY3VsdHkYAyABKAkSDgoGaXNfd2luGAQgASgIEhgKEGR1cmF0aW9uX3NlY29uZHMYBSABKAUSFAoMcmV3YXJkX2NvaW5zGAYgASgFEg0KBXNjb3JlGAcgASgFEhIKCmVsYXBzZWRfbXMYCCABKAMSEwoLbGF5b3V0X3R5cGUYCSABKAUSFgoObWlzdGFrZXNfY291bnQYCiABKAUSEgoKaGludHNfdXNlZBgLIAEoBSL+AQoOTWF0Y2hDb21wbGV0ZWQSEAoIbWF0Y2hfaWQYASABKAkSFgoOd2lubmVyX3VzZXJfaWQYAiABKAkSFQoNbG9zZXJfdXNlcl9pZBgDIAEoCRIbChN3aW5uZXJfcmV3YXJkX2NvaW5zGAQgASgFEhQKDHJhdGluZ19kZWx0YRgFIAEoBRITCgtwbGF5X2Zvcm1hdBgGIAEoBRIUCgxib2FyZF9sYXlvdXQYByABKAUSEAoIbGV2ZWxfaWQYCCABKAkSDwoHaXNfZHJhdxgJIAEoCBITCgtkdXJhdGlvbl9tcxgKIAEoAxIVCg10b3VybmFtZW50X2lkGAsgASgJIjwKC1VzZXJVcGRhdGVkEg8KB3VzZXJfaWQYASABKAkSDgoGc3RhdHVzGAIgASgJEgwKBHJvbGUYAyABKAkiawoPVXNlckFkbWluQWN0aW9uEg8KB3VzZXJfaWQYASABKAkSDgoGYWN0aW9uGAIgASgJEg4KBnJlYXNvbhgDIAEoCRIUCgxiYW5uZWRfdW50aWwYBCABKAkSEQoJZWxvX2RlbHRhGAUgASgFImAKEEdhbWVSdWxlc0NoYW5nZWQSDQoFdGl0bGUYASABKAkSDwoHY29udGVudBgCIAEoCRIUCgxlZmZlY3RpdmVfYXQYAyABKAkSFgoOY2hhbmdlZF9lbnRpdHkYBCABKAlCE6oCEFN1ZG9rdS5FdmVudHMuVjFiBnByb3RvMw");
 
 /**
  * @generated from message sudoku.events.v1.EventEnvelope
@@ -182,4 +182,108 @@ export type MatchCompleted = Message<"sudoku.events.v1.MatchCompleted"> & {
  */
 export const MatchCompletedSchema: GenMessage<MatchCompleted> = /*@__PURE__*/
   messageDesc(file_sudoku_events_v1_events, 2);
+
+/**
+ * @generated from message sudoku.events.v1.UserUpdated
+ */
+export type UserUpdated = Message<"sudoku.events.v1.UserUpdated"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+
+  /**
+   * ACTIVE, BANNED, DELETED
+   *
+   * @generated from field: string status = 2;
+   */
+  status: string;
+
+  /**
+   * user, admin
+   *
+   * @generated from field: string role = 3;
+   */
+  role: string;
+};
+
+/**
+ * Describes the message sudoku.events.v1.UserUpdated.
+ * Use `create(UserUpdatedSchema)` to create a new message.
+ */
+export const UserUpdatedSchema: GenMessage<UserUpdated> = /*@__PURE__*/
+  messageDesc(file_sudoku_events_v1_events, 3);
+
+/**
+ * @generated from message sudoku.events.v1.UserAdminAction
+ */
+export type UserAdminAction = Message<"sudoku.events.v1.UserAdminAction"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+
+  /**
+   * BANNED, UNBANNED, ELO_ADJUSTED, ROLE_CHANGED
+   *
+   * @generated from field: string action = 2;
+   */
+  action: string;
+
+  /**
+   * @generated from field: string reason = 3;
+   */
+  reason: string;
+
+  /**
+   * @generated from field: string banned_until = 4;
+   */
+  bannedUntil: string;
+
+  /**
+   * @generated from field: int32 elo_delta = 5;
+   */
+  eloDelta: number;
+};
+
+/**
+ * Describes the message sudoku.events.v1.UserAdminAction.
+ * Use `create(UserAdminActionSchema)` to create a new message.
+ */
+export const UserAdminActionSchema: GenMessage<UserAdminAction> = /*@__PURE__*/
+  messageDesc(file_sudoku_events_v1_events, 4);
+
+/**
+ * @generated from message sudoku.events.v1.GameRulesChanged
+ */
+export type GameRulesChanged = Message<"sudoku.events.v1.GameRulesChanged"> & {
+  /**
+   * @generated from field: string title = 1;
+   */
+  title: string;
+
+  /**
+   * @generated from field: string content = 2;
+   */
+  content: string;
+
+  /**
+   * @generated from field: string effective_at = 3;
+   */
+  effectiveAt: string;
+
+  /**
+   * GAME_MODE, LEVEL, TASK_DEF
+   *
+   * @generated from field: string changed_entity = 4;
+   */
+  changedEntity: string;
+};
+
+/**
+ * Describes the message sudoku.events.v1.GameRulesChanged.
+ * Use `create(GameRulesChangedSchema)` to create a new message.
+ */
+export const GameRulesChangedSchema: GenMessage<GameRulesChanged> = /*@__PURE__*/
+  messageDesc(file_sudoku_events_v1_events, 5);
 

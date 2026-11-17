@@ -5,4 +5,8 @@ public sealed class ProfileNotFoundException : Exception
     public ProfileNotFoundException() : base("Không tìm thấy hồ sơ người dùng.")
     {
     }
+
+    public ProfileNotFoundException(string message) : base(message)
+    {
+    }
 }

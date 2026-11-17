@@ -105,15 +105,17 @@ export function getNotificationMeta(notification: AppNotification): Notification
         categoryLabel: 'Giải đấu',
         targetRoute: undefined,
       }
-    case 'FEEDBACK_REPLY':
+    case 'FEEDBACK_REPLY': {
+      const ticketId = (payload as { ticketId?: string })?.ticketId
       return {
         icon: '💬',
         color: '#0284C7',
         bgSoft: 'rgba(2, 132, 199, 0.12)',
         category: 'system',
         categoryLabel: 'Hỗ trợ',
-        targetRoute: '/settings',
+        targetRoute: ticketId ? `/feedback?ticketId=${ticketId}` : '/feedback',
       }
+    }
     case 'ANNOUNCEMENT': {
       const p = payload.type === 'ANNOUNCEMENT' ? payload : undefined
       const isWarning = p?.severity === 'WARNING'

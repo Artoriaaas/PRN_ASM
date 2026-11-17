@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams } from '
 import type { UserProfile } from './gen/sudoku/user/v1/user_pb'
 import { useAuth } from './auth/useAuth'
 import { getCachedProfile, syncUserProfile, clearCachedProfile } from './api/userClient'
-import { RequireAuth } from './auth/RequireAuth'
+import { RequireAuth, RequireAdmin } from './auth/RequireAuth'
 import { AppShell } from './components/AppShell'
 import { ToastProvider } from './components/ui/Toast'
 import { NotificationsProvider } from './features/notifications/NotificationsProvider'
@@ -11,6 +11,7 @@ import { NotificationToast } from './features/notifications/components/Notificat
 import { AuthPage } from './features/auth/AuthPage'
 import { LandingPage } from './features/landing/LandingPage'
 import { NotFoundPage } from './features/error/NotFoundPage'
+import { DEV_ADMIN_EMAIL } from './auth/devAuth'
 import './styles/tokens.css'
 import './styles/global.css'
 import './index.css'
@@ -57,6 +58,31 @@ const LeaderboardPage = lazy(() =>
 const QuestsPage = lazy(() =>
   import('./features/quests/QuestsPage').then((m) => ({
     default: m.QuestsPage,
+  })),
+)
+const FeedbackPage = lazy(() =>
+  import('./features/feedback/FeedbackPage').then((m) => ({
+    default: m.FeedbackPage,
+  })),
+)
+const AdminLayout = lazy(() =>
+  import('./features/admin/AdminLayout').then((m) => ({
+    default: m.AdminLayout,
+  })),
+)
+const AdminUsersPage = lazy(() =>
+  import('./features/admin/users/AdminUsersPage').then((m) => ({
+    default: m.AdminUsersPage,
+  })),
+)
+const AdminGameRulesPage = lazy(() =>
+  import('./features/admin/game-rules/AdminGameRulesPage').then((m) => ({
+    default: m.AdminGameRulesPage,
+  })),
+)
+const AdminFeedbackPage = lazy(() =>
+  import('./features/admin/feedback/AdminFeedbackPage').then((m) => ({
+    default: m.AdminFeedbackPage,
   })),
 )
 
@@ -172,7 +198,17 @@ function AppRoutes() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<LandingPage />} />
-        <Route path="/auth" element={user ? <Navigate to="/home" replace /> : <AuthPage />} />
+        <Route
+          path="/auth"
+          element={
+            user
+              ? user.email === DEV_ADMIN_EMAIL ||
+                sessionStorage.getItem('dev-admin-active') === 'true'
+                ? <Navigate to="/admin" replace />
+                : <Navigate to="/home" replace />
+              : <AuthPage />
+          }
+        />
         {import.meta.env.DEV && (
           <>
             <Route
@@ -310,73 +346,92 @@ function AppRoutes() {
           </>
         )}
 
-        {/* Private — bọc AppShell */}
+        {/* Private — bọc AppShell (chỉ dành cho user thường, không phải admin) */}
         <Route
           path="/*"
           element={
-            <RequireAuth>
-              <AppShell profile={profile}>
-                <Routes>
-                  <Route path="/home" element={<HomePage profile={profile} loading={profileLoading} />} />
-                  <Route path="/solo/new" element={<SoloSetupPage />} />
-                  <Route path="/solo/:sessionId" element={<SoloPlayPage />} />
-                  <Route path="/solo/:sessionId/result" element={<SoloResultPage />} />
-                  <Route
-                    path="/profile/:userId?"
-                    element={
-                      user ? (
-                        <ProfilePage
-                          user={user}
-                          profile={profile}
-                          loading={profileLoading}
-                          loadError={profileLoadError}
-                          view="profile"
-                          onNavigate={(path) => navigate(path)}
-                          onRetry={handleProfileRetry}
-                          onUpdated={handleProfileUpdated}
-                        />
-                      ) : null
-                    }
-                  />
-                  <Route
-                    path="/settings"
-                    element={
-                      user ? (
-                        <ProfilePage
-                          user={user}
-                          profile={profile}
-                          loading={profileLoading}
-                          loadError={profileLoadError}
-                          view="settings"
-                          onNavigate={(path) => navigate(path)}
-                          onRetry={handleProfileRetry}
-                          onUpdated={handleProfileUpdated}
-                        />
-                      ) : null
-                    }
-                  />
-                  {/* Multiplayer Screens */}
-                  <Route path="/play" element={<MultiplayerLobbyPage profile={profile} />} />
-                  <Route path="/play/queue" element={<MultiplayerQueuePage profile={profile} />} />
-                  <Route path="/match/:matchId" element={<MultiplayerMatchPage profile={profile} />} />
-                  <Route path="/match/:matchId/result" element={<MultiplayerResultPage profile={profile} />} />
-                  <Route path="/leaderboard" element={<LeaderboardPage profile={profile} />} />
-                  <Route path="/xep-hang" element={<Navigate to="/leaderboard" replace />} />
-                  <Route path="/history" element={<ComingSoon title="Lịch sử đấu" />} />
-                  <Route path="/quests" element={<QuestsPage />} />
-                  <Route path="/learn" element={<LearnPage />} />
-                  <Route path="/learn/:lessonCode" element={<LessonPage />} />
-                  <Route path="/hoc" element={<Navigate to="/learn" replace />} />
-                  <Route path="/hoc/:lessonCode" element={<LessonPage />} />
-                  <Route path="/notices" element={<NoticesPage />} />
-                  <Route path="/dau-tran/phong/:roomCode" element={<RoomRedirect />} />
-                  <Route path="/admin/*" element={<ComingSoon title="Admin" />} />
-                  <Route path="*" element={<NotFoundPage />} />
-                </Routes>
-              </AppShell>
-            </RequireAuth>
+            sessionStorage.getItem('dev-admin-active') === 'true' ? (
+              <Navigate to="/admin" replace />
+            ) : (
+              <RequireAuth>
+                <AppShell profile={profile}>
+                  <Routes>
+                    <Route path="/home" element={<HomePage profile={profile} loading={profileLoading} />} />
+                    <Route path="/solo/new" element={<SoloSetupPage />} />
+                    <Route path="/solo/:sessionId" element={<SoloPlayPage />} />
+                    <Route path="/solo/:sessionId/result" element={<SoloResultPage />} />
+                    <Route
+                      path="/profile/:userId?"
+                      element={
+                        user ? (
+                          <ProfilePage
+                            user={user}
+                            profile={profile}
+                            loading={profileLoading}
+                            loadError={profileLoadError}
+                            view="profile"
+                            onNavigate={(path) => navigate(path)}
+                            onRetry={handleProfileRetry}
+                            onUpdated={handleProfileUpdated}
+                          />
+                        ) : null
+                      }
+                    />
+                    <Route
+                      path="/settings"
+                      element={
+                        user ? (
+                          <ProfilePage
+                            user={user}
+                            profile={profile}
+                            loading={profileLoading}
+                            loadError={profileLoadError}
+                            view="settings"
+                            onNavigate={(path) => navigate(path)}
+                            onRetry={handleProfileRetry}
+                            onUpdated={handleProfileUpdated}
+                          />
+                        ) : null
+                      }
+                    />
+                    {/* Multiplayer Screens */}
+                    <Route path="/play" element={<MultiplayerLobbyPage profile={profile} />} />
+                    <Route path="/play/queue" element={<MultiplayerQueuePage profile={profile} />} />
+                    <Route path="/match/:matchId" element={<MultiplayerMatchPage profile={profile} />} />
+                    <Route path="/match/:matchId/result" element={<MultiplayerResultPage profile={profile} />} />
+                    <Route path="/leaderboard" element={<LeaderboardPage profile={profile} />} />
+                    <Route path="/xep-hang" element={<Navigate to="/leaderboard" replace />} />
+                    <Route path="/history" element={<ComingSoon title="Lịch sử đấu" />} />
+                    <Route path="/quests" element={<QuestsPage />} />
+                    <Route path="/learn" element={<LearnPage />} />
+                    <Route path="/learn/:lessonCode" element={<LessonPage />} />
+                    <Route path="/hoc" element={<Navigate to="/learn" replace />} />
+                    <Route path="/hoc/:lessonCode" element={<LessonPage />} />
+                    <Route path="/notices" element={<NoticesPage />} />
+                    <Route path="/feedback" element={<FeedbackPage />} />
+                    <Route path="/dau-tran/phong/:roomCode" element={<RoomRedirect />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
+                </AppShell>
+              </RequireAuth>
+            )
           }
         />
+
+        {/* Admin Portal */}
+        <Route
+          path="/admin"
+          element={
+            <RequireAdmin>
+              <AdminLayout />
+            </RequireAdmin>
+          }
+        >
+          <Route index element={<Navigate to="/admin/users" replace />} />
+          <Route path="users" element={<AdminUsersPage />} />
+          <Route path="game-rules" element={<AdminGameRulesPage />} />
+          <Route path="feedback" element={<AdminFeedbackPage />} />
+        </Route>
 
         {/* Catch-all */}
         <Route path="*" element={<NotFoundPage />} />
