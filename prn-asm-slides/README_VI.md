@@ -1,6 +1,6 @@
 # PRN ASM — Sudoku Online | Bộ slide 18 tờ (có editor)
 
-Bộ trình chiếu cho **PRN232 · Final Assignment**, nội dung bám theo 7 tiêu chí chấm điểm trong đề, minh hoạ bằng dự án Sudoku Online (`github.com/Artoriaaas/PRN_ASM`).
+Bộ trình chiếu cho **PRN232 · Final Assignment**, nội dung bám theo các mục của đề, minh hoạ bằng dự án Sudoku Online (`github.com/Artoriaaas/PRN_ASM`). Có container diagram C4 và ERD riêng cho phần kiến trúc.
 
 ## Cách dùng nhanh
 
@@ -42,7 +42,7 @@ Bản này dựng lại theo ngôn ngữ trình bày của bộ slide MLN122: n�
 | `src/deck.css.part` | Hệ thống thiết kế dùng chung: khung, chữ, `.fig`, `.strip`, `.thread`, `.foot`, `.note-band`, modal. |
 | `src/prn.css.part` | Layout riêng từng slide. |
 | `src/editor.css.part` | Giao diện bảng chỉnh sửa (giữ nguyên id cũ). |
-| `src/slides.js.part` | 18 slide React, dữ liệu (`MEMBERS`, `DELIV`, `COMPOSE`, `MATRIX`, `AGENDA`, `NOTES`), điều hướng, phím tắt. |
+| `src/slides.js.part` | 18 slide React, dữ liệu (`MEMBERS`, `DELIV`, `COMPOSE`, `MATRIX`, `ERD`, `TOC`, `WEIGHTS`, `NOTES`), điều hướng, phím tắt. |
 | `src/editor.js.part` | Mã editor (sửa chữ, chèn ảnh/diagram, lưu, xuất/nhập). |
 | `src/react-vendor.part` | React 16 + ReactDOM nhúng sẵn. |
 | `scripts/build.py` | Ghép các mảnh thành `index.html` và kiểm tra. |
@@ -73,21 +73,21 @@ Nếu đổi số slide, phải sửa đồng thời: `TOTAL` trong `slides.js.p
 | # | Slide | Mục trong đề |
 | :--- | :--- | :--- |
 | 01 | Bìa | Giới thiệu nhóm, học phần |
-| 02 | Bảy tiêu chí chấm điểm | Assessment criteria |
+| 02 | Mục lục · bản đồ bài trình bày | Giới thiệu nội dung + thang điểm |
 | 03 | Mục tiêu & phạm vi | Objective |
-| 04 | Kiến trúc tổng thể | Kiến trúc |
+| 04 | Kiến trúc tổng thể (C4 container) | Kiến trúc |
 | 05 | Kiến trúc tầng & database | Thành phần, database-per-service |
-| 06 | REST API (Support) | REST API |
-| 07 | Background job | Background job |
-| 08 | Kafka & Outbox–Inbox | Message broker |
-| 09 | gRPC contract-first | gRPC service |
-| 10 | Xác thực JWT | Technical requirements |
-| 11 | Luồng solo end-to-end | Workflow |
-| 12 | Multiplayer realtime | Hot path |
-| 13 | Deploy bằng Docker Compose | Deployment |
-| 14 | Mười hai yêu cầu kỹ thuật | Technical requirements |
-| 15 | Sáu sản phẩm phải nộp | Deliverables |
-| 16 | Kịch bản demo 8 phút | Demonstration |
+| 06 | Sơ đồ thực thể (ERD) | CSDL quan hệ, mô hình dữ liệu |
+| 07 | REST API (Support) | REST API |
+| 08 | Background job | Background job |
+| 09 | Kafka & Outbox–Inbox | Message broker |
+| 10 | gRPC contract-first | gRPC service |
+| 11 | Xác thực JWT | Technical requirements |
+| 12 | Luồng solo end-to-end | Workflow |
+| 13 | Multiplayer realtime | Hot path |
+| 14 | Deploy bằng Docker Compose | Deployment |
+| 15 | Mười hai yêu cầu kỹ thuật | Technical requirements |
+| 16 | Sáu sản phẩm phải nộp | Deliverables |
 | 17 | Ba quyết định thiết kế | Notes / bài học |
 | 18 | Kết & Q&A | Kết |
 

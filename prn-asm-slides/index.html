@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#F2F4F0" />
-  <meta name="description" content="PRN ASM · Sudoku Online — 18 tờ trình chiếu theo rubric PRN232 Final Assignment (REST, background job, Kafka, gRPC, Docker)." />
+  <meta name="description" content="PRN ASM · Sudoku Online — 18 tờ trình chiếu theo rubric PRN232 Final Assignment (C4, ERD, REST, background job, Kafka, gRPC, Docker)." />
   <title>PRN232 · PRN ASM — Sudoku Online · 18 tờ trình chiếu</title>
   <style>
 /* ===== tokens.css.part ===== */
@@ -246,16 +246,21 @@ td.mono,th.mono{font-family:var(--mono);font-size:17px;letter-spacing:0}
 .dim{display:flex;align-items:center;gap:8px;font:600 12px var(--mono);letter-spacing:.08em;color:var(--vai-3);text-transform:uppercase}
 .dim::before,.dim::after{content:"";height:1px;background:var(--cham-3);flex:1}
 
-/* ---------- 02 · tiêu chí ---------- */
-.bars{display:flex;flex-direction:column;gap:11px;justify-content:center;flex:1}
-.bar{display:grid;grid-template-columns:300px 1fr 74px;gap:16px;align-items:center;font-size:22px}
-.bar .t{height:24px;background:var(--cham-2);position:relative;box-shadow:inset 0 0 0 1px var(--cham-3)}
-.bar .f{position:absolute;left:0;top:0;bottom:0;background:var(--nghe)}
-.bar .f.p{background:var(--son)}
-.bar .f.m{background:var(--si)}
-.bar .v{font:600 19px var(--mono);text-align:right;color:var(--vai-2)}
-.legend{display:flex;gap:26px;font:600 14px var(--mono);letter-spacing:.05em;color:var(--vai-3);text-transform:uppercase}
-.legend i{display:inline-block;width:16px;height:16px;margin-right:8px;vertical-align:-3px}
+/* ---------- 02 · mục lục ---------- */
+.toc{display:grid;grid-template-columns:repeat(3,1fr);gap:0;align-content:center;flex:1;min-height:0}
+.toc-col{display:flex;flex-direction:column;justify-content:center;padding:0 30px;border-left:1px solid var(--cham-3)}
+.toc-col:first-child{border-left:0;padding-left:0}
+.toc-col:last-child{padding-right:0}
+.toc-item{display:grid;grid-template-columns:42px 1fr;column-gap:12px;padding:16px 0;border-top:1px solid var(--cham-3)}
+.toc-item:first-child{border-top:0}
+.toc-item em{grid-area:1/1/3/2;font:700 15px var(--mono);font-style:normal;color:var(--si);letter-spacing:.04em;padding-top:5px}
+.toc-item b{grid-area:1/2/2/3;font:600 22px/1.2 var(--display);color:var(--vai)}
+.toc-item span{grid-area:2/2/3/3;font-size:15px;line-height:1.3;color:var(--vai-3)}
+.weights{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px}
+.weights .k{font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--vai-3);margin-right:4px}
+.weights .w{display:inline-flex;align-items:baseline;gap:6px;padding:5px 11px;background:var(--cham-2)}
+.weights .w b{font:700 15px var(--mono);color:var(--son)}
+.weights .w span{font-size:14px;color:var(--vai-2)}
 
 /* ---------- 03 · phạm vi ---------- */
 .ticks{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
@@ -274,6 +279,19 @@ td.mono,th.mono{font-family:var(--mono);font-size:17px;letter-spacing:0}
 .arch .node{justify-content:center;padding:16px 18px}
 .arch .node b{font-size:23px}
 .arch .node span{font-size:12.5px}
+.arch .c4row{display:grid;grid-template-columns:224px 54px 1fr 54px 224px;align-items:stretch}
+.arch .c4row .band{padding:9px 18px}
+.arch .c4-ext{display:flex;flex-direction:column;justify-content:center;gap:2px;padding:8px 14px;border:1.5px dashed var(--cham-3)}
+.arch .c4-ext b{font:600 18px/1.15 var(--display)}
+.arch .c4-ext span{font:600 10.5px/1.3 var(--mono);letter-spacing:.05em;color:var(--vai-3);text-transform:uppercase;text-align:left}
+.arch .c4-ext.actor{border-color:var(--son)}
+.arch .c4-ext.actor b{color:var(--son)}
+.arch .c4-ext.ext{border-color:var(--si)}
+.arch .c4-ext.ext b{color:var(--si)}
+.arch .c4-link{position:relative;display:grid;place-items:center;font:600 10px/1.2 var(--mono);letter-spacing:.04em;color:var(--si);text-transform:uppercase;text-align:center}
+.arch .c4-link::before{content:"";position:absolute;left:8px;right:12px;top:50%;border-top:1.5px solid var(--cham-3)}
+.arch .c4-link::after{content:"";position:absolute;right:7px;top:calc(50% - 4px);border:4px solid transparent;border-left-color:var(--cham-3);border-right:0}
+.arch .c4-link span{position:relative;background:var(--cham-2);padding:2px 5px;color:var(--si)}
 
 /* ---------- 05 · tầng ---------- */
 .layers{display:flex;flex-direction:column;gap:8px;justify-content:stretch;flex:1;min-height:0}
@@ -287,7 +305,28 @@ td.mono,th.mono{font-family:var(--mono);font-size:17px;letter-spacing:0}
 .dbs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .dbs .node b{font-size:18px}
 
-/* ---------- 06 · REST ---------- */
+/* ---------- 06 · ERD ---------- */
+.erd{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px 18px;flex:1;min-height:0}
+.erd-card{display:flex;flex-direction:column;gap:10px;padding:14px 16px 12px;background:var(--cham-2);border-top:4px solid var(--son);min-height:0}
+.erd-card:nth-child(2){border-top-color:var(--si)}
+.erd-card:nth-child(3){border-top-color:var(--nghe)}
+.erd-card:nth-child(4){border-top-color:var(--vai-2)}
+.erd-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.erd-head b{font:600 21px/1.1 var(--mono);letter-spacing:-.01em}
+.erd-head span{font:600 10.5px var(--mono);letter-spacing:.05em;color:var(--vai-3);text-transform:uppercase;text-align:right}
+.erd-body{display:flex;flex-direction:column;gap:8px;justify-content:center;flex:1;min-height:0}
+.erd-chain{display:flex;align-items:stretch;gap:0}
+.erd-ent{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;justify-content:center;padding:10px 12px;background:var(--cham-deep);box-shadow:inset 0 0 0 1.5px var(--cham-3)}
+.erd-ent b{font:600 15px/1.2 var(--mono);letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.erd-ent span{font:600 10px/1.2 var(--mono);letter-spacing:.04em;color:var(--vai-3);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.erd-rel{position:relative;flex:0 0 38px;display:grid;place-items:center;font:600 10.5px var(--mono);color:var(--si);letter-spacing:0}
+.erd-rel::before{content:"";position:absolute;left:3px;right:3px;top:50%;border-top:1px dashed var(--cham-3)}
+.erd-rel span{position:relative;background:var(--cham-2);padding:2px 4px}
+.erd-more{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 8px;padding-top:8px;border-top:1px dashed var(--cham-3);font:600 10.5px/1.3 var(--mono);letter-spacing:.03em;color:var(--vai-3);text-transform:uppercase}
+.erd-more>span{color:var(--son)}
+.erd-more i{font-style:normal;padding:2px 7px;background:var(--cham-deep);box-shadow:inset 0 0 0 1px var(--cham-3)}
+
+/* ---------- 07 · REST ---------- */
 .api{display:flex;flex-direction:column;gap:6px;font:600 17px/1.3 var(--mono);color:var(--vai)}
 .api .ep{display:grid;grid-template-columns:78px 1fr;gap:10px;align-items:center;padding:5px 0;border-top:1px solid var(--cham-3)}
 .api .ep:first-child{border-top:0}
@@ -296,7 +335,7 @@ td.mono,th.mono{font-family:var(--mono);font-size:17px;letter-spacing:0}
 .q{display:flex;flex-wrap:wrap;gap:7px}
 .q code{font:600 15px var(--mono);padding:4px 8px;background:var(--cham-2);box-shadow:inset 0 0 0 1px var(--cham-3)}
 
-/* ---------- 07 · worker ---------- */
+/* ---------- 08 · worker ---------- */
 .wk{display:grid;grid-template-columns:auto 1fr auto;gap:0 20px;align-items:center;align-content:center;flex:1;padding:18px 24px 18px 20px;background:var(--cham-2);border-left:6px solid var(--son)}
 .wk:nth-child(even){border-left-color:var(--nghe)}
 .wk .iv{grid-area:1/1/3/2;font:800 40px/1 var(--display);color:var(--son);min-width:120px}
@@ -305,7 +344,7 @@ td.mono,th.mono{font-family:var(--mono);font-size:17px;letter-spacing:0}
 .wk p{grid-area:2/2/3/3;font-size:21px;line-height:1.34;color:var(--vai-2);margin-top:2px;align-self:start}
 .wk .file{grid-area:1/3/3/4;font:600 13px var(--mono);color:var(--vai-3);letter-spacing:.02em;text-align:right;max-width:300px}
 
-/* ---------- 08 · kafka ---------- */
+/* ---------- 09 · kafka ---------- */
 .pipe{display:flex;align-items:stretch;gap:8px}
 .pipe .node{flex:1;justify-content:center}
 .pipe .node b{font-size:16px;line-height:1.2;overflow-wrap:anywhere}
@@ -316,14 +355,14 @@ td.mono,th.mono{font-family:var(--mono);font-size:17px;letter-spacing:0}
 .evt{display:flex;gap:8px;flex-wrap:wrap}
 .evt code{font:600 14px var(--mono);padding:4px 8px;background:var(--cham-2);color:var(--vai-2);box-shadow:inset 0 0 0 1px var(--cham-3)}
 
-/* ---------- 09 · proto ---------- */
+/* ---------- 10 · proto ---------- */
 .protos{display:flex;flex-direction:column;gap:10px}
 .protos .pf{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 14px;background:var(--cham-2);font:600 17px var(--mono)}
 .protos .pf span{font-size:13px;color:var(--vai-3);letter-spacing:.05em;text-transform:uppercase;font-family:var(--mono)}
 .gen{display:flex;flex-direction:column;gap:10px;justify-content:space-between;flex:1;min-height:0}
 .gen .node{flex:1;justify-content:center}
 
-/* ---------- 10 · auth ---------- */
+/* ---------- 11 · auth ---------- */
 .seq{display:flex;flex-direction:column;gap:8px;justify-content:space-between;flex:1;min-height:0}
 .seq .st{display:grid;grid-template-columns:42px 1fr auto;gap:14px;align-items:center;flex:1;padding:11px 16px;background:var(--cham-2)}
 .seq .st b{font:600 20px/1.25 var(--display)}
@@ -333,7 +372,7 @@ td.mono,th.mono{font-family:var(--mono);font-size:17px;letter-spacing:0}
 .claim b{font:600 17px var(--mono);letter-spacing:.04em}
 .claim span{font-size:18px;line-height:1.35;color:var(--on-vai);opacity:.8}
 
-/* ---------- 11 · luồng ---------- */
+/* ---------- 12 · luồng ---------- */
 .steps{display:grid;grid-template-columns:repeat(6,1fr);gap:0;align-items:stretch}
 .steps .st{position:relative;padding:14px 14px 16px;background:var(--cham-2);display:flex;flex-direction:column;gap:6px;min-width:0}
 .steps .st+.st{margin-left:8px}
@@ -346,7 +385,7 @@ td.mono,th.mono{font-family:var(--mono);font-size:17px;letter-spacing:0}
 .steps .st b{font:600 19px/1.2 var(--display)}
 .steps .st .sm{font-size:17px;line-height:1.3}
 
-/* ---------- 12 · hub ---------- */
+/* ---------- 13 · hub ---------- */
 .hub{display:grid;grid-template-columns:1fr 380px 1fr;gap:20px;align-items:center;flex:1;min-height:0}
 .hubcol{display:flex;flex-direction:column;gap:18px;justify-content:center}
 .hubcol .node{padding:16px 18px}
@@ -355,7 +394,7 @@ td.mono,th.mono{font-family:var(--mono);font-size:17px;letter-spacing:0}
 .hubc span{font:600 12px var(--mono);letter-spacing:.06em;color:var(--vai-3);text-transform:uppercase}
 .hubc::after{content:"";position:absolute;inset:-11px;border:1px dashed var(--cham-3);border-radius:50%}
 
-/* ---------- 13 · compose ---------- */
+/* ---------- 14 · compose ---------- */
 .compose{display:grid;grid-template-rows:1fr 1.1fr 1fr;gap:14px;flex:1;min-height:0}
 .crow{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:stretch;min-height:0}
 .rlbl{align-self:center;text-align:right;font:600 11px/1.5 var(--mono);letter-spacing:.12em;color:var(--vai-3);text-transform:uppercase}
@@ -369,14 +408,14 @@ td.mono,th.mono{font-family:var(--mono);font-size:17px;letter-spacing:0}
 .ports .kv{font-size:19px}
 .ports .kv b{font-size:17px}
 
-/* ---------- 14 · bảng ---------- */
+/* ---------- 15 · bảng ---------- */
 table.matrix{font-size:20px;width:100%;table-layout:fixed}
 table.matrix td{padding-block:8px;vertical-align:top}
 table.matrix td:first-child{font-weight:600;width:41%}
 table.matrix td:last-child{font-family:var(--mono);font-size:16px;color:var(--vai-2);letter-spacing:0}
 .ok{color:var(--si);font-weight:600;margin-right:6px}
 
-/* ---------- 15 · nộp bài ---------- */
+/* ---------- 16 · nộp bài ---------- */
 .deliv{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .deliv .card{background:var(--cham-2);padding:14px 18px;display:flex;flex-direction:column;gap:4px;min-width:0}
 .deliv .card b{font:600 21px/1.2 var(--display)}
@@ -386,13 +425,6 @@ table.matrix td:last-child{font-family:var(--mono);font-size:16px;color:var(--va
 .kv.tight{font-size:19px}
 .kv.tight>*{padding:6px 0}
 .kv.tight b{font-size:15px}
-
-/* ---------- 16 · kịch bản demo ---------- */
-.agenda{display:grid;grid-template-columns:86px 1fr 150px;gap:0 18px;align-content:center;flex:1;min-height:0}
-.agenda .t{font:600 21px var(--mono);color:var(--nghe);padding:10px 0;border-top:1px solid var(--cham-3)}
-.agenda .a{font-size:21px;line-height:1.3;padding:10px 0;border-top:1px solid var(--cham-3)}
-.agenda .b{font:600 13px var(--mono);letter-spacing:.05em;color:var(--vai-3);text-transform:uppercase;text-align:right;padding:12px 0;border-top:1px solid var(--cham-3)}
-.agenda .a b{font-weight:600}
 
 /* ---------- 17 · quyết định ---------- */
 .dec{display:flex;flex-direction:column;gap:8px;padding:20px 20px 22px;background:var(--cham-2);border-top:5px solid var(--son)}
@@ -501,8 +533,9 @@ table.matrix td:last-child{font-family:var(--mono);font-size:16px;color:var(--va
 </script>
 <script id="prn-slides">
 /* PRN ASM — 18 tờ trình chiếu theo rubric PRN232 Final Assignment.
-   Nội dung: mục tiêu, kiến trúc, REST API, background job, Kafka, gRPC, JWT,
-   deploy Docker, yêu cầu kỹ thuật, sản phẩm nộp, kịch bản demo, ghi chú.
+   Nội dung: mục lục, mục tiêu, kiến trúc (C4 container) + ERD, REST API,
+   background job, Kafka, gRPC, JWT, deploy Docker, yêu cầu kỹ thuật,
+   sản phẩm nộp, ghi chú.
    Giao diện: "Bản vẽ kỹ thuật động" — giấy kẻ ô, mực cobalt, nhãn mono. */
 (function(){
 'use strict';
@@ -567,7 +600,6 @@ function Board(){
     return span({key:r*9+c,className:cls.join(' ')},v?String(v):'');
   })));
 }
-const RATE=[['Kiến trúc & thiết kế hệ thống',20,'p'],['REST API',20,'p'],['Message Broker',15,'m'],['gRPC service',15,'m'],['Background job',10,''],['Docker / Cloud deploy',10,''],['Tài liệu & thuyết trình',10,'']];
 const WORKERS=[
  ['2 giây','OutboxProcessorWorker','Quét OutboxMessage chưa gửi, publish lên Kafka rồi đánh dấu đã xử lý.','Game.Api + Multiplayer.Api · Messaging/'],
  ['60 giây','PuzzleReplenishWorker','Giữ tối thiểu 15 puzzle chưa chơi cho mỗi cấp độ đang mở để không cạn đề.','Game.Api · khởi động chờ 10 giây'],
@@ -619,14 +651,27 @@ const DELIV=[
  ['API documentation','Swagger cho REST, .proto cho gRPC','/swagger · proto/sudoku'],
  ['README','Kiến trúc, cài đặt, deploy và phân công','README.md · README_VI.md']
 ];
-const AGENDA=[
- ['00:00','Kiến trúc tổng thể','4 service · 3 kho dữ liệu','BẢNG 1'],
- ['01:00','REST API','GET /api/v1/tutorials?search=&page=2','SWAGGER'],
- ['02:00','JWT','POST thiếu token → 401, có token → 201','401 / 201'],
- ['03:00','gRPC','Chơi một ván solo, xem log request','CONNECTRPC'],
- ['04:30','Background job','Log OutboxProcessorWorker gửi GameFinished','2 GIÂY'],
- ['05:30','Kafka','Consumer User cộng total_games','INBOX'],
- ['06:30','Docker','docker compose ps · web qua cổng 18080','COMPOSE']
+const TOC=[
+ ['03','Mục tiêu & phạm vi','Solo · 1v1 · nội dung đọc'],
+ ['04','Kiến trúc tổng thể','Container diagram C4 · bốn service'],
+ ['05','Kiến trúc tầng & database','API · Domain · Data · UnitOfWork'],
+ ['06','Sơ đồ thực thể (ERD)','22 thực thể · khoá ngoại trong từng DB'],
+ ['07','REST API','Support: CRUD, tìm kiếm, phân trang'],
+ ['08','Background job','Ba worker, ba chu kỳ quét'],
+ ['09','Kafka & Outbox–Inbox','Một topic, không mất sự kiện'],
+ ['10','gRPC contract-first','Năm hợp đồng .proto sinh mã'],
+ ['11','Xác thực JWT','Envoy kiểm Firebase JWKS'],
+ ['12','Luồng solo end-to-end','Sáu bước, một transaction'],
+ ['13','Multiplayer realtime','SignalR + Redis cho hot path'],
+ ['14','Deploy Docker Compose','Mười container, một lệnh'],
+ ['15','Yêu cầu kỹ thuật','Bảng đối chiếu mười hai dòng'],
+ ['16','Sản phẩm phải nộp','Sáu danh mục trong repo'],
+ ['17','Ba quyết định thiết kế','Đánh đổi đi kèm bằng chứng'],
+ ['18','Kết & hỏi đáp','Repo, demo và câu hỏi']
+];
+const WEIGHTS=[
+ ['20','Kiến trúc'],['20','REST API'],['15','Message broker'],['15','gRPC'],
+ ['10','Background job'],['10','Docker'],['10','Tài liệu']
 ];
 
 /* ---------------- 01 · bìa ---------------- */
@@ -654,20 +699,18 @@ function SlideCover(){
   );
 }
 
-/* ---------------- 02 · tiêu chí ---------------- */
-function SlideRubric(){
-  return h(Shell,{n:2,eb:'MỤC 7 · TIÊU CHÍ CHẤM',
-    title:h('span',null,'Bảy hạng mục, ',h('em',null,'một nửa điểm'),' nằm ở kiến trúc và API')},
-    div({className:'bars r',style:{'--i':2}},...RATE.map(([name,w,tone],k)=>
-      div({className:'bar',key:k},
-        span(null,name),
-        div({className:'t'},div({className:'f '+tone,style:{width:w*4.6+'%'}})),
-        span({className:'v'},w+'%')))),
-    div({className:'legend r',style:{'--i':3}},
-      span(null,h('i',{style:{background:'var(--son)'}}),'Trọng số 20%'),
-      span(null,h('i',{style:{background:'var(--si)'}}),'15%'),
-      span(null,h('i',{style:{background:'var(--nghe)'}}),'10%')),
-    h(Strip,{k:'Tổng',tone:'son'},'100% điểm nằm ở bảy dòng trên. Nhóm chọn domain Sudoku để mỗi tiêu chí có một thành phần cụ thể để đối chiếu, không phải mô tả chung.')
+/* ---------------- 02 · mục lục ---------------- */
+function SlideToc(){
+  return h(Shell,{n:2,eb:'MỤC LỤC · BẢN ĐỒ BÀI TRÌNH BÀY',
+    title:h('span',null,'Từ bài toán đến ',h('em',null,'bàn cờ chạy thật'))},
+    div({className:'toc r',style:{'--i':2}},...[0,6,11].map(start=>
+      div({className:'toc-col',key:start},...TOC.slice(start,start+(start===0?6:5)).map(([n,t,d],i)=>
+        div({className:'toc-item',key:i},
+          h('em',null,n),h('b',null,t),span(null,d)))))),
+    div({className:'weights r',style:{'--i':3}},
+      span({className:'k'},'Thang điểm'),
+      ...WEIGHTS.map(([w,l],i)=>span({className:'w',key:i},h('b',null,w+'%'),span(null,l)))),
+    h(Strip,{k:'Cách đọc',tone:'nghe'},'Mười sáu tờ nội dung đi theo thứ tự trình bày; tờ 15 đối chiếu mười hai yêu cầu kỹ thuật, tờ 16 là danh mục sản phẩm.')
   );
 }
 
@@ -697,12 +740,17 @@ function SlideScope(){
 
 /* ---------------- 04 · kiến trúc ---------------- */
 function SlideArch(){
-  return h(Shell,{n:4,eb:'MỤC 2–3 · KIẾN TRÚC TỔNG THỂ',
-    title:h('span',null,'Một cửa vào, ',h('em',null,'bốn service'),', ba kho dữ liệu')},
-    h(Frame,{className:'grow r',style:{'--i':2},tag:'HÌNH 2',cap:'THÀNH PHẦN · DATABASE-PER-SERVICE · EVENT BUS'},
+  return h(Shell,{n:4,eb:'MỤC 2–3 · KIẾN TRÚC TỔNG THỂ · C4',
+    title:h('span',null,'Một cửa vào, ',h('em',null,'bốn service'),', bốn database')},
+    h(Frame,{className:'grow r',style:{'--i':2},tag:'HÌNH 2',cap:'CONTAINER DIAGRAM (C4) · DATABASE-PER-SERVICE · EVENT BUS'},
       div({className:'arch'},
-        div({className:'band'},h('b',null,'React 19 SPA · ConnectRPC + SignalR'),span(null,'localhost:5173 · Firebase Auth')),
-        h(VLine,{label:'HTTPS · gRPC-Web + WebSocket'}),
+        div({className:'c4row'},
+          div({className:'c4-ext actor'},h('b',null,'Người chơi'),span(null,'Actor · trình duyệt')),
+          span({className:'c4-link'},span(null,'HTTPS')),
+          div({className:'band'},h('b',null,'React 19 SPA · ConnectRPC + SignalR'),span(null,'localhost:5173')),
+          span({className:'c4-link'},span(null,'token')),
+          div({className:'c4-ext ext'},h('b',null,'Firebase Auth'),span(null,'Hệ thống ngoài · OIDC · JWKS'))),
+        h(VLine,{label:'HTTPS · gRPC-Web + WebSocket · Bearer JWT'}),
         div({className:'band'},h('b',null,'Envoy Gateway'),span(null,'8080 · JWT JWKS · CORS · WS upgrade')),
         h(VLine,{label:'HTTP/2 gRPC'}),
         div({className:'svcs'},
@@ -719,7 +767,7 @@ function SlideArch(){
           h(Node,{t:'Redis 7',s:'room · cache',tone:'si'}),
           h(Node,{t:'Kafka 3.9',s:'sudoku.events',tone:'nghe'}))
       )),
-    h(Strip,{k:'Nguyên tắc',tone:'son'},'Không service nào đọc database của service khác. Dữ liệu chia sẻ đi qua gRPC hoặc Kafka, không qua bảng chung.')
+    h(Strip,{k:'C4 · mức container',tone:'son'},'Actor ngoài cùng, hệ thống ngoài Firebase Auth, còn lại là container: SPA, Envoy, bốn service và hạ tầng. Không service nào đọc database của service khác — dữ liệu chia sẻ đi qua gRPC hoặc Kafka.')
   );
 }
 
@@ -746,10 +794,40 @@ function SlideLayers(){
   );
 }
 
-/* ---------------- 06 · REST ---------------- */
+/* ---------------- 06 · ERD ---------------- */
+const ERD=[
+ ['game_db','8 bảng · Game.Api',[
+   [['Level','PK level_id'],['Puzzle','FK level_id'],['GameSession','FK puzzle_id'],['GameMove','FK session_id']]
+  ],['GameMode','TaskDefinition','GameAuditLog','OutboxMessage']],
+ ['user_db','5 bảng · User.Api',[
+   [['UserAccount','PK id · UQ firebase_uid'],['EloHistory','FK user_id']]
+  ],['AuditLog','OutboxMessage','InboxMessage']],
+ ['multiplayer_db','5 bảng · Multiplayer.Api',[
+   [['Match','PK id'],['MatchPlayer','FK match_id']],
+   [['Match','PK id'],['MatchMove','FK match_id']]
+  ],['PlayerRating · PK (user_id, play_format)','OutboxMessage']],
+ ['support_db','7 bảng · Support.Api',[
+   [['FeedbackTicket','PK id'],['FeedbackMessage','FK ticket_id']]
+  ],['Notification','PlayerRef','Tutorial','SystemNotice','SupportAuditLog']]
+];
+function SlideErd(){
+  return h(Shell,{n:6,eb:'MỤC 2.1 · SƠ ĐỒ THỰC THỂ (ERD)',
+    title:h('span',null,'Bốn kho dữ liệu, ',h('em',null,'hai mươi hai'),' thực thể')},
+    div({className:'erd r',style:{'--i':2}},...ERD.map(([db,meta,chains,extra],i)=>
+      div({className:'erd-card',key:i},
+        div({className:'erd-head'},h('b',null,db),span(null,meta)),
+        div({className:'erd-body'},...chains.map((chain,ci)=>
+          div({className:'erd-chain',key:ci},...chain.flatMap(([ent,key],ei)=>
+            [ei?span({className:'erd-rel',key:'r'+ei},span(null,'1—n')):null,
+             div({className:'erd-ent',key:'e'+ei},h('b',null,ent),span(null,key))].filter(Boolean))))),
+        div({className:'erd-more'},span(null,'Bảng phụ'),...extra.map((x,xi)=>h('i',{key:xi},x)))))),
+    h(Strip,{k:'Xuyên database'},'UserId, PuzzleId và MatchId chỉ là tham chiếu mềm: đồng bộ qua gRPC và sudoku.events, không có khoá ngoại vật lý giữa bốn database.'));
+}
+
+/* ---------------- 07 · REST ---------------- */
 function SlideRest(){
   const ep=(m,path,cls)=>div({className:'ep'},span({className:'method '+cls},m),span(null,path));
-  return h(Shell,{n:6,eb:'MỤC 2.1 · REST API',
+  return h(Shell,{n:7,eb:'MỤC 2.1 · REST API',
     title:h('span',null,'REST cho phần đọc nhiều: ',h('em',null,'CRUD, lọc, sắp xếp, phân trang'))},
     div({className:'row r grow',style:{'--i':2,gridTemplateColumns:'1.06fr .94fr'}},
       div({className:'panel'},
@@ -779,9 +857,9 @@ function SlideRest(){
   );
 }
 
-/* ---------------- 07 · background job ---------------- */
+/* ---------------- 08 · background job ---------------- */
 function SlideJobs(){
-  return h(Shell,{n:7,eb:'MỤC 2.2 · BACKGROUND JOB',
+  return h(Shell,{n:8,eb:'MỤC 2.2 · BACKGROUND JOB',
     title:h('span',null,'Ba việc chạy nền, ',h('em',null,'không chặn người chơi'))},
     div({className:'stack grow r',style:{'--i':2,justifyContent:'center',gap:'12px'}},
       ...WORKERS.map(([iv,name,desc,file],i)=>div({className:'wk',key:i},
@@ -790,11 +868,11 @@ function SlideJobs(){
   );
 }
 
-/* ---------------- 08 · kafka ---------------- */
+/* ---------------- 09 · kafka ---------------- */
 function SlideKafka(){
-  return h(Shell,{n:8,eb:'MỤC 2.3 · MESSAGE BROKER',
+  return h(Shell,{n:9,eb:'MỤC 2.3 · MESSAGE BROKER',
     title:h('span',null,'Ghi outbox trong transaction, ',h('em',null,'Kafka chỉ là bước sau'))},
-    h(Frame,{className:'grow r',style:{'--i':2},tag:'HÌNH 3',cap:'TRANSACTIONAL OUTBOX → KAFKA → IDEMPOTENT INBOX'},
+    h(Frame,{className:'grow r',style:{'--i':2},tag:'HÌNH 4',cap:'TRANSACTIONAL OUTBOX → KAFKA → IDEMPOTENT INBOX'},
       div({className:'pipe'},
         h(Node,{t:'Game / Multiplayer',s:'BEGIN TRANSACTION'}),
         h(Harrow),
@@ -816,9 +894,9 @@ function SlideKafka(){
   );
 }
 
-/* ---------------- 09 · gRPC ---------------- */
+/* ---------------- 10 · gRPC ---------------- */
 function SlideGrpc(){
-  return h(Shell,{n:9,eb:'MỤC 2.4 · gRPC SERVICE',
+  return h(Shell,{n:10,eb:'MỤC 2.4 · gRPC SERVICE',
     title:h('span',null,'Hợp đồng viết trước, ',h('em',null,'client sinh tự động'))},
     div({className:'row r grow',style:{'--i':2,gridTemplateColumns:'1fr 120px 1fr',gap:'22px',alignItems:'center'}},
       h(Frame,{tag:'NGUỒN CHÂN LÝ',cap:'proto/sudoku/*/v1',style:{height:'100%',justifyContent:'center'}},
@@ -837,7 +915,7 @@ function SlideGrpc(){
   );
 }
 
-/* ---------------- 10 · auth ---------------- */
+/* ---------------- 11 · auth ---------------- */
 function SlideAuth(){
   const steps=[
     ['01','React đăng nhập bằng Firebase','FIREBASE SDK'],
@@ -846,7 +924,7 @@ function SlideAuth(){
     ['04','Envoy xác thực chữ ký qua Google JWKS','SAI → 401'],
     ['05','Service đọc claim sub làm UserId','MapInboundClaims = false']
   ];
-  return h(Shell,{n:10,eb:'MỤC 4 · JWT AUTHENTICATION',
+  return h(Shell,{n:11,eb:'MỤC 4 · JWT AUTHENTICATION',
     title:h('span',null,'Token kiểm ở cửa, ',h('em',null,'UserId lấy từ claim sub'))},
     div({className:'row r grow',style:{'--i':2,gridTemplateColumns:'1.2fr .8fr',gap:'36px'}},
       div({className:'seq'},...steps.map(([n,t,s],i)=>
@@ -859,9 +937,9 @@ function SlideAuth(){
   );
 }
 
-/* ---------------- 11 · luồng solo ---------------- */
+/* ---------------- 12 · luồng solo ---------------- */
 function SlideSoloFlow(){
-  return h(Shell,{n:11,eb:'MỤC 6 · END-TO-END WORKFLOW',
+  return h(Shell,{n:12,eb:'MỤC 6 · END-TO-END WORKFLOW',
     title:h('span',null,'Một ván solo đi qua ',h('em',null,'cả bốn thành phần'))},
     div({className:'steps r',style:{'--i':2}},...STEPS.map(([n,t,d,tone],i)=>
       div({className:'st '+tone,key:i},span({className:'n'},n),h('b',null,t),span({className:'sm'},d)))),
@@ -881,9 +959,9 @@ function SlideSoloFlow(){
   );
 }
 
-/* ---------------- 12 · multiplayer ---------------- */
+/* ---------------- 13 · multiplayer ---------------- */
 function SlideMulti(){
-  return h(Shell,{n:12,eb:'MỤC 6 · REALTIME 1V1',
+  return h(Shell,{n:13,eb:'MỤC 6 · REALTIME 1V1',
     title:h('span',null,'Nước đi ',h('em',null,'không chạm database'))},
     div({className:'hub r',style:{'--i':2}},
       div({className:'hubcol'},
@@ -902,12 +980,12 @@ function SlideMulti(){
   );
 }
 
-/* ---------------- 13 · deploy ---------------- */
+/* ---------------- 14 · deploy ---------------- */
 function SlideDeploy(){
-  return h(Shell,{n:13,eb:'MỤC 3 · DEPLOYMENT',
+  return h(Shell,{n:14,eb:'MỤC 3 · DEPLOYMENT',
     title:h('span',null,'Cả hệ thống lên bằng ',h('em',null,'một lệnh docker compose'))},
     div({className:'row r grow',style:{'--i':2,gridTemplateColumns:'1.25fr .75fr',gap:'34px'}},
-      h(Frame,{tag:'HÌNH 4',cap:'deploy/docker-compose.yml · mạng nội bộ prn-asm'},
+      h(Frame,{tag:'HÌNH 5',cap:'deploy/docker-compose.yml · mạng nội bộ prn-asm'},
         div({className:'compose'},...COMPOSE.map(([label,list],ri)=>
           div({className:'crow',key:'r'+ri},
             span({className:'rlbl'},label),
@@ -928,9 +1006,9 @@ function SlideDeploy(){
   );
 }
 
-/* ---------------- 14 · yêu cầu kỹ thuật ---------------- */
+/* ---------------- 15 · yêu cầu kỹ thuật ---------------- */
 function SlideTech(){
-  return h(Shell,{n:14,eb:'MỤC 4 · TECHNICAL REQUIREMENTS',
+  return h(Shell,{n:15,eb:'MỤC 4 · TECHNICAL REQUIREMENTS',
     title:h('span',null,'Mười hai yêu cầu, ',h('em',null,'mỗi dòng một chỗ đối chiếu'))},
     div({className:'row r grow',style:{'--i':2,gridTemplateColumns:'1fr 1fr',gap:'36px'}},
       h('table',{className:'matrix'},h('tbody',null,...MATRIX.slice(0,6).map(([a,b],i)=>
@@ -941,9 +1019,9 @@ function SlideTech(){
   );
 }
 
-/* ---------------- 15 · nộp bài ---------------- */
+/* ---------------- 16 · nộp bài ---------------- */
 function SlideDeliverables(){
-  return h(Shell,{n:15,eb:'MỤC 5 · DELIVERABLES',
+  return h(Shell,{n:16,eb:'MỤC 5 · DELIVERABLES',
     title:h('span',null,'Sáu thứ phải nộp, ',h('em',null,'tất cả nằm trong repo'))},
     div({className:'deliv r',style:{'--i':2}},...DELIV.map(([t,s,path],i)=>
       div({className:'card',key:i},span({className:'chk'},'✓ có trong repo'),h('b',null,t),span(null,s),span({className:'path'},path)))),
@@ -962,19 +1040,6 @@ function SlideDeliverables(){
           span(null,'Sửa .proto'),h('b',{style:{fontSize:'16px'}},'npm run gen'),
           span(null,'Smoke test'),h('b',{style:{fontSize:'16px'}},'compose up · /swagger')))),
     h(Strip,{k:'README'},'Mô tả dự án, kiến trúc, công nghệ, hướng dẫn cài đặt, hướng dẫn deploy và phân công thành viên — đúng danh mục đề yêu cầu.')
-  );
-}
-
-/* ---------------- 16 · demo ---------------- */
-function SlideAgenda(){
-  return h(Shell,{n:16,eb:'MỤC 6 · KỊCH BẢN TRÌNH DIỄN',
-    title:h('span',null,'Tám phút, ',h('em',null,'bảy điểm bấm'))},
-    div({className:'agenda r',style:{'--i':2}},...AGENDA.flatMap(([t,a,b],i)=>[
-      div({key:'t'+i,className:'t'},t),
-      div({key:'a'+i,className:'a'},h('b',null,a),' — ',b),
-      div({key:'b'+i,className:'b'},AGENDA[i][3])
-    ])),
-    h(Strip,{k:'Dự phòng',tone:'nghe'},'Mỗi điểm bấm có ảnh log hoặc video 20 giây: mạng lớp học lỗi vẫn trình diễn được.')
   );
 }
 
@@ -1032,19 +1097,20 @@ function SlideEnd(){
 }
 
 /* ---------------- bộ khung trình chiếu ---------------- */
-const slides=[SlideCover,SlideRubric,SlideScope,SlideArch,SlideLayers,SlideRest,SlideJobs,SlideKafka,
-  SlideGrpc,SlideAuth,SlideSoloFlow,SlideMulti,SlideDeploy,SlideTech,SlideDeliverables,SlideAgenda,
+const slides=[SlideCover,SlideToc,SlideScope,SlideArch,SlideLayers,SlideErd,SlideRest,SlideJobs,
+  SlideKafka,SlideGrpc,SlideAuth,SlideSoloFlow,SlideMulti,SlideDeploy,SlideTech,SlideDeliverables,
   SlideDecisions,SlideEnd];
-const slideTitles=['Bìa · Bàn cờ Sudoku, bốn service','Bảy tiêu chí chấm điểm','Mục tiêu & phạm vi','Kiến trúc tổng thể',
-  'Kiến trúc tầng & database','REST API (Support)','Background job','Kafka & Outbox–Inbox','gRPC contract-first',
+const slideTitles=['Bìa · Bàn cờ Sudoku, bốn service','Mục lục · bản đồ bài trình bày','Mục tiêu & phạm vi','Kiến trúc tổng thể (C4)',
+  'Kiến trúc tầng & database','Sơ đồ thực thể (ERD)','REST API (Support)','Background job','Kafka & Outbox–Inbox','gRPC contract-first',
   'Xác thực JWT','Luồng solo end-to-end','Multiplayer realtime','Deploy bằng Docker Compose','Yêu cầu kỹ thuật',
-  'Sản phẩm phải nộp','Kịch bản demo 8 phút','Ba quyết định thiết kế','Kết & Q&A'];
+  'Sản phẩm phải nộp','Ba quyết định thiết kế','Kết & Q&A'];
 const NOTES=[
- 'Chào thầy và các bạn. Nhóm em làm Sudoku Online: chơi đơn và đấu 1v1 thời gian thực. Bài hôm nay đi theo đúng bảy tiêu chí của đề, mỗi tiêu chí chỉ vào một thành phần cụ thể trong hệ thống.',
- 'Đề cho 100 điểm, trong đó kiến trúc và REST API chiếm 40. Nhóm em ưu tiên hai phần này trước, các phần còn lại vẫn phải có bằng chứng chạy được.',
+ 'Chào thầy và các bạn. Nhóm em làm Sudoku Online: chơi đơn và đấu 1v1 thời gian thực. Bài hôm nay đi theo đúng cấu trúc của đề, mỗi mục chỉ vào một thành phần cụ thể trong hệ thống.',
+ 'Bài trình bày đi theo ba chặng: nền tảng và kiến trúc, bốn trụ công nghệ bắt buộc, rồi luồng chạy thật và phần nộp bài. Thang điểm in ở cuối tờ này — kiến trúc và REST API mỗi phần 20 điểm nên hai phần đó được nói kỹ nhất.',
  'Domain Sudoku được chọn vì nó có ba loại tải khác nhau: đọc nội dung nhiều, chơi đơn cần kiểm tra ở server, và đấu 1v1 cần độ trễ thấp. Mỗi loại ứng với một công nghệ trong đề.',
  'Toàn bộ hệ thống có một cửa vào là Envoy. Envoy làm ba việc: chuyển gRPC-Web sang gRPC, kiểm JWT, và nâng cấp WebSocket cho SignalR. Phía sau là bốn service, mỗi service một database.',
  'Mọi service theo cùng một khuôn: tầng API, tầng Domain, tầng Data. Quy ước quan trọng là Repository không tự SaveChanges, Domain service gom một lần qua UnitOfWork.',
+ 'Sơ đồ thực thể có 22 thực thể trên 25 bảng. Điểm cần nói là khoá ngoại chỉ tồn tại bên trong từng database: Level sinh ra Puzzle, Puzzle sinh ra GameSession, mỗi phiên có nhiều GameMove. Xuyên service chỉ có tham chiếu mềm bằng UserId, PuzzleId, MatchId.',
  'Phần nội dung đọc nhiều được tách thành REST: notices và tutorials có CRUD, tìm kiếm, lọc theo category hoặc difficulty, sắp xếp và phân trang. GET công khai, ghi dữ liệu cần JWT.',
  'Ba worker đang chạy: quét outbox mỗi 2 giây, bổ sung puzzle mỗi 60 giây để không cạn đề, và quét vòng đời trận 1v1 mỗi giây. Cả ba đều không chặn request của người chơi.',
  'Điểm chính của slide này: sự kiện được ghi vào outbox trong cùng transaction với dữ liệu, rồi worker mới đẩy lên Kafka. Phía nhận kiểm tra Inbox trước khi xử lý nên không bị cộng hai lần.',
@@ -1055,7 +1121,6 @@ const NOTES=[
  'Cả hệ thống chạy bằng một lệnh compose: mười container, gồm gateway, web, bốn service, PostgreSQL, Redis và Kafka. Cấu hình đọc từ .env, không hardcode secret.',
  'Bảng này là bản đối chiếu để trả lời câu hỏi: mỗi yêu cầu kỹ thuật của đề nằm ở đâu trong mã nguồn. Cột phải là đường dẫn hoặc thành phần có thể mở ra xem ngay.',
  'Sáu sản phẩm nộp đều nằm trong repo. Phần dễ mất điểm nhất là README và phân công, nên nhóm ghi rõ từng người phụ trách service nào.',
- 'Kịch bản tám phút, bảy điểm bấm. Mỗi mục có thời lượng riêng để không bị cháy giờ; nếu mạng lỗi thì dùng ảnh log đã chuẩn bị.',
  'Ba quyết định giữ cho hệ thống nhất quán: hợp đồng viết trước, outbox/inbox cho sự kiện, và tách hot path realtime ra khỏi database.',
  'Cảm ơn thầy và các bạn. Nhóm em nhận câu hỏi, ưu tiên câu hỏi về kiến trúc và luồng sự kiện vì đó là phần nhóm đầu tư nhiều nhất.'
 ];
@@ -1170,7 +1235,7 @@ RD.render(h(Presentation),document.getElementById('root'));
   const embedded = document.getElementById('prn-baked-state');
   let state = {version:2, slides:Array.from({length:COUNT},()=>({texts:{},objects:[]})), updatedAt:null};
   const readState = value => {
-    if (!value || typeof value !== 'object' || !Array.isArray(value.slides) || value.slides.length !== COUNT) throw new Error('Tệp dữ liệu phải có chính xác 18 slide');
+    if (!value || typeof value !== 'object' || !Array.isArray(value.slides) || value.slides.length !== COUNT) throw new Error('Tệp dữ liệu phải có chính xác '+COUNT+' slide');
     return {version:2,slides:value.slides.map(s=>({texts:s.texts && typeof s.texts==='object'?s.texts:{},objects:Array.isArray(s.objects)?s.objects:[]})),updatedAt:value.updatedAt||null};
   };
   try { if(embedded && embedded.textContent.trim()) state=readState(JSON.parse(embedded.textContent)); }catch(err){console.warn('Embedded state ignored',err);}
@@ -1180,7 +1245,7 @@ RD.render(h(Presentation),document.getElementById('root'));
   const el = (tag,attrs={},textValue)=>{const v=document.createElement(tag);for(const [k,value] of Object.entries(attrs)){if(k==='className')v.className=value;else if(k==='dataset')for(const [x,z] of Object.entries(value))v.dataset[x]=z;else v.setAttribute(k,value);}if(textValue!==undefined)v.textContent=textValue;return v;};
   const safeHTML = text => String(text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const getSlide = () => $('.slide-inner');
-  const getCurrent = () => Math.max(0,Math.min(17,(Number(location.hash.replace('#',''))||1)-1));
+  const getCurrent = () => Math.max(0,Math.min(COUNT-1,(Number(location.hash.replace('#',''))||1)-1));
   const newId = () => 'obj-'+Math.random().toString(36).slice(2,11);
   const toast = msg =>{const n=$('#prn-notice');n.textContent=msg;n.classList.add('prn-on');clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>n.classList.remove('prn-on'),3400);};
   const store = () => {state.updatedAt=new Date().toISOString();try{localStorage.setItem(STORE,JSON.stringify(state));hasDraftWarning=false;}catch(err){if(!hasDraftWarning){toast('Bộ nhớ trình duyệt đã đầy. Hãy xuất JSON hoặc HTML để tránh mất dữ liệu.');hasDraftWarning=true;}console.warn(err);}};
@@ -1269,7 +1334,7 @@ RD.render(h(Presentation),document.getElementById('root'));
   const tb=el('button',{id:'prn-editor-toggle',type:'button'},'✎  Chỉnh sửa');
   const panel=el('aside',{id:'prn-editor-panel','aria-label':'Bảng chỉnh sửa slide'});
   panel.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between"><h3>✦ PRN ASM Editor</h3><span class="prn-badge" id="prn-slide-indicator">Slide 01 / 18</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between"><h3>✦ PRN ASM Editor</h3><span class="prn-badge" id="prn-slide-indicator">Slide 01 / ${COUNT}</span></div>
     <p>Nhấp vào chữ trên slide để sửa trực tiếp. Nhấp vào đối tượng để kéo thả, định dạng hoặc thay kích thước.</p>
     <h4>Chèn nội dung</h4>
     <div class="prn-buttons"><button type="button" id="prn-add-text">＋ Hộp chữ</button><button type="button" id="prn-add-image">＋ Ảnh / logo</button><button type="button" id="prn-add-diagram">＋ Diagram</button><button type="button" id="prn-duplicate-object">⧉ Nhân đôi</button></div>
@@ -1288,7 +1353,7 @@ RD.render(h(Presentation),document.getElementById('root'));
   const props=$('#prn-object-props');
   const inputLine=(name,value,type='text')=>`<label class="prn-field"><span>${name}</span><input data-prn-prop="${safeHTML(name)}" type="${type}" value="${safeHTML(value)}"></label>`;
   function refreshPanel(){
-    $('#prn-slide-indicator').textContent='Slide '+String(slideIndex+1).padStart(2,'0')+' / 18';
+    $('#prn-slide-indicator').textContent='Slide '+String(slideIndex+1).padStart(2,'0')+' / '+COUNT;
     const obj=findObject();
     if(selectedElement && editing){
       props.innerHTML=`<span class="prn-badge">Đang chỉnh chữ gốc</span>
@@ -1329,7 +1394,7 @@ RD.render(h(Presentation),document.getElementById('root'));
   $('#prn-duplicate-object').onclick=()=>{const obj=findObject();if(!obj){toast('Hãy chọn một đối tượng trước.');return;}addObject({...obj,id:newId(),x:obj.x+24,y:obj.y+24})};
   $('#prn-save-local').onclick=()=>{store();toast('Đã lưu trên trình duyệt này. Hãy xuất HTML hoặc JSON để gửi cho người khác.');};
   function download(name,text,type){const blob=new Blob([text],{type});const url=URL.createObjectURL(blob);const a=el('a',{href:url,download:name});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
-  $('#prn-export-json').onclick=()=>{store();download('PRN_ASM_18_Slides.project.json',JSON.stringify(state,null,2),'application/json');toast('Đã xuất dự án JSON: gửi cho bạn bè để nhập vào cùng bản HTML Editor.');};
+  $('#prn-export-json').onclick=()=>{store();download('PRN_ASM_'+COUNT+'_Slides.project.json',JSON.stringify(state,null,2),'application/json');toast('Đã xuất dự án JSON: gửi cho bạn bè để nhập vào cùng bản HTML Editor.');};
   function buildStandalone(){
     const clone=document.documentElement.cloneNode(true);
     const root=clone.querySelector('#root');if(root)root.replaceChildren();
@@ -1340,7 +1405,7 @@ RD.render(h(Presentation),document.getElementById('root'));
   }
   $('#prn-export-html').onclick=()=>{store();download('index.html',buildStandalone(),'text/html');toast('Đã xuất index.html – có thể đăng GitHub Pages hoặc chia sẻ như một file độc lập.');};
   $('#prn-import-json').onclick=()=>$('#prn-json-file').click();
-  $('#prn-json-file').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const v=readState(JSON.parse(await f.text()));if(!confirm('Nhập file dự án sẽ thay thế các chỉnh sửa đang lưu trên trình duyệt. Tiếp tục?'))return;state=v;selected=null;selectedElement=null;store();refreshSlide();toast('Đã nhập dự án 18 slide.');}catch(err){toast('Không đọc được dự án: '+err.message)}finally{e.target.value='';}};
+  $('#prn-json-file').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const v=readState(JSON.parse(await f.text()));if(!confirm('Nhập file dự án sẽ thay thế các chỉnh sửa đang lưu trên trình duyệt. Tiếp tục?'))return;state=v;selected=null;selectedElement=null;store();refreshSlide();toast('Đã nhập dự án '+COUNT+' slide.');}catch(err){toast('Không đọc được dự án: '+err.message)}finally{e.target.value='';}};
   $('#prn-reset-slide').onclick=()=>{if(!confirm('Khôi phục toàn bộ thay đổi trên slide '+(slideIndex+1)+'?'))return;state.slides[slideIndex]={texts:{},objects:[]};selected=null;selectedElement=null;store();location.reload();};
   tb.addEventListener('click',()=>{
     editing=!editing;document.documentElement.classList.toggle('prn-editing',editing);tb.textContent=editing?'✓  Xong chỉnh sửa':'✎  Chỉnh sửa';selected=null;selectedElement=null;updateScale();refreshSlide();

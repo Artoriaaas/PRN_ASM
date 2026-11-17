@@ -6,7 +6,7 @@
   const embedded = document.getElementById('prn-baked-state');
   let state = {version:2, slides:Array.from({length:COUNT},()=>({texts:{},objects:[]})), updatedAt:null};
   const readState = value => {
-    if (!value || typeof value !== 'object' || !Array.isArray(value.slides) || value.slides.length !== COUNT) throw new Error('Tệp dữ liệu phải có chính xác 18 slide');
+    if (!value || typeof value !== 'object' || !Array.isArray(value.slides) || value.slides.length !== COUNT) throw new Error('Tệp dữ liệu phải có chính xác '+COUNT+' slide');
     return {version:2,slides:value.slides.map(s=>({texts:s.texts && typeof s.texts==='object'?s.texts:{},objects:Array.isArray(s.objects)?s.objects:[]})),updatedAt:value.updatedAt||null};
   };
   try { if(embedded && embedded.textContent.trim()) state=readState(JSON.parse(embedded.textContent)); }catch(err){console.warn('Embedded state ignored',err);}
@@ -16,7 +16,7 @@
   const el = (tag,attrs={},textValue)=>{const v=document.createElement(tag);for(const [k,value] of Object.entries(attrs)){if(k==='className')v.className=value;else if(k==='dataset')for(const [x,z] of Object.entries(value))v.dataset[x]=z;else v.setAttribute(k,value);}if(textValue!==undefined)v.textContent=textValue;return v;};
   const safeHTML = text => String(text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const getSlide = () => $('.slide-inner');
-  const getCurrent = () => Math.max(0,Math.min(17,(Number(location.hash.replace('#',''))||1)-1));
+  const getCurrent = () => Math.max(0,Math.min(COUNT-1,(Number(location.hash.replace('#',''))||1)-1));
   const newId = () => 'obj-'+Math.random().toString(36).slice(2,11);
   const toast = msg =>{const n=$('#prn-notice');n.textContent=msg;n.classList.add('prn-on');clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>n.classList.remove('prn-on'),3400);};
   const store = () => {state.updatedAt=new Date().toISOString();try{localStorage.setItem(STORE,JSON.stringify(state));hasDraftWarning=false;}catch(err){if(!hasDraftWarning){toast('Bộ nhớ trình duyệt đã đầy. Hãy xuất JSON hoặc HTML để tránh mất dữ liệu.');hasDraftWarning=true;}console.warn(err);}};
@@ -105,7 +105,7 @@
   const tb=el('button',{id:'prn-editor-toggle',type:'button'},'✎  Chỉnh sửa');
   const panel=el('aside',{id:'prn-editor-panel','aria-label':'Bảng chỉnh sửa slide'});
   panel.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between"><h3>✦ PRN ASM Editor</h3><span class="prn-badge" id="prn-slide-indicator">Slide 01 / 18</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between"><h3>✦ PRN ASM Editor</h3><span class="prn-badge" id="prn-slide-indicator">Slide 01 / ${COUNT}</span></div>
     <p>Nhấp vào chữ trên slide để sửa trực tiếp. Nhấp vào đối tượng để kéo thả, định dạng hoặc thay kích thước.</p>
     <h4>Chèn nội dung</h4>
     <div class="prn-buttons"><button type="button" id="prn-add-text">＋ Hộp chữ</button><button type="button" id="prn-add-image">＋ Ảnh / logo</button><button type="button" id="prn-add-diagram">＋ Diagram</button><button type="button" id="prn-duplicate-object">⧉ Nhân đôi</button></div>
@@ -124,7 +124,7 @@
   const props=$('#prn-object-props');
   const inputLine=(name,value,type='text')=>`<label class="prn-field"><span>${name}</span><input data-prn-prop="${safeHTML(name)}" type="${type}" value="${safeHTML(value)}"></label>`;
   function refreshPanel(){
-    $('#prn-slide-indicator').textContent='Slide '+String(slideIndex+1).padStart(2,'0')+' / 18';
+    $('#prn-slide-indicator').textContent='Slide '+String(slideIndex+1).padStart(2,'0')+' / '+COUNT;
     const obj=findObject();
     if(selectedElement && editing){
       props.innerHTML=`<span class="prn-badge">Đang chỉnh chữ gốc</span>
@@ -165,7 +165,7 @@
   $('#prn-duplicate-object').onclick=()=>{const obj=findObject();if(!obj){toast('Hãy chọn một đối tượng trước.');return;}addObject({...obj,id:newId(),x:obj.x+24,y:obj.y+24})};
   $('#prn-save-local').onclick=()=>{store();toast('Đã lưu trên trình duyệt này. Hãy xuất HTML hoặc JSON để gửi cho người khác.');};
   function download(name,text,type){const blob=new Blob([text],{type});const url=URL.createObjectURL(blob);const a=el('a',{href:url,download:name});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
-  $('#prn-export-json').onclick=()=>{store();download('PRN_ASM_18_Slides.project.json',JSON.stringify(state,null,2),'application/json');toast('Đã xuất dự án JSON: gửi cho bạn bè để nhập vào cùng bản HTML Editor.');};
+  $('#prn-export-json').onclick=()=>{store();download('PRN_ASM_'+COUNT+'_Slides.project.json',JSON.stringify(state,null,2),'application/json');toast('Đã xuất dự án JSON: gửi cho bạn bè để nhập vào cùng bản HTML Editor.');};
   function buildStandalone(){
     const clone=document.documentElement.cloneNode(true);
     const root=clone.querySelector('#root');if(root)root.replaceChildren();
@@ -176,7 +176,7 @@
   }
   $('#prn-export-html').onclick=()=>{store();download('index.html',buildStandalone(),'text/html');toast('Đã xuất index.html – có thể đăng GitHub Pages hoặc chia sẻ như một file độc lập.');};
   $('#prn-import-json').onclick=()=>$('#prn-json-file').click();
-  $('#prn-json-file').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const v=readState(JSON.parse(await f.text()));if(!confirm('Nhập file dự án sẽ thay thế các chỉnh sửa đang lưu trên trình duyệt. Tiếp tục?'))return;state=v;selected=null;selectedElement=null;store();refreshSlide();toast('Đã nhập dự án 18 slide.');}catch(err){toast('Không đọc được dự án: '+err.message)}finally{e.target.value='';}};
+  $('#prn-json-file').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const v=readState(JSON.parse(await f.text()));if(!confirm('Nhập file dự án sẽ thay thế các chỉnh sửa đang lưu trên trình duyệt. Tiếp tục?'))return;state=v;selected=null;selectedElement=null;store();refreshSlide();toast('Đã nhập dự án '+COUNT+' slide.');}catch(err){toast('Không đọc được dự án: '+err.message)}finally{e.target.value='';}};
   $('#prn-reset-slide').onclick=()=>{if(!confirm('Khôi phục toàn bộ thay đổi trên slide '+(slideIndex+1)+'?'))return;state.slides[slideIndex]={texts:{},objects:[]};selected=null;selectedElement=null;store();location.reload();};
   tb.addEventListener('click',()=>{
     editing=!editing;document.documentElement.classList.toggle('prn-editing',editing);tb.textContent=editing?'✓  Xong chỉnh sửa':'✎  Chỉnh sửa';selected=null;selectedElement=null;updateScale();refreshSlide();
