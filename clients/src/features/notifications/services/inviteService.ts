@@ -1,19 +1,9 @@
-import { auth } from '../../../auth/firebase'
-import { getDevToken } from '../../../auth/devAuth'
+import { getApiBase } from '../../../api/apiBase'
+import { getAccessToken } from '../../../auth/accessToken'
 import type { InviteService } from './types'
 import { loadMockNotifications, saveMockNotifications } from './mockData'
 
-async function getAuthToken(): Promise<string> {
-  const user = auth.currentUser
-  if (user) {
-    try {
-      return await user.getIdToken()
-    } catch {
-      return await getDevToken()
-    }
-  }
-  return await getDevToken()
-}
+const getAuthToken = getAccessToken
 
 export class MockInviteService implements InviteService {
   private delay(ms = 350): Promise<void> {
@@ -41,16 +31,16 @@ export class MockInviteService implements InviteService {
 }
 
 export class ApiInviteService implements InviteService {
-  private baseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
+  private baseUrl = getApiBase()
 
   async respond(inviteId: string, accept: boolean): Promise<{ roomCode?: string }> {
     const token = await getAuthToken()
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (token) headers.Authorization = `Bearer ${token}`
+
     const res = await fetch(`${this.baseUrl}/api/match/invites/${inviteId}/respond`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      headers,
       body: JSON.stringify({ accept }),
     })
 

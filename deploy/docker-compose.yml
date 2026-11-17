@@ -17,6 +17,7 @@ services:
       context: ../clients
       args:
         - VITE_API_URL=
+        - VITE_DEV_AUTH_SECRET=${DEV_AUTH_SECRET:-sudoku-platform-insecure-dev-jwt-secret-key-2026-minimum-32-chars!}
     ports:
       - '${WEB_PORT:-5173}:80'
     depends_on:
@@ -28,7 +29,9 @@ services:
       dockerfile: services/Game/Game.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__Default=Host=postgres;Database=game_db;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-12345}
+      - ConnectionStrings__Default=Host=postgres;Database=game_db;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      - Auth__AllowDevTokens=${ALLOW_DEV_TOKENS:-true}
+      - Auth__DevSecret=${DEV_AUTH_SECRET:-sudoku-platform-insecure-dev-jwt-secret-key-2026-minimum-32-chars!}
       - Kafka__BootstrapServers=kafka:9092
       - Services__User=http://user-service:8080
       - Firebase__ProjectId=${FIREBASE_PROJECT_ID:-prn222-469cc}
@@ -47,7 +50,9 @@ services:
       dockerfile: services/User/User.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__Default=Host=postgres;Database=user_db;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-12345}
+      - ConnectionStrings__Default=Host=postgres;Database=user_db;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      - Auth__AllowDevTokens=${ALLOW_DEV_TOKENS:-true}
+      - Auth__DevSecret=${DEV_AUTH_SECRET:-sudoku-platform-insecure-dev-jwt-secret-key-2026-minimum-32-chars!}
       - Kafka__BootstrapServers=kafka:9092
       - Firebase__ProjectId=${FIREBASE_PROJECT_ID:-prn222-469cc}
       - Kestrel__Endpoints__Grpc__Url=http://*:8080
@@ -65,7 +70,9 @@ services:
       dockerfile: services/Support/Support.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__Default=Host=postgres;Database=support_db;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-12345}
+      - ConnectionStrings__Default=Host=postgres;Database=support_db;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      - Auth__AllowDevTokens=${ALLOW_DEV_TOKENS:-true}
+      - Auth__DevSecret=${DEV_AUTH_SECRET:-sudoku-platform-insecure-dev-jwt-secret-key-2026-minimum-32-chars!}
       - Kafka__BootstrapServers=kafka:9092
       - Services__Game=http://game-service:8080
       - Services__User=http://user-service:8080
@@ -91,7 +98,9 @@ services:
       dockerfile: services/Multiplayer/Multiplayer.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__Default=Host=postgres;Database=multiplayer_db;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-12345}
+      - ConnectionStrings__Default=Host=postgres;Database=multiplayer_db;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      - Auth__AllowDevTokens=${ALLOW_DEV_TOKENS:-true}
+      - Auth__DevSecret=${DEV_AUTH_SECRET:-sudoku-platform-insecure-dev-jwt-secret-key-2026-minimum-32-chars!}
       - ConnectionStrings__Redis=redis:6379,abortConnect=false
       - Kafka__BootstrapServers=kafka:9092
       - Services__User=http://user-service:8080
@@ -114,7 +123,7 @@ services:
     image: postgres:16
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-12345}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
       - '5432:5432'
     volumes:

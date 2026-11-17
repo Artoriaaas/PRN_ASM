@@ -1,13 +1,13 @@
-# Frontend Rules (`web/`)
+# Frontend Rules (`clients/`)
 
-File này tự động nạp khi làm việc trong `web/**`. Kế thừa luật gốc từ `/AGENTS.md`.
+File này tự động nạp khi làm việc trong `clients/**`. Kế thừa luật gốc từ `/AGENTS.md`.
 
-## Stack & Quy ước Thư mục (`web/src/`)
+## Stack & Quy ước Thư mục (`clients/src/`)
 - React 19 · TypeScript · Vite 8 · `@bufbuild/protobuf` v2 · `@connectrpc/connect` & `connect-web` v2 · `@microsoft/signalr` · Firebase v13 · `oxlint`.
 - **`src/gen/`**: Code sinh tự động từ `../proto` qua lệnh `npm run gen`. **Tuyệt đối không sửa tay.**
   - Lưu ý `@bufbuild/protobuf` v2: Service descriptor (`UserService`, `GameService`, `MultiplayerService`, `SupportService`) được export trực tiếp từ file `*_pb.ts` (vd `../gen/sudoku/user/v1/user_pb`). **Không tồn tại** file `*_connect.ts`.
-- **`src/api/`**: Khởi tạo ConnectRPC client qua `createGrpcWebTransport` trỏ tới **Envoy Gateway** (`import.meta.env.VITE_API_URL ?? "http://localhost:8080"` — không bao giờ gọi thẳng port `5101..5105` của backend), gắn interceptor `Authorization: Bearer <idToken>`, kèm cache 2 tầng (RAM `Map` + `sessionStorage`).
-- **`src/auth/`**: Khởi tạo Firebase Auth & quản lý ID Token.
+- **`src/api/`**: Khởi tạo ConnectRPC client qua `createGrpcWebTransport` trỏ tới **Envoy Gateway** — base URL **không hardcode**, lấy từ `src/api/apiBase.ts` (thứ tự: `?api=` → `localStorage["prnasm.apiBase"]` → `<meta name="api-base">` → `VITE_API_URL` → same-origin). Không bao giờ gọi thẳng port `5101..5105` của backend. Token gắn qua interceptor dùng chung `src/auth/accessToken.ts`, kèm cache 2 tầng (RAM `Map` + `sessionStorage`).
+- **`src/auth/`**: Khởi tạo Firebase Auth & quản lý ID Token. **Chỉ `accessToken.ts` được chọn token** (dev-admin → Firebase → dev guest); không tự viết lại logic `auth.currentUser ?? getDevToken()` ở nơi khác. Dev JWT chỉ hoạt động khi `VITE_DEV_AUTH_SECRET` (>= 32 ký tự) được set lúc build — xem `docs/DEPLOY_VERCEL_TUNNEL.md`.
 - **`src/realtime/`**: Quản lý kết nối SignalR tới `/hubs/match` qua Envoy.
 
 ## Luật Hiệu năng & UX Bắt buộc (chi tiết: `docs/OPTIMIZATION.md` §3)

@@ -37,9 +37,14 @@ PRN_ASM/
    {
      "Firebase": {
        "ProjectId": "YOUR_FIREBASE_PROJECT_ID"
+     },
+     "Auth": {
+       "AllowDevTokens": false,
+       "DevSecret": ""
      }
    }
    ```
+   `Auth:AllowDevTokens` phải để `false` ở production; chỉ bật `true` cho local/demo (compose đặt qua `Auth__AllowDevTokens`).
 2. **Kích hoạt trong `Program.cs`**:
    ```csharp
    using Sudoku.Auth;
@@ -84,12 +89,18 @@ PRN_ASM/
    var userId = Context.User?.FindFirst("sub")?.Value;
    ```
 
-5. **Token development cục bộ**:
-   * Token HS256 dùng cho chế độ phát triển phải có `iss = sudoku-dev-auth`,
-     `aud = sudoku-platform`, `sub`, `iat` và `exp`.
+5. **Token development cục bộ (opt-in, không bật mặc định)**:
+   * Chỉ được chấp nhận khi `Auth:AllowDevTokens = true` (compose: `Auth__AllowDevTokens`).
+     Khi tắt, `ValidIssuers`/`ValidAudiences` chỉ chứa giá trị Firebase ⇒ token HS256 bị từ chối
+     vì resolver chỉ trả signing key HMAC khi cờ này bật.
+   * Secret đọc từ `Auth:DevSecret` (env `Auth__DevSecret`), tối thiểu 32 ký tự và phải **trùng**
+     `VITE_DEV_AUTH_SECRET` của frontend. Không cấu hình ⇒ dùng `AuthExtensions.DevSecretKey`
+     (giá trị công khai, chỉ dành cho demo).
+   * Token HS256 phải có `iss = sudoku-dev-auth`, `aud = sudoku-platform`, `sub`, `iat`, `exp`.
    * `IssuerSigningKeyResolverUsingConfiguration` chọn khóa HMAC cục bộ cho HS256;
      token Firebase RS256 tiếp tục dùng signing keys từ OpenID Connect/JWKS của Google.
    * Luôn bật kiểm tra thời hạn token (`ValidateLifetime = true`).
+   * Quy trình bật/tắt & deploy: xem `docs/DEPLOY_VERCEL_TUNNEL.md` §4.
 
 ### 2.3. Hướng dẫn mở rộng tính năng mới trong `Sudoku.Auth`
 

@@ -197,19 +197,19 @@ Checklist đánh Index ngay từ Migration đầu tiên cho 4 DB của `PRN_ASM`
 
 ---
 
-## 3. 🖥️ Tối ưu hóa Frontend (`web/` — React 19 + TypeScript + Vite 8 + ConnectRPC + SignalR)
+## 3. 🖥️ Tối ưu hóa Frontend (`clients/` — React 19 + TypeScript + Vite 8 + ConnectRPC + SignalR)
 
 ### 3.1. Khởi tạo Tức thì (0ms) với Stale-While-Revalidate & In-Flight Deduplication
 **Vấn đề & Rủi ro giao diện (Frontend Anti-Patterns)**:
 - Lưu dữ liệu vào state khởi tạo rỗng `useState(null)` kèm `loading = true` khiến mỗi lần chuyển màn hình hay F5 là giao diện nháy trắng chờ mạng, thậm chí chặn cả route bảo vệ.
 - Nhiều component cùng mount (Navbar hiển thị Avatar/Elo, trang Lobby cũng gọi Profile) bắn trùng 2–3 gRPC-Web request giống hệt nhau.
 
-**Áp dụng cho `web/src/api/`**:
+**Áp dụng cho `clients/src/api/`**:
 - Tạo lớp cache 2 tầng (**RAM Map** + **`sessionStorage`**) kèm **In-Flight Promise Map** cho các dữ liệu đọc lặp lại (`GetOrCreateProfile`, `ListTutorials`, `ListNotices`, `GetRankings`).
 - Khởi tạo state React đồng bộ ngay từ cache để render ngay ở frame đầu tiên (`0ms`), sau đó âm thầm revalidate ở nền:
 
 ```ts
-// web/src/api/queryCache.ts
+// clients/src/api/queryCache.ts
 const memoryCache = new Map<string, { data: unknown; ts: number }>();
 const inflightMap = new Map<string, Promise<unknown>>();
 
@@ -264,7 +264,7 @@ const [profile, setProfile] = useState<UserProfile | null>(
 - Sau khi bấm Lưu (`UpdateProfile`, `SubmitResult`), gọi tiếp một lệnh `fetchAll()` để tải lại dữ liệu làm tốn gấp đôi thời gian phản hồi.
 - Không khóa nút khi đang gửi khiến người dùng sốt ruột bấm liên tiếp, sinh bản ghi trùng hoặc lỗi race condition.
 
-**Quy tắc bắt buộc trong `web/src/`**:
+**Quy tắc bắt buộc trong `clients/src/`**:
 1. **Không bao giờ re-fetch sau khi mutate nếu response đã trả đủ dữ liệu**: Khi gọi `UpdateProfile` hoặc `SubmitResult`, cập nhật thẳng state và cache từ Protobuf response trả về.
 2. **Optimistic UI (0ms) cho mọi thao tác trên bàn cờ Sudoku**:
    - Khi người chơi gõ phím `1–9` hoặc bật ghi chú (Notes), cập nhật mảng bàn cờ trên Client **ngay lập tức ở 0ms** (`useState` / `useOptimistic`), đồng thời bắn frame SignalR đi ở nền. Không bao giờ disable bàn cờ ngồi chờ ack từ server trên từng ô!
@@ -296,7 +296,7 @@ const [profile, setProfile] = useState<UserProfile | null>(
 - Người dùng upload ảnh Avatar gốc nặng 4–8MB làm treo request; quên `URL.revokeObjectURL` gây rò rỉ bộ nhớ trình duyệt.
 - Không hủy request cũ khi đổi filter nhanh gây hiện tượng response cũ về sau ghi đè response mới.
 
-**Áp dụng cho `web/`**:
+**Áp dụng cho `clients/`**:
 1. **Lazy-mount các khu vực phụ (`React.lazy` + cờ `visitedTabs`)**:
    - Khi vào trang chủ, chỉ tải bundle cốt lõi của Lobby & Bàn cờ. Các màn `Tutorials` (`SupportService`), `MatchHistory`, `Leaderboard` dùng `React.lazy()` và chỉ mount lần đầu khi người dùng thực sự mở tab, sau đó giữ bằng `display: none` nếu muốn chuyển qua lại tức thì không tải lại.
 2. **Truyền `AbortSignal` cho `@connectrpc/connect-web`**:
@@ -309,7 +309,8 @@ const [profile, setProfile] = useState<UserProfile | null>(
      return () => controller.abort(); // Hủy ngay trên đường truyền khi chuyển trang/đổi trang phân trang
    }, [page]);
    ```
-3. **Vòng đời SignalR (`web/src/realtime/`)**:
+3. **Vòng đời SignalR (`clients/src/realtime/`)**:
+   - WebSocket URL lấy từ `getAbsoluteApiUrl('/hubs/match')` trong `clients/src/api/apiBase.ts` (tự đổi theo tunnel/domain, không hardcode).
    - Khởi tạo 1 connection duy nhất cho phiên đấu, cấu hình `.withAutomaticReconnect([0, 1000, 2000, 5000])`.
    - Khi reconnect thành công (`onreconnected`), gửi lại `SyncRoomState(roomId)` để lấy snapshot mới nhất từ Redis phòng trường hợp rớt mạng 1–2 giây.
    - Bắt buộc gỡ listener `connection.off("OpponentProgress", handler)` trong hàm cleanup của `useEffect` để không bị nhân đôi callback sau mỗi ván đấu.
@@ -340,7 +341,7 @@ Dự án `PRN_ASM` đã có sẵn thư viện `building-block/Sudoku.Observabili
 - [ ] Mọi gRPC method & Repository method đã nhận và truyền `CancellationToken` xuyên suốt chưa?
 - [ ] Mệnh đề `WHERE` + `ORDER BY` mới thêm đã có Composite Index tương ứng trong EF Migration chưa?
 
-### Frontend (`web/`)
+### Frontend (`clients/`)
 - [ ] Màn hình chính có bị trắng xóa chờ API khi đã có dữ liệu cache từ phiên trước không? *(Phải hydrate đồng bộ bằng `getCachedSync`)*.
 - [ ] Nhiều component cùng lấy chung 1 dữ liệu đã đi qua hàm deduplicate in-flight promise chưa?
 - [ ] Đồng hồ đếm giờ (`Timer`) đã được tách thành component riêng để không kéo theo 81 ô bàn cờ re-render mỗi giây chưa?

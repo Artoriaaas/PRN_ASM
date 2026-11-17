@@ -155,21 +155,3 @@ static_resources:
                     socket_address:
                       address: multiplayer-service
                       port_value: 8081
-    - name: jwks
-      type: LOGICAL_DNS
-      dns_lookup_family: V4_ONLY
-      connect_timeout: 5s
-      load_assignment:
-        cluster_name: jwks
-        endpoints:
-          - lb_endpoints:
-              - endpoint:
-                  address:
-                    socket_address:
-                      address: www.googleapis.com
-                      port_value: 443
-      transport_socket:
-        name: envoy.transport_sockets.tls
-        typed_config:
-          '@type': type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
-          sni: www.googleapis.com

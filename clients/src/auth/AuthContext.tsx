@@ -25,7 +25,13 @@ import {
   DEV_ADMIN_UID,
   DEV_ADMIN_EMAIL,
   DEV_ADMIN_PASSWORD,
+  isDevAuthEnabled,
 } from './devAuth'
+import {
+  clearDevAdminSession,
+  isDevAdminSession,
+  startDevAdminSession,
+} from './accessToken'
 
 const googleProvider = new GoogleAuthProvider()
 googleProvider.setCustomParameters({ prompt: 'select_account' })
@@ -70,9 +76,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Nếu đã lưu dev-admin session, khôi phục ngay
-    if (sessionStorage.getItem('dev-admin-active') === 'true') {
+    // Nếu đã lưu dev-admin session, khôi phục ngay (chỉ khi dev-auth còn bật)
+    if (isDevAdminSession()) {
       getAdminDevToken().then((token) => {
+        if (!token) {
+          clearDevAdminSession()
+          setUser(null)
+          setLoading(false)
+          return
+        }
         setUser(buildDevAdminUser(token))
         setLoading(false)
       })
@@ -85,12 +97,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [])
 
   const login = useCallback(async (email: string, password: string) => {
-    // Dev-admin shortcut: sudokuadmin@gmail.com / Admin@123
-    if (email.trim() === DEV_ADMIN_EMAIL && password === DEV_ADMIN_PASSWORD) {
+    // Dev-admin shortcut: sudokuadmin@gmail.com / Admin@123 (chỉ khi dev-auth bật)
+    if (isDevAuthEnabled && email.trim() === DEV_ADMIN_EMAIL && password === DEV_ADMIN_PASSWORD) {
       const token = await getAdminDevToken()
-      sessionStorage.setItem('dev-admin-active', 'true')
-      setUser(buildDevAdminUser(token))
-      return
+      if (token) {
+        startDevAdminSession()
+        setUser(buildDevAdminUser(token))
+        return
+      }
     }
     await signInWithEmailAndPassword(auth, email.trim(), password)
   }, [])
@@ -123,7 +137,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [])
 
   const logout = useCallback(async () => {
-    sessionStorage.removeItem('dev-admin-active')
+    clearDevAdminSession()
     setUser(null)
     await signOut(auth)
   }, [])

@@ -1,19 +1,9 @@
 import * as signalR from '@microsoft/signalr'
-import { auth } from '../../../auth/firebase'
-import { getDevToken } from '../../../auth/devAuth'
+import { getAbsoluteApiUrl } from '../../../api/apiBase'
+import { getAccessToken } from '../../../auth/accessToken'
 import type { AppNotification, InviteStatus, NotificationRealtime, RealtimeHandlers } from './types'
 
-async function getAuthToken(): Promise<string> {
-  const user = auth.currentUser
-  if (user) {
-    try {
-      return await user.getIdToken()
-    } catch {
-      return await getDevToken()
-    }
-  }
-  return await getDevToken()
-}
+const getAuthToken = getAccessToken
 
 export class MockRealtime implements NotificationRealtime {
   private subscribers = new Set<RealtimeHandlers>()
@@ -47,7 +37,7 @@ export class MockRealtime implements NotificationRealtime {
 }
 
 export class SignalRRealtime implements NotificationRealtime {
-  private hubUrl = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080') + '/hubs/multiplayer'
+  private hubUrl = getAbsoluteApiUrl('/hubs/multiplayer')
   private connection: signalR.HubConnection | null = null
   private subscribers = new Set<RealtimeHandlers>()
   private isConnecting = false
@@ -63,7 +53,7 @@ export class SignalRRealtime implements NotificationRealtime {
       if (!this.connection) {
         this.connection = new signalR.HubConnectionBuilder()
           .withUrl(this.hubUrl, {
-            accessTokenFactory: async () => await getAuthToken(),
+            accessTokenFactory: async () => (await getAuthToken()) ?? '',
           })
           .withAutomaticReconnect([0, 2000, 5000, 10000, 20000])
           .configureLogging(signalR.LogLevel.Warning)

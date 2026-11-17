@@ -321,19 +321,15 @@ public class MatchmakerService : IMatchmakerService
 ---
 
 ### 4.6. Frontend (React Client): Gọi gRPC-Web qua Envoy
-Tất cả các lời gọi từ React **KHÔNG gọi trực tiếp tới port của backend .NET** mà gọi qua **Envoy Gateway (`http://localhost:8080`)**:
+Tất cả các lời gọi từ React **KHÔNG gọi trực tiếp tới port của backend .NET** mà gọi qua **Envoy Gateway**. Base URL do `clients/src/api/apiBase.ts` quyết định lúc runtime (`?api=`, `localStorage`, `<meta name="api-base">`, `VITE_API_URL`, hoặc same-origin).
 
 ```typescript
-// web/src/api/userClient.ts
-import { createPromiseClient } from "@connectrpc/connect";
-import { createGrpcWebTransport } from "@connectrpc/connect-web";
+// clients/src/api/userClient.ts
+import { createClient } from "@connectrpc/connect";
 import { UserService } from "../gen/sudoku/user/v1/user_pb";
+import { transport } from "./transport"; // đã gắn authInterceptor + baseUrl
 
-const transport = createGrpcWebTransport({
-  baseUrl: "http://localhost:8080", // URL của Envoy Gateway
-});
-
-export const userClient = createPromiseClient(UserService, transport);
+export const userClient = createClient(UserService, transport);
 
 // Trong React Component:
 const response = await userClient.getProfile({});
@@ -351,7 +347,7 @@ Khi bạn cần thêm 1 API hoặc tính năng mới, tuân thủ đúng 5 bư�
    * Khai báo message Request, Response và method `rpc`.
 2. **Bước 2 — Biên dịch Proto**:
    * Backend .NET sẽ tự động biên dịch Proto khi build (nhờ `Grpc.Tools` trong `.csproj`).
-   * Với Frontend: Chạy lệnh `npm run gen` trong thư mục `web/` để tạo các file TypeScript type-safe trong `web/src/gen/`.
+   * Với Frontend: Chạy lệnh `npm run gen` trong thư mục `clients/` để tạo các file TypeScript type-safe trong `clients/src/gen/`.
 3. **Bước 3 — Viết Data & Domain**:
    * Tạo Entity / migration trong `Data/`.
    * Viết Business logic / Use case trong `Domain/`.
@@ -366,39 +362,55 @@ Khi bạn cần thêm 1 API hoặc tính năng mới, tuân thủ đúng 5 bư�
 
 ## 6. 🚀 Hướng dẫn Chạy dự án (Local Development)
 
-### 1. Khởi động Hạ tầng (Database, Kafka, Redis, Envoy Gateway):
+> Toàn bộ stack chạy bằng Docker (Postgres, Kafka, Redis, Envoy, 4 service, web) — không cần cài .NET/Node nếu chỉ muốn demo.
+> Deploy FE lên Vercel + public backend qua Cloudflare Quick Tunnel: xem `docs/DEPLOY_VERCEL_TUNNEL.md`.
+
+### 1. Chuẩn bị biến môi trường (một lần)
 ```powershell
 cd deploy
-docker compose up -d
+Copy-Item .env.example .env    # sửa nếu cần POSTGRES_PASSWORD / FIREBASE_PROJECT_ID
 ```
-* Envoy Gateway sẽ lắng nghe tại: `http://localhost:8080`
-* PostgreSQL: `localhost:5432` (User: `postgres` / Pass: `postgres`)
-* Kafka: `localhost:9092`
-* Redis: `localhost:6379`
 
-### 2. Chạy Backend Services:
-Mở solution `PRN_ASM.sln` bằng Visual Studio / Rider hoặc chạy terminal:
+### 2. Chạy toàn bộ stack
 ```powershell
-# Chạy Game Service (Port 5101)
-dotnet run --project services/Game/Game.Api
-
-# Chạy User Service (Port 5102)
-dotnet run --project services/User/User.Api
-
-# Chạy Multiplayer Service (Port gRPC 5105 / SignalR 5115)
-dotnet run --project services/Multiplayer/Multiplayer.Api
-
-# Chạy Support Service (Port 5104)
-dotnet run --project services/Support/Support.Api
+cd D:\GitHub\PRN_ASM
+pwsh -File deploy/start-be.ps1            # = docker compose up -d --build
+pwsh -File deploy/start-be.ps1 -NoBuild   # khởi động lại nhanh, không build lại image
+```
+Hoặc thủ công:
+```powershell
+cd deploy
+docker compose up -d --build
 ```
 
-### 3. Chạy Frontend (Web):
+| Thành phần | URL local |
+| :--- | :--- |
+| Web SPA (nginx, proxy same-origin tới Envoy) | `http://localhost:5173` |
+| Envoy Gateway | `http://localhost:18080` (`GATEWAY_PORT`) |
+| PostgreSQL | `localhost:5432` — user/pass theo `deploy/.env` (mặc định `postgres`/`postgres`) |
+| Kafka | `localhost:9092` |
+| Redis | `localhost:6379` |
+| Swagger (Support REST) | `http://localhost:18080/swagger` |
+
+Dev JWT (đăng nhập không cần Firebase) bật/tắt bằng `ALLOW_DEV_TOKENS` trong `deploy/.env`; secret phải
+trùng `VITE_DEV_AUTH_SECRET` khi build web (`docker compose` đã tự truyền `DEV_AUTH_SECRET`).
+
+### 3. Chạy riêng lẻ (debug trong IDE) — tuỳ chọn
+Hạ tầng tối thiểu: `cd deploy; docker compose up -d postgres kafka redis gateway`
+
+```powershell
+dotnet run --project services/Game/Game.Api          # 5101
+dotnet run --project services/User/User.Api          # 5102
+dotnet run --project services/Support/Support.Api    # 5104 (REST + /swagger)
+dotnet run --project services/Multiplayer/Multiplayer.Api  # 5105 gRPC / 5115 SignalR
+```
+Chạy frontend ở chế độ dev (HMR):
 ```powershell
 cd clients
 npm install
-npm run dev
+npm run gen      # chỉ cần khi proto thay đổi hoặc clone mới
+npm run dev      # http://localhost:5173 (gọi API qua VITE_API_URL, mặc định http://localhost:8080)
 ```
-Truy cập giao diện web tại: `http://localhost:5173`
 
 ---
 

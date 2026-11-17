@@ -31,7 +31,8 @@ File này luôn được agent nạp. Chỉ chứa **luật bắt buộc + bản
 9. **Lỗi**: domain exception ⇒ `RpcException` với `StatusCode` chuẩn (`NotFound`, `InvalidArgument`, `Unauthenticated`…).
 10. **Không hardcode** connection string/secret/URL — đọc từ `appsettings*.json` / env.
 11. UserId lấy từ JWT claim **`sub`** (Firebase UID), **không** nhận từ request body. Không dùng `ClaimTypes.NameIdentifier` (sẽ `null` vì `MapInboundClaims = false`).
-12. Không sửa file sinh tự động: `web/src/gen/**`, `obj/**`, `bin/**`.
+12. Không sửa file sinh tự động: `clients/src/gen/**`, `obj/**`, `bin/**`.
+13. Frontend **không hardcode** backend URL: dùng `clients/src/api/apiBase.ts` (`getApiBase`/`getApiUrl`/`getAbsoluteApiUrl`) và `clients/src/auth/accessToken.ts` cho token. Đổi domain/tunnel chỉ được phép qua config (`?api=`, meta, `VITE_API_URL`), không sửa CORS từng service.
 
 ## Khi nào đọc tài liệu nào
 | Task | Đọc |
@@ -42,8 +43,9 @@ File này luôn được agent nạp. Chỉ chứa **luật bắt buộc + bản
 | Dùng/mở rộng Auth, Messaging, Observability; tạo building block mới | `docs/BUILDING_BLOCKS.md` |
 | Hiểu tổng thể kiến trúc, luồng auth/event | `docs/ARCHITECTURE.md` |
 | Chạy dự án local | `docs/HANDOFF.md` §6 |
+| Deploy FE (Vercel) + backend qua Cloudflare Quick Tunnel, đổi domain/API base | `docs/DEPLOY_VERCEL_TUNNEL.md` |
 
 ## Kiểm tra trước khi kết thúc task
 - Backend: `dotnet build PRN_ASM.sln` phải pass.
-- Frontend: `cd web; npm run build` và `npm run lint`. Sửa proto ⇒ chạy `npm run gen` trong `web/`.
+- Frontend: `cd clients; npm run build` và `npm run lint`. Sửa proto ⇒ chạy `npm run gen` trong `clients/`.
 - Đổi port/config/kiến trúc ⇒ cập nhật bảng ở file này và `docs/` tương ứng.

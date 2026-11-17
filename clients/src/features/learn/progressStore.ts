@@ -1,3 +1,4 @@
+import { getApiUrl } from '../../api/apiBase'
 import type { LessonProgress, LessonProgressStore } from './types'
 
 const STORAGE_KEY = 'sudoku.lessonProgress.v1'
@@ -39,7 +40,7 @@ export class LocalStorageProgressStore implements LessonProgressStore {
  * Tương ứng bảng lesson_progress(user_id, lesson_code, completed_at)
  */
 export class ApiProgressStore implements LessonProgressStore {
-  constructor(private readonly baseUrl: string = '/api') {}
+  constructor(private readonly baseUrl: string = getApiUrl('/api')) {}
 
   async getAll(): Promise<Record<string, LessonProgress>> {
     const res = await fetch(`${this.baseUrl}/lessons/progress`, {

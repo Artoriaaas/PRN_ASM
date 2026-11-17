@@ -4,6 +4,10 @@ WORKDIR /app
 ARG VITE_API_URL=""
 ENV VITE_API_URL=$VITE_API_URL
 
+# Dev JWT (demo): bật bằng cách truyền secret >= 32 ký tự, phải trùng Auth__DevSecret của backend.
+ARG VITE_DEV_AUTH_SECRET=""
+ENV VITE_DEV_AUTH_SECRET=$VITE_DEV_AUTH_SECRET
+
 COPY package*.json ./
 RUN npm ci
 

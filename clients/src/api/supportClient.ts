@@ -1,7 +1,8 @@
-import { auth } from '../auth/firebase'
-import { getDevToken, getAdminDevToken } from '../auth/devAuth'
+import { getApiBase } from './apiBase'
+import { getJsonAuthHeaders as getAuthHeaders } from '../auth/accessToken'
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
+/** Base URL backend — xem `apiBase.ts` ('' = same-origin). */
+const BASE_URL = getApiBase()
 
 export type FeedbackMessage = {
   id: string
@@ -43,32 +44,6 @@ export type PagedResult<T> = {
   pageSize: number
 }
 
-async function getAuthHeaders(): Promise<HeadersInit> {
-  if (sessionStorage.getItem('dev-admin-active') === 'true') {
-    const adminToken = await getAdminDevToken()
-    return {
-      Authorization: `Bearer ${adminToken}`,
-      'Content-Type': 'application/json',
-    }
-  }
-
-  const user = auth.currentUser
-  let token: string
-  if (user) {
-    try {
-      token = await user.getIdToken()
-    } catch {
-      token = await getDevToken()
-    }
-  } else {
-    token = await getDevToken()
-  }
-
-  return {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  }
-}
 
 export async function submitFeedback(input: {
   type: string

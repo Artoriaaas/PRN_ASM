@@ -1,6 +1,6 @@
 # DESIGN.md: Sudoku Online Platform (PRN_ASM), thiết kế giao diện web
 
-Tài liệu thiết kế cho `web/` (React 19 + TypeScript + Vite). Gộp từ `ARCHITECTURE.md`, `HANDOFF.md`, `OPTIMIZATION.md`, `BUILDING_BLOCKS.md`, `CORE-LOGIC.md` và các quyết định trước đó.
+Tài liệu thiết kế cho `clients/` (React 19 + TypeScript + Vite). Gộp từ `ARCHITECTURE.md`, `HANDOFF.md`, `OPTIMIZATION.md`, `BUILDING_BLOCKS.md`, `CORE-LOGIC.md` và các quyết định trước đó.
 
 **Nhãn**: **Đã chốt** = có trong tài liệu nguồn hoặc đã xác nhận. **Đề xuất** = hợp lý nhưng chưa xác nhận, chỉnh khi làm. **Cần proto** = màn hình cần RPC hoặc sự kiện chưa có trong `proto/`.
 
@@ -377,12 +377,12 @@ Mọi màn có dữ liệu đều có ba trạng thái: đang tải (`Skeleton`)
 | Mã nguồn tách | `React.lazy` cho Học, Lịch sử, Xếp hạng, Giải đấu, Admin; Bàn cờ và Lobby nằm trong bundle chính |
 | Ảnh avatar | Nén phía client về dưới 40 KB, `URL.revokeObjectURL` khi xong |
 
-Cấu trúc `web/src/` (Đề xuất, bám tài liệu nguồn):
+Cấu trúc `clients/src/` (Đề xuất, bám tài liệu nguồn):
 
 ```text
-web/src/
-├── api/            # connect-web client, interceptor token, queryCache.ts
-├── auth/           # Firebase, AuthProvider, RequireAuth, RequireAdmin
+clients/src/
+├── api/            # apiBase.ts, transport.ts (ConnectRPC), userClient/supportClient, queryCache.ts
+├── auth/           # Firebase, AuthProvider, accessToken.ts, RequireAuth, RequireAdmin
 ├── realtime/       # SignalR connection, hook useMatch
 ├── gen/            # code sinh từ proto (không sửa tay)
 ├── components/     # SudokuBoard, NumberPad, GameTimer, ... (mục 5)

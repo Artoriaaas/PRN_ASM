@@ -483,7 +483,6 @@ $RECYCLE.BIN/
 
 # Custom ignores (PRN_ASM)
 node_modules/
-web/src/gen/
 .env
 .env.*
 *.env
@@ -504,7 +503,5 @@ ui-debug.log*
 
 # Frontend build output
 dist/
-web/dist/
 .vite-temp/
-web/
 

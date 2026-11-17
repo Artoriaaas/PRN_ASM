@@ -12,6 +12,7 @@ import { AuthPage } from './features/auth/AuthPage'
 import { LandingPage } from './features/landing/LandingPage'
 import { NotFoundPage } from './features/error/NotFoundPage'
 import { DEV_ADMIN_EMAIL } from './auth/devAuth'
+import { isDevAdminSession } from './auth/accessToken'
 import './styles/tokens.css'
 import './styles/global.css'
 import './index.css'
@@ -202,8 +203,7 @@ function AppRoutes() {
           path="/auth"
           element={
             user
-              ? user.email === DEV_ADMIN_EMAIL ||
-                sessionStorage.getItem('dev-admin-active') === 'true'
+              ? user.email === DEV_ADMIN_EMAIL || isDevAdminSession()
                 ? <Navigate to="/admin" replace />
                 : <Navigate to="/home" replace />
               : <AuthPage />
@@ -350,7 +350,7 @@ function AppRoutes() {
         <Route
           path="/*"
           element={
-            sessionStorage.getItem('dev-admin-active') === 'true' ? (
+            isDevAdminSession() ? (
               <Navigate to="/admin" replace />
             ) : (
               <RequireAuth>

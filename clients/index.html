@@ -5,6 +5,12 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sudoku Online</title>
+    <!--
+      Backend base URL khi build. Để trống = same-origin (nginx/Vercel rewrite).
+      Đổi tunnel mà không muốn build lại: mở app với ?api=https://xxx.trycloudflare.com
+      (xem clients/src/api/apiBase.ts). Muốn pin cứng thì điền URL vào content dưới đây.
+    -->
+    <meta name="api-base" content="" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

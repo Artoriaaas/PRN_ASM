@@ -1,3 +1,5 @@
+# Giữ lại clients/.env: image web cần VITE_FIREBASE_* (khóa công khai) lúc build.
 node_modules
 dist
-.git
+.vite-temp
+npm-debug.log*

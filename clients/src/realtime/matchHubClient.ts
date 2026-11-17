@@ -1,6 +1,7 @@
 import * as signalR from '@microsoft/signalr'
 import { auth } from '../auth/firebase'
-import { getDevToken } from '../auth/devAuth'
+import { getAccessToken } from '../auth/accessToken'
+import { getAbsoluteApiUrl } from '../api/apiBase'
 import { LayoutType } from '../gen/sudoku/game/v1/game_pb'
 import { PlayFormat, BoardLayoutType, MatchResult } from '../gen/sudoku/multi/v1/multi_pb'
 import {
@@ -330,21 +331,11 @@ class MatchHubClientManager {
 
     this.connectPromise = (async () => {
       try {
-        const baseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
         const conn = new signalR.HubConnectionBuilder()
-          .withUrl(`${baseUrl}/hubs/match`, {
+          .withUrl(getAbsoluteApiUrl('/hubs/match'), {
             accessTokenFactory: async () => {
-              const user = auth.currentUser
-              if (user) {
-                try {
-                  return await user.getIdToken()
-                } catch {
-                  const caller = this.getCallerIdentity()
-                  return await getDevToken(caller.userId)
-                }
-              }
               const caller = this.getCallerIdentity()
-              return await getDevToken(caller.userId)
+              return (await getAccessToken(caller.userId)) ?? ''
             },
           })
           .withAutomaticReconnect([0, 1000, 2000, 5000])

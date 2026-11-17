@@ -1,19 +1,9 @@
-import { auth } from '../../../auth/firebase'
-import { getDevToken } from '../../../auth/devAuth'
+import { getApiBase } from '../../../api/apiBase'
+import { getAccessToken } from '../../../auth/accessToken'
 import type { AppNotification, NotificationService, NotificationType } from './types'
 import { loadMockNotifications, saveMockNotifications } from './mockData'
 
-async function getAuthToken(): Promise<string> {
-  const user = auth.currentUser
-  if (user) {
-    try {
-      return await user.getIdToken()
-    } catch {
-      return await getDevToken()
-    }
-  }
-  return await getDevToken()
-}
+const getAuthToken = getAccessToken
 
 export class MockNotificationService implements NotificationService {
   async list(params: {
@@ -86,7 +76,7 @@ export class MockNotificationService implements NotificationService {
 }
 
 export class ApiNotificationService implements NotificationService {
-  private baseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
+  private baseUrl = getApiBase()
 
   private async fetchWithAuth(input: string, init?: RequestInit): Promise<Response> {
     const token = await getAuthToken()

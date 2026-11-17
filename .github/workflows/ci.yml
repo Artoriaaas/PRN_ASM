@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (.NET 8)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore PRN_ASM.sln
+
+      - name: Build
+        run: dotnet build PRN_ASM.sln --no-restore -c Release
+
+      - name: Test
+        run: dotnet test PRN_ASM.sln --no-build -c Release --logger "console;verbosity=normal"
+
+  frontend:
+    name: Frontend (React + Vite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: clients
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: clients/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Generate protobuf stubs
+        run: npm run gen
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check & build
+        run: npm run build
+
+  proto:
+    name: Protobuf lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: proto
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: buf lint
+        run: npx --yes @bufbuild/buf@1 lint

@@ -16,26 +16,38 @@ public static class AuthExtensions
     public static IServiceCollection AddFirebaseJwt(this IServiceCollection services, IConfiguration config)
     {
         var projectId = config["Firebase:ProjectId"] ?? "YOUR_FIREBASE_PROJECT_ID";
-        var isDevPlaceholder = string.IsNullOrWhiteSpace(projectId) || projectId == "YOUR_FIREBASE_PROJECT_ID" || config["Firebase:DevMode"] == "true";
         var authority = $"https://securetoken.google.com/{projectId}";
+
+        // Dev token (HS256) CHỈ được chấp nhận khi bật tường minh:
+        //   Auth:AllowDevTokens = true   (compose: Auth__AllowDevTokens)
+        //   Auth:DevSecret      = secret >= 32 ký tự, trùng VITE_DEV_AUTH_SECRET của FE
+        // Không bật ⇒ chỉ Firebase ID token hợp lệ mới qua được (mặc định an toàn cho production).
+        var allowDevTokens = bool.TryParse(config["Auth:AllowDevTokens"], out var allowDev) && allowDev;
+        var devSecret = config["Auth:DevSecret"];
+        if (string.IsNullOrWhiteSpace(devSecret) || devSecret.Length < 32)
+        {
+            devSecret = DevSecretKey;
+        }
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(o =>
             {
                 var googleIssuer = authority;
-                var devSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DevSecretKey));
+                var devSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(devSecret));
 
                 o.Authority = authority;
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidIssuers = [googleIssuer, DevIssuer],
-                    ValidAudiences = [projectId, DevAudience],
+                    ValidIssuers = allowDevTokens ? [googleIssuer, DevIssuer] : [googleIssuer],
+                    ValidAudiences = allowDevTokens ? [projectId, DevAudience] : [projectId],
                     ValidateLifetime = true,
                     IssuerSigningKeyResolverUsingConfiguration = (token, securityToken, kid, parameters, configuration) =>
                     {
-                        // Dev tokens use a local HMAC key; Firebase tokens keep the signing keys
-                        // supplied by the OpenID Connect configuration manager.
-                        if (securityToken is Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwt &&
+                        // Dev tokens dùng HMAC key local; Firebase tokens dùng signing keys từ
+                        // OpenID Connect configuration manager. Khi tắt dev-auth thì HMAC token
+                        // chỉ nhận được RSA keys ⇒ luôn fail validation.
+                        if (allowDevTokens &&
+                            securityToken is Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwt &&
                             string.Equals(jwt.Alg, SecurityAlgorithms.HmacSha256, System.StringComparison.Ordinal))
                         {
                             return new[] { devSigningKey };

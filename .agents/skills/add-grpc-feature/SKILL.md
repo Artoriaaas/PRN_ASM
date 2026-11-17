@@ -23,7 +23,7 @@ Follow these 6 steps in order. Never skip Step 1 (Contract-First).
    - `GrpcServices="Client"` for another service's `.proto` it calls synchronously.
    - `GrpcServices="None"` for `events.proto`.
    - Run `dotnet build PRN_ASM.sln` so `Grpc.Tools` generates the C# classes.
-2. **Frontend (`web/`)**: Run `npm run gen` inside `web/` to regenerate `web/src/gen/**` via Buf.
+2. **Frontend (`clients/`)**: Run `npm run gen` inside `clients/` to regenerate `clients/src/gen/**` via Buf.
    - Note: `@bufbuild/protoc-gen-es` v2 generates both message schemas and the `GenService` descriptor inside `*_pb.ts` (there is no `*_connect.ts`).
 
 ## Step 3 — Implement Data Layer (`services/<Svc>/<Svc>.Api/Data/`)
@@ -48,12 +48,13 @@ Follow these 6 steps in order. Never skip Step 1 (Contract-First).
    - Translate domain validation/not-found errors to `RpcException` with standard `StatusCode`.
 2. Register new services/repositories/clients in `Program.cs`.
 3. **Check `gateway/envoy.yaml`**:
-   - Existing package prefixes (`/sudoku.{game,user,support,multi}.v1.`) are already routed. Add a new route + cluster if introducing a new package.
-   - **Public RPC check**: `envoy.yaml` enforces Firebase JWT on catch-all prefix `'/'` and only bypasses JWT for explicit prefixes listed **above** `'/'` (e.g., `GetRules`, `ListTutorials`, `ListNotices`). If the new RPC is public/anonymous, add its full path `/sudoku.<pkg>.v1.<Service>/<Method>` above the `'/'` rule in `jwt_authn.rules`.
+   - Existing package prefixes (`/sudoku.{game,user,multi}.v1.`) are already routed. Add a new route + cluster if introducing a new package.
+   - **Auth is NOT enforced at the gateway**: Envoy chỉ route + CORS, không có `jwt_authn`. Việc chặn/cho phép nằm ở `[Authorize]`/`[AllowAnonymous]` trên `*GrpcService.cs` (validate bằng `Sudoku.Auth`). Vì vậy **không** cần thêm rule public path ở đây; chỉ cần gắn `[AllowAnonymous]` cho RPC công khai.
+   - Support Service là **REST** (`/api/v1/*`), không có gRPC tương ứng — nếu cần API mới cho Support, tạo Controller thay vì sửa `support.proto`.
 
-## Step 6 — Wire Frontend (`web/src/`) & Verify
-1. Import the service from `../gen/sudoku/<domain>/v1/<domain>_pb` and call it through the Envoy Gateway client (`http://localhost:8080`).
-2. Follow `web/AGENTS.md`: pass `AbortController` `signal` in `useEffect`, use `getCachedSync`/`fetchDeduped` for repeatable reads, update state directly from mutation responses, and guard submit buttons against double-clicks.
+## Step 6 — Wire Frontend (`clients/src/`) & Verify
+1. Import the service from `../gen/sudoku/<domain>/v1/<domain>_pb` and call it through the shared ConnectRPC client (`src/api/transport.ts` → base URL từ `src/api/apiBase.ts`, **không hardcode** `localhost:8080`).
+2. Follow `clients/AGENTS.md`: pass `AbortController` `signal` in `useEffect`, use `getCachedSync`/`fetchDeduped` for repeatable reads, update state directly from mutation responses, and guard submit buttons against double-clicks.
 3. **Verify everything builds cleanly**:
    - `dotnet build PRN_ASM.sln`
-   - `cd web && npm run lint && npm run build`
+   - `cd clients && npm run lint && npm run build`

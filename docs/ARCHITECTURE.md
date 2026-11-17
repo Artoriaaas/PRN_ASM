@@ -11,7 +11,7 @@
 * **Contract-First & gRPC-First**: Định nghĩa toàn bộ schema API và sự kiện (events) thông qua `.proto` làm chuẩn duy nhất (Single Source of Truth).
 * **Database-per-Service**: Mỗi microservice sở hữu cơ sở dữ liệu độc lập, phân tách ranh giới nghiệp vụ (bounded context) hoàn toàn, giảm thiểu khớp nối (loose coupling).
 * **Event-Driven Communication**: Giao tiếp bất đồng bộ giữa các microservices thông qua Apache Kafka, áp dụng Transactional Outbox & Inbox Pattern đảm bảo tính toàn vẹn và độ tin cậy của dữ liệu.
-* **Unified API Gateway**: Sử dụng Envoy Proxy đóng vai trò làm Reverse Proxy, chuyển dịch giao thức (gRPC-Web ➔ gRPC HTTP/2), xử lý CORS, xác thực Firebase JWT tập trung và hỗ trợ WebSocket Upgrade cho SignalR.
+* **Unified API Gateway**: Sử dụng Envoy Proxy đóng vai trò làm Reverse Proxy, chuyển dịch giao thức (gRPC-Web ➔ gRPC HTTP/2), xử lý CORS và hỗ trợ WebSocket Upgrade cho SignalR. Envoy **không** xác thực JWT — token `Authorization: Bearer` được chuyển tiếp nguyên vẹn, việc xác thực do từng service thực hiện qua building block `Sudoku.Auth`.
 * **Distributed Observability**: Tích hợp OpenTelemetry chuẩn OTLP cho toàn bộ các microservices để theo dõi distributed tracing và metrics tập trung.
 
 ---
@@ -25,20 +25,21 @@ flowchart TD
     end
 
     subgraph GatewayLayer["🚪 Gateway & Edge Layer"]
-        Envoy["Envoy Proxy (:8080)\n- gRPC-Web Filter\n- CORS Policy\n- Firebase JWT Authentication\n- WebSocket Upgrade"]
+        Envoy["Envoy Proxy (:8080)\n- gRPC-Web Filter\n- CORS Policy\n- Bearer token passthrough\n- WebSocket Upgrade"]
     end
 
     subgraph ServiceLayer["⚙️ Microservices Layer (.NET 8)"]
         GameSvc["Game Service (:5101)\n(Sudoku Logic, Levels, Scoring)"]
         UserSvc["User Service (:5102)\n(Profiles, Statistics, History)"]
         MultiSvc["Multiplayer Service (:5105 / :5115)\n(1v1 Matchmaking, SignalR Hub, Elo)"]
-        SupportSvc["Support Service (:5104)\n(Tutorials, Rules, System Notices)"]
+        SupportSvc["Support Service (:5104)\n(REST: Tutorials, Notices, Feedback)"]
     end
 
     subgraph BuildingBlocks["🧩 Shared Building Blocks"]
         AuthLib["Sudoku.Auth\n(Firebase JWT Validation)"]
         MsgLib["Sudoku.Messaging\n(Kafka Publisher, Outbox & Inbox)"]
         ObsLib["Sudoku.Observability\n(OpenTelemetry Tracing & Metrics)"]
+        CoreLib["Sudoku.Core\n(Sudoku Engine: Generator/Solver/Hints)"]
     end
 
     subgraph MessageBrokerLayer["📬 Message Broker & Event Bus"]
@@ -46,7 +47,7 @@ flowchart TD
     end
 
     subgraph CacheLayer["⚡ In-Memory Cache"]
-        Redis["Redis 7\n(Support Cache, Leaderboard, Session Data)"]
+        Redis["Redis 7\n(Leaderboard & Room Session — Multiplayer only)"]
     end
 
     subgraph PersistenceLayer["💾 Data Persistence Layer (PostgreSQL 16)"]
@@ -64,12 +65,13 @@ flowchart TD
     Envoy -->|"HTTP/2 gRPC (:5101 / :8080)"| GameSvc
     Envoy -->|"HTTP/2 gRPC (:5102 / :8080)"| UserSvc
     Envoy <-->|"gRPC :5105 & WS :5115"| MultiSvc
-    Envoy -->|"HTTP/2 gRPC (:5104 / :8080)"| SupportSvc
+    Envoy -->|"HTTP/1.1 REST (:5104 / :8080)"| SupportSvc
 
     %% Shared Library Attachments
     AuthLib -.-> GameSvc & UserSvc & MultiSvc & SupportSvc
-    MsgLib -.-> GameSvc & UserSvc & MultiSvc
+    MsgLib -.-> GameSvc & UserSvc & MultiSvc & SupportSvc
     ObsLib -.-> GameSvc & UserSvc & MultiSvc & SupportSvc
+    CoreLib -.-> GameSvc & MultiSvc
 
     %% Async Events
     GameSvc -.->|"Publish Event"| Kafka
@@ -83,7 +85,6 @@ flowchart TD
     SupportSvc --> DB_Support
 
     %% Cache
-    SupportSvc --> Redis
     MultiSvc --> Redis
 ```
 
@@ -97,13 +98,13 @@ flowchart TD
 | **Frontend Language** | **TypeScript** | `~6.0.x` | Type safety toàn diện, tương thích 100% với kiểu dữ liệu sinh tự động từ Protocol Buffers. |
 | **Build & Tooling** | **Vite** & **Oxlint** | Vite 8, Oxlint | Tốc độ dev server cực nhanh (HMR), bundle siêu nhẹ, linter tốc độ cao thay thế ESLint. |
 | **Frontend RPC & Realtime** | **@connectrpc/connect-web**, **@microsoft/signalr** | Connect 2.2, SignalR 10 | Gọi trực tiếp gRPC từ trình duyệt không cần REST wrapper; kết nối WebSocket 2 chiều cho trận đấu realtime. |
-| **API Gateway** | **Envoy Proxy** | `1.31+` | Xử lý transcode gRPC-Web sang HTTP/2 gRPC, CORS, rate limiting, kiểm tra JWT xác thực trước khi chạm tới services. |
+| **API Gateway** | **Envoy Proxy** | `1.32` | Transcode gRPC-Web ➔ HTTP/2 gRPC, CORS (cho phép mọi origin), route REST `/api/v1/*` tới Support, WebSocket Upgrade cho SignalR. **Không** xác thực JWT — việc đó do `Sudoku.Auth` trong từng service đảm nhiệm. |
 | **Backend Framework** | **.NET 8 (C# 12)** / ASP.NET Core | `net8.0` | Nền tảng backend hiệu năng hàng đầu thế giới, native hỗ trợ gRPC, HTTP/2, SignalR và async IO. |
 | **RPC & Serialization** | **gRPC** & **Protocol Buffers** | `v3` / Grpc 2.57 | Chuẩn hóa hợp đồng dữ liệu, serialization dạng nhị phân kích thước siêu nhỏ, tốc độ vượt trội so với JSON/REST. |
 | **Schema Tooling** | **Buf CLI** | `1.74.x` | Quản lý linting, formatting và tự động code generation cho cả C# và TypeScript từ file `.proto`. |
 | **Message Broker** | **Apache Kafka** | `3.9.0` (KRaft mode) | Xử lý streaming sự kiện phân tán, throughput cao, độ tin cậy và khả năng scale ngang cho Event-Driven Architecture. |
 | **Data Persistence** | **PostgreSQL** | `16.x` | Cơ sở dữ liệu quan hệ mạnh mẽ, ACID, hỗ trợ JSONB linh hoạt cho trạng thái bàn cờ Sudoku. |
-| **In-Memory Cache** | **Redis** | `7.x` | Caching dữ liệu tần suất cao (Tutorials, Notices, Leaderboards, Room sessions). |
+| **In-Memory Cache** | **Redis** | `7.x` | Chỉ Multiplayer dùng: cache bảng xếp hạng Elo (`RedisLeaderboardCache`) và trạng thái phòng đấu realtime (`RedisMatchRuntimeStore`). |
 | **Authentication & IAM** | **Firebase Auth** | `13.x` / JwtBearer | Định danh người dùng bảo mật cao, xác thực JWT token qua Google Remote JWKS. |
 | **Distributed Tracing** | **OpenTelemetry (OTel)** | `1.20.0` | Tiêu chuẩn mở thu thập Trace, Metrics, Logs qua OTLP Exporter, dễ dàng nối tới Grafana Tempo/Jaeger. |
 | **Container & Orchestration** | **Docker & Docker Compose** | Compose v2 | Chuẩn hóa môi trường local dev và đóng gói container đồng nhất cho deployment. |
@@ -115,10 +116,11 @@ flowchart TD
 ### 4.1. Edge & Gateway Layer: Envoy Proxy
 * **Cổng lắng nghe**: `8080` (HTTP/1.1 và HTTP/2).
 * **Nhiệm vụ chính**:
-  1. **gRPC-Web Filter**: Chuyển đổi các HTTP request định dạng gRPC-Web từ trình duyệt thành cuộc gọi HTTP/2 gRPC thuần gửi tới các backend services.
-  2. **JWT Authentication Provider**: Xác thực trực tiếp Firebase ID Token thông qua Remote JWKS endpoint của Google (`https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com`).
-  3. **CORS Enforcement**: Quản lý whitelist domain trình duyệt (`http://localhost:5173`), method (`GET, POST, OPTIONS`), và các headers đặc thù của gRPC (`x-grpc-web`, `grpc-status`, `grpc-message`).
-  4. **WebSocket Upgrade**: Điều hướng route `/hubs/match` tới cluster `Multiplayer Service` mà không ngắt quãng stream.
+  1. **gRPC-Web Filter**: Chuyển đổi HTTP request định dạng gRPC-Web từ trình duyệt thành cuộc gọi HTTP/2 gRPC thuần gửi tới các backend services (`/sudoku.game.v1.*`, `/sudoku.user.v1.*`, `/sudoku.multi.v1.*`).
+  2. **CORS Policy**: Cho phép **mọi origin** (`safe_regex: ".*"`) kèm `allow_credentials: true`, echo lại đúng origin của request. Nhờ vậy frontend chạy ở domain bất kỳ (Vercel, Cloudflare Quick Tunnel, localhost) đều gọi được mà không phải sửa CORS trong code service. Muốn siết chặt: chỉ sửa `gateway/envoy.yaml`.
+  3. **REST Routing**: `/api/v1/*` và `/swagger*` được route thẳng tới Support Service (REST/JSON, không qua gRPC-Web filter).
+  4. **WebSocket Upgrade**: Điều hướng route `/hubs/match` tới cluster `multi_ws` của Multiplayer Service với `timeout: 0s` để không ngắt stream.
+  5. **Không xác thực JWT**: Envoy chỉ chuyển tiếp header `Authorization` xuống service. Việc validate Firebase ID Token / Dev token nằm ở `Sudoku.Auth` (`AddFirebaseJwt`) trong từng service.
 
 ---
 
@@ -150,11 +152,14 @@ Hệ thống bao gồm 4 Microservices độc lập nằm trong thư mục `serv
   * **Sự kiện xuất bản (Publisher)**: Bắn sự kiện `MatchCompleted` (người thắng, người thua, cộng/trừ Elo) vào Kafka.
 
 #### 4. Support Service (`Support.Api`) — Port Local: `5104` (Docker: `8080`)
+* **Giao diện**: **REST/JSON (ASP.NET Core Controllers + Swagger UI tại `/swagger`)** — khác 3 service còn lại. `proto/sudoku/support/v1/support.proto` hiện **không** được implement/route; toàn bộ endpoint thực tế nằm dưới `/api/v1/*`.
 * **Trách nhiệm**:
-  * Cung cấp luật chơi Sudoku chuẩn và các biến thể (`GetRules`).
-  * Hướng dẫn các kỹ thuật giải Sudoku từ cơ bản đến nâng cao (`ListTutorials`).
-  * Danh sách thông báo cập nhật hệ thống, sự kiện trong game (`ListNotices`).
-  * Tích hợp **Redis Caching** để phản hồi tức thì với tốc độ sub-millisecond, giảm tải tối đa cho cơ sở dữ liệu.
+  * Bài viết hướng dẫn kỹ thuật giải Sudoku (`/api/v1/tutorials`).
+  * Thông báo hệ thống (`/api/v1/notices`).
+  * Cổng thông tin tổng hợp (`/api/v1/portal`).
+  * Feedback/Support ticket + thông báo người dùng (`/api/v1/feedback`, `/api/v1/admin/feedback`, `/api/v1/notifications`).
+* **Giao tiếp nội bộ**: gRPC client tới Game/User service khi cần; publish/consume Kafka qua `Sudoku.Messaging`.
+* **Không dùng Redis** — dữ liệu đọc đi thẳng PostgreSQL (xem `docs/OPTIMIZATION.md` về index/projection).
 
 ---
 
@@ -171,6 +176,9 @@ Các thư viện dùng chung độc lập (Shared Libraries) giải quyết các
 3. **`Sudoku.Observability`**:
    * Cung cấp phương thức mở rộng `AddSudokuObservability(serviceName)` tích hợp OpenTelemetry.
    * Thu thập Traces & Metrics tự động từ ASP.NET Core, gRPC Client, gRPC Server và xuất qua chuẩn OTLP.
+4. **`Sudoku.Core`**:
+   * Engine Sudoku thuần (không phụ thuộc ASP.NET/EF): `SudokuGenerator`, `SudokuSolver`, `SudokuBoard`, `MoveEvaluator`, `HintFinder`, `RegionMap`.
+   * Được Game và Multiplayer tham chiếu để sinh đề, kiểm tra nước đi và sinh gợi ý.
 
 ---
 
@@ -191,12 +199,13 @@ sequenceDiagram
     Client->>Firebase: Xác thực thông tin người dùng
     Firebase-->>Client: Trả về Firebase ID Token (JWT)
     Client->>Envoy: Gửi gRPC-Web Request + Header Authorization: Bearer <JWT>
-    Envoy->>Envoy: Kiểm tra chữ ký JWT qua Google Public JWKS Key
+    Envoy->>Backend: Chuyển tiếp nguyên vẹn header Authorization (Envoy không validate JWT)
+    Backend->>Backend: Sudoku.Auth kiểm tra chữ ký qua Google JWKS (hoặc HMAC nếu bật Dev token)
     alt Token không hợp lệ / Hết hạn
-        Envoy-->>Client: Trả về HTTP 401 Unauthorized
+        Backend-->>Envoy: RpcException Unauthenticated
+        Envoy-->>Client: gRPC-Web Response (HTTP 401 / grpc-status 16)
     else Token hợp lệ
-        Envoy->>Backend: Chuyển tiếp Request kèm JWT Claims qua gRPC HTTP/2
-        Backend->>Backend: Trích xuất UserId từ ClaimsPrincipal & thực thi logic
+        Backend->>Backend: Trích xuất UserId từ claim `sub` & thực thi logic
         Backend-->>Envoy: Trả về gRPC Response
         Envoy-->>Client: Phản hồi gRPC-Web Response
     end
@@ -237,12 +246,13 @@ PostgreSQL 16 Instance
 ├── 📁 game_db          # Bàn cờ Sudoku, ván game, lịch sử bước đi, điểm thưởng
 ├── 📁 user_db          # Hồ sơ người dùng, chỉ số thành tích cá nhân, settings
 ├── 📁 multiplayer_db   # Lịch sử trận đấu 1v1, điểm xếp hạng Elo, bảng vàng
-└── 📁 support_db       # Danh mục câu hỏi, luật chơi, bài hướng dẫn, thông báo
+└── 📁 support_db       # Bài hướng dẫn, thông báo hệ thống, feedback ticket & notification
 
-Redis 7 Instance
-├── 🔑 cached:support:rules:*      # Cache luật chơi
-├── 🔑 cached:support:tutorials    # Cache danh sách bài hướng dẫn
-└── 🔑 match:room:session:*        # Trạng thái phòng đấu realtime tạm thời
+Redis 7 Instance (chỉ Multiplayer)
+├── 🔑 leaderboard:elo:{playFormat}      # Sorted set điểm Elo (RedisLeaderboardCache)
+├── 🔑 leaderboard:meta:{playFormat}     # Hash metadata người chơi cho bảng xếp hạng
+├── 🔑 match:room:session:{matchId}      # Snapshot phòng đấu (RedisMatchRuntimeStore)
+└── 🔑 match:user:active:{userId}        # Trận đang hoạt động của user
 ```
 
 ---
@@ -257,7 +267,8 @@ PRN_ASM/
 │   ├── ARCHITECTURE.md                  # Kiến trúc hệ thống & danh mục công nghệ
 │   ├── HANDOFF.md                       # Quy ước layer, code mẫu & hướng dẫn chạy local
 │   ├── OPTIMIZATION.md                  # Tiêu chuẩn tối ưu hiệu năng Backend & Frontend
-│   └── BUILDING_BLOCKS.md               # Hướng dẫn sử dụng & mở rộng building-block
+│   ├── BUILDING_BLOCKS.md               # Hướng dẫn sử dụng & mở rộng building-block
+│   └── DEPLOY_VERCEL_TUNNEL.md          # Runbook deploy Vercel + Cloudflare Quick Tunnel (config-only)
 │
 ├── proto/                               # [Single Source of Truth] Định nghĩa Protobuf
 │   ├── buf.yaml                         # Cấu hình Buf Workspace & Lint
@@ -266,15 +277,16 @@ PRN_ASM/
 │       ├── events/v1/events.proto       # Các sự kiện EventEnvelope, GameFinished, MatchCompleted
 │       ├── game/v1/game.proto           # API GameService (StartGame, SubmitResult,...)
 │       ├── multi/v1/multi.proto         # API MultiplayerService (GetRankings, MatchHistory,...)
-│       ├── support/v1/support.proto     # API SupportService (Rules, Tutorials, Notices)
+│       ├── support/v1/support.proto     # ⚠️ Chưa implement — Support hiện chạy REST /api/v1/*
 │       └── user/v1/user.proto           # API UserService (Profile, Stats, Updates)
 │
 ├── gateway/                             # [Edge Layer] Cấu hình Envoy Gateway
-│   ├── Dockerfile                       # Image Envoy Proxy 
-│   └── envoy.yaml                       # Filter CORS, gRPC-Web, JWT Authn, WebSocket route
+│   ├── Dockerfile                       # Image Envoy Proxy v1.32
+│   └── envoy.yaml                       # Filter CORS (allow any origin), gRPC-Web, REST route, WebSocket route
 │
 ├── building-block/                      # [Shared Libraries] Thư viện dùng chung
-│   ├── Sudoku.Auth/                     # Module xác thực Firebase Bearer JWT
+│   ├── Sudoku.Auth/                     # Module xác thực Firebase Bearer JWT (+ dev token opt-in)
+│   ├── Sudoku.Core/                     # Sudoku engine: generator, solver, hints, board
 │   ├── Sudoku.Messaging/                # Kafka Publisher, Outbox & Inbox Models
 │   └── Sudoku.Observability/            # Tích hợp OpenTelemetry Tracing & Metrics
 │
@@ -290,18 +302,24 @@ PRN_ASM/
 │           ├── Data/                    # DbContext, Migrations, Repositories
 │           └── Messaging/               # Kafka Consumers & Handlers
 │
-├── web/                                 # [Frontend] React 19 Client SPA
+├── clients/                             # [Frontend] React 19 Client SPA
 │   ├── src/
-│   │   ├── api/                         # Khởi tạo gRPC-Web Client qua @connectrpc
-│   │   ├── auth/                        # Firebase Authentication integration
+│   │   ├── api/                         # apiBase.ts (resolve backend runtime) + ConnectRPC transport
+│   │   ├── auth/                        # Firebase Auth + accessToken.ts (chọn token duy nhất)
 │   │   ├── realtime/                    # SignalR Hub Client connection
-│   │   ├── gen/                         # TypeScript code tự động sinh từ proto
+│   │   ├── features/                    # Landing, Auth, Game, Learn, Multiplayer, Admin, Notifications
+│   │   ├── components/                  # AppShell, UI kit
+│   │   ├── gen/                         # TypeScript code tự động sinh từ proto (không sửa tay)
 │   │   ├── App.tsx                      # Component giao diện chính
 │   │   └── main.tsx                     # Entry point ứng dụng
+│   ├── index.html                       # Có <meta name="api-base"> để pin backend URL
+│   ├── Dockerfile                       # Build tĩnh + nginx (proxy same-origin)
 │   └── package.json
 │
 ├── deploy/                              # [DevOps & Infrastructure]
-│   ├── docker-compose.yml               # Định nghĩa các container: Envoy, DB, Kafka, Redis
+│   ├── docker-compose.yml               # Container: Envoy, 4 service, web, Postgres, Kafka, Redis
+│   ├── start-be.ps1                     # Khởi động toàn bộ backend (compose up -d --build)
+│   ├── quick-tunnel.ps1                 # Mở Cloudflare Quick Tunnel trỏ vào UI (:5173) hoặc API (:18080)
 │   ├── postgres-init/01-create-dbs.sql  # Script tạo sẵn 4 cơ sở dữ liệu
 │   └── .env.example                     # Mẫu biến môi trường
 └── PRN_ASM.sln                          # Solution .NET quản lý toàn bộ backend
