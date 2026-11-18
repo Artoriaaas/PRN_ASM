@@ -216,7 +216,7 @@ export function AdminFeedbackPage() {
                   {t.title}
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
-                  Từ: {t.userId.substring(0, 12)}... • {new Date(t.createdAt).toLocaleDateString()}
+                  {new Date(t.createdAt).toLocaleDateString('vi-VN')}
                 </div>
               </div>
             ))
@@ -245,7 +245,7 @@ export function AdminFeedbackPage() {
                   <div>
                     <h2 style={{ margin: '0 0 6px 0', fontSize: '1.3rem' }}>{selectedTicket.title}</h2>
                     <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
-                      Mã ticket: <code>{selectedTicket.id}</code> • Gửi bởi: <code>{selectedTicket.userId}</code>
+                      Mã ticket: <code>{selectedTicket.id}</code>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
@@ -329,6 +329,42 @@ export function AdminFeedbackPage() {
                     onChange={(e) => setStatusReason(e.target.value)}
                     style={{ width: '100%', marginTop: 6 }}
                   />
+
+                  {selectedTicket.statusHistory && selectedTicket.statusHistory.length > 0 && (
+                    <div
+                      style={{
+                        marginTop: 12,
+                        paddingTop: 10,
+                        borderTop: '1px solid var(--line)',
+                      }}
+                    >
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, marginBottom: 8 }}>
+                        Lịch sử đổi trạng thái đã thông báo cho người dùng:
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {selectedTicket.statusHistory.map((entry) => (
+                          <div
+                            key={`${entry.createdAt}-${entry.newStatus}`}
+                            style={{
+                              padding: '8px 10px',
+                              background: '#fff',
+                              border: '1px solid var(--line)',
+                              borderRadius: 8,
+                              fontSize: '0.84rem',
+                            }}
+                          >
+                            <div style={{ fontWeight: 700 }}>
+                              {entry.oldStatus || '—'} → {entry.newStatus || '—'}
+                              <span style={{ marginLeft: 8, color: 'var(--muted)', fontWeight: 400 }}>
+                                {new Date(entry.createdAt).toLocaleString('vi-VN')}
+                              </span>
+                            </div>
+                            <div style={{ marginTop: 4 }}>Lý do: {entry.reason}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -372,7 +408,7 @@ export function AdminFeedbackPage() {
                           fontWeight: 700,
                         }}
                       >
-                        {isAdmin ? '🛡️ Quản trị viên' : `👤 Người chơi (${msg.senderId.slice(0, 8)})`} •{' '}
+                        {isAdmin ? '🛡️ Quản trị viên' : '👤 Người chơi'} •{' '}
                         {new Date(msg.createdAt).toLocaleTimeString()}
                       </div>
                       <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.92rem' }}>{msg.content}</div>

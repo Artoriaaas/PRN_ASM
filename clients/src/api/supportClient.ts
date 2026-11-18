@@ -13,6 +13,13 @@ export type FeedbackMessage = {
   createdAt: string
 }
 
+export type FeedbackStatusHistory = {
+  oldStatus: string
+  newStatus: string
+  reason: string
+  createdAt: string
+}
+
 export type FeedbackTicket = {
   id: string
   userId: string
@@ -24,6 +31,7 @@ export type FeedbackTicket = {
   createdAt: string
   updatedAt: string
   messages?: FeedbackMessage[]
+  statusHistory?: FeedbackStatusHistory[]
 }
 
 export type NotificationItem = {

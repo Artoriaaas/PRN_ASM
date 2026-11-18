@@ -98,6 +98,7 @@ public sealed class FeedbackService(
                 t.RelatedMatchId,
                 t.CreatedAt,
                 t.UpdatedAt,
+                null,
                 null))
             .ToListAsync(cancellationToken);
 
@@ -205,6 +206,7 @@ public sealed class FeedbackService(
                 t.RelatedMatchId,
                 t.CreatedAt,
                 t.UpdatedAt,
+                null,
                 null))
             .ToListAsync(cancellationToken);
 
@@ -219,7 +221,8 @@ public sealed class FeedbackService(
             .FirstOrDefaultAsync(t => t.Id == ticketId, cancellationToken)
             ?? throw new KeyNotFoundException("Không tìm thấy ticket phản hồi.");
 
-        return MapTicket(ticket, ticket.Messages.OrderBy(m => m.CreatedAt).ToList());
+        var statusHistory = await GetStatusHistoryAsync(ticketId, cancellationToken);
+        return MapTicket(ticket, ticket.Messages.OrderBy(m => m.CreatedAt).ToList(), statusHistory);
     }
 
     public async Task<FeedbackMessageDto> AdminReplyAsync(
@@ -317,7 +320,10 @@ public sealed class FeedbackService(
 
         string oldStatus = ticket.Status;
         if (oldStatus == newStatus)
-            return MapTicket(ticket, ticket.Messages);
+        {
+            var unchangedHistory = await GetStatusHistoryAsync(ticketId, cancellationToken);
+            return MapTicket(ticket, ticket.Messages, unchangedHistory);
+        }
 
         var now = DateTime.UtcNow;
         ticket.Status = newStatus;
@@ -355,7 +361,8 @@ public sealed class FeedbackService(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return MapTicket(ticket, ticket.Messages);
+        var statusHistory = await GetStatusHistoryAsync(ticketId, cancellationToken);
+        return MapTicket(ticket, ticket.Messages, statusHistory);
     }
 
     public async Task<FeedbackTicketDto> AdminAssignAsync(
@@ -468,7 +475,56 @@ public sealed class FeedbackService(
             throw new ArgumentException("Lý do thao tác (reason) là bắt buộc đối với mọi hành động quản trị.");
     }
 
-    private static FeedbackTicketDto MapTicket(FeedbackTicket t, IEnumerable<FeedbackMessage>? messages)
+    private async Task<List<FeedbackStatusHistoryDto>> GetStatusHistoryAsync(
+        Guid ticketId,
+        CancellationToken cancellationToken)
+    {
+        string targetId = ticketId.ToString();
+        var rows = await dbContext.SupportAuditLogs
+            .AsNoTracking()
+            .Where(log =>
+                log.Action == "CHANGE_FEEDBACK_STATUS" &&
+                log.TargetType == "FEEDBACK_TICKET" &&
+                log.TargetId == targetId)
+            .OrderByDescending(log => log.CreatedAt)
+            .Take(50)
+            .Select(log => new
+            {
+                log.Before,
+                log.After,
+                log.Reason,
+                log.CreatedAt
+            })
+            .ToListAsync(cancellationToken);
+
+        return rows
+            .Select(row => new FeedbackStatusHistoryDto(
+                ReadStatusFromAuditJson(row.Before),
+                ReadStatusFromAuditJson(row.After),
+                row.Reason,
+                row.CreatedAt))
+            .ToList();
+    }
+
+    private static string ReadStatusFromAuditJson(string json)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(json);
+            return document.RootElement.TryGetProperty("Status", out var status)
+                ? status.GetString() ?? string.Empty
+                : string.Empty;
+        }
+        catch (JsonException)
+        {
+            return string.Empty;
+        }
+    }
+
+    private static FeedbackTicketDto MapTicket(
+        FeedbackTicket t,
+        IEnumerable<FeedbackMessage>? messages,
+        List<FeedbackStatusHistoryDto>? statusHistory = null)
     {
         var msgDtos = messages?
             .Select(m => new FeedbackMessageDto(m.Id, m.TicketId, m.SenderId, m.SenderRole, m.Content, m.CreatedAt))
@@ -484,6 +540,7 @@ public sealed class FeedbackService(
             t.RelatedMatchId,
             t.CreatedAt,
             t.UpdatedAt,
-            msgDtos);
+            msgDtos,
+            statusHistory);
     }
 }

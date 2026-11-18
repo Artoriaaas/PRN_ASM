@@ -38,6 +38,13 @@ public record FeedbackMessageDto(
     DateTime CreatedAt
 );
 
+public record FeedbackStatusHistoryDto(
+    string OldStatus,
+    string NewStatus,
+    string Reason,
+    DateTime CreatedAt
+);
+
 public record FeedbackTicketDto(
     Guid Id,
     string UserId,
@@ -48,7 +55,8 @@ public record FeedbackTicketDto(
     string? RelatedMatchId,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    List<FeedbackMessageDto>? Messages
+    List<FeedbackMessageDto>? Messages,
+    List<FeedbackStatusHistoryDto>? StatusHistory = null
 );
 
 public record NotificationDto(
