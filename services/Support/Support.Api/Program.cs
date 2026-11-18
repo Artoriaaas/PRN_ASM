@@ -15,6 +15,7 @@ using Support.Api.Domain.Repositories;
 using Support.Api.Domain.Services;
 using Support.Api.Messaging;
 using Sudoku.Messaging;
+using Support.Api.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.AddSudokuObservability("support-service");
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddApiErrorHandling();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -60,7 +62,9 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddDbContext<SupportDbContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("Default");
+    var connectionString = builder.Configuration.GetConnectionString("Default")
+        ?? throw new InvalidOperationException(
+            "Missing required configuration: ConnectionStrings:Default");
     options.UseNpgsql(connectionString)
            .UseSnakeCaseNamingConvention();
 });
@@ -98,6 +102,8 @@ builder.Services.AddCors(o => o.AddPolicy("AllowAll", p =>
 }));
 
 var app = builder.Build();
+
+app.UseApiErrorHandling();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

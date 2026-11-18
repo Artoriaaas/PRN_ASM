@@ -19,15 +19,8 @@ public sealed class FeedbackController(IFeedbackService feedbackService) : Contr
         string? uid = User.FindFirst("sub")?.Value;
         if (string.IsNullOrWhiteSpace(uid)) return Unauthorized();
 
-        try
-        {
-            var ticket = await feedbackService.SubmitFeedbackAsync(uid, request, ct);
-            return Ok(ticket);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        var ticket = await feedbackService.SubmitFeedbackAsync(uid, request, ct);
+        return Ok(ticket);
     }
 
     [HttpGet]
@@ -46,15 +39,8 @@ public sealed class FeedbackController(IFeedbackService feedbackService) : Contr
         string? uid = User.FindFirst("sub")?.Value;
         if (string.IsNullOrWhiteSpace(uid)) return Unauthorized();
 
-        try
-        {
-            var detail = await feedbackService.GetTicketDetailAsync(uid, id, ct);
-            return Ok(detail);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound(new { error = "Không tìm thấy ticket." });
-        }
+        var detail = await feedbackService.GetTicketDetailAsync(uid, id, ct);
+        return Ok(detail);
     }
 
     [HttpPost("{id:guid}/messages")]
@@ -63,26 +49,7 @@ public sealed class FeedbackController(IFeedbackService feedbackService) : Contr
         string? uid = User.FindFirst("sub")?.Value;
         if (string.IsNullOrWhiteSpace(uid)) return Unauthorized();
 
-        try
-        {
-            var msg = await feedbackService.AddUserMessageAsync(uid, id, request.Content, ct);
-            return Ok(msg);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound(new { error = "Không tìm thấy ticket." });
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return Forbid();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        var msg = await feedbackService.AddUserMessageAsync(uid, id, request.Content, ct);
+        return Ok(msg);
     }
 }
