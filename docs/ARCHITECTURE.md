@@ -117,7 +117,7 @@ flowchart TD
 * **Cổng lắng nghe**: `8080` (HTTP/1.1 và HTTP/2).
 * **Nhiệm vụ chính**:
   1. **gRPC-Web Filter**: Chuyển đổi HTTP request định dạng gRPC-Web từ trình duyệt thành cuộc gọi HTTP/2 gRPC thuần gửi tới các backend services (`/sudoku.game.v1.*`, `/sudoku.user.v1.*`, `/sudoku.multi.v1.*`).
-  2. **CORS Policy**: Cho phép **mọi origin** (`safe_regex: ".*"`) kèm `allow_credentials: true`, echo lại đúng origin của request. Nhờ vậy frontend chạy ở domain bất kỳ (Vercel, Cloudflare Quick Tunnel, localhost) đều gọi được mà không phải sửa CORS trong code service. Muốn siết chặt: chỉ sửa `gateway/envoy.yaml`.
+  2. **CORS Policy**: Cho phép **mọi origin** (`safe_regex: ".*"`) kèm `allow_credentials: true`, echo lại đúng origin của request và cho phép các method `GET, POST, PUT, PATCH, DELETE, OPTIONS`. Nhờ vậy frontend chạy ở domain bất kỳ (Vercel, Cloudflare Quick Tunnel, localhost) đều gọi được mà không phải sửa CORS trong code service. Muốn siết chặt: chỉ sửa `gateway/envoy.yaml`.
   3. **REST Routing**: `/api/v1/*` và `/swagger*` được route thẳng tới Support Service (REST/JSON, không qua gRPC-Web filter).
   4. **WebSocket Upgrade**: Điều hướng route `/hubs/match` tới cluster `multi_ws` của Multiplayer Service với `timeout: 0s` để không ngắt stream.
   5. **Không xác thực JWT**: Envoy chỉ chuyển tiếp header `Authorization` xuống service. Việc validate Firebase ID Token / Dev token nằm ở `Sudoku.Auth` (`AddFirebaseJwt`) trong từng service.

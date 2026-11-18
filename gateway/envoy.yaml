@@ -31,7 +31,7 @@ static_resources:
                           allow_origin_string_match:
                             - safe_regex:
                                 regex: ".*"
-                          allow_methods: 'GET, POST, PUT, DELETE, OPTIONS'
+                          allow_methods: 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
                           allow_headers: 'authorization,content-type,x-grpc-web,x-user-agent,grpc-timeout,x-requested-with,x-signalr-user-agent'
                           allow_credentials: true
                           expose_headers: 'grpc-status,grpc-message,grpc-encoding,grpc-accept-encoding'

@@ -5,7 +5,6 @@ import {
   adminGetTicketDetail,
   adminReplyFeedback,
   adminChangeStatus,
-  adminAssignFeedback,
   type FeedbackTicket,
 } from '../../../api/supportClient'
 
@@ -29,10 +28,7 @@ export function AdminFeedbackPage() {
   // Change status state
   const [newStatus, setNewStatus] = useState('')
   const [statusReason, setStatusReason] = useState('')
-
-  // Assign state
-  const [assignAdminId, setAssignAdminId] = useState('')
-  const [assignReason, setAssignReason] = useState('')
+  const [statusUpdating, setStatusUpdating] = useState(false)
 
   const loadQueue = async () => {
     setLoading(true)
@@ -63,7 +59,6 @@ export function AdminFeedbackPage() {
       const detail = await adminGetTicketDetail(id)
       setSelectedTicket(detail)
       setNewStatus(detail.status)
-      setAssignAdminId(detail.assignedAdminId || '')
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Lỗi tải chi tiết ticket.')
     } finally {
@@ -95,32 +90,22 @@ export function AdminFeedbackPage() {
       alert('Vui lòng chọn trạng thái và nhập lý do.')
       return
     }
+    setStatusUpdating(true)
     try {
       const updated = await adminChangeStatus(selectedTicket.id, newStatus, statusReason.trim())
       setSelectedTicket(updated)
+      setTickets((current) =>
+        current.map((ticket) =>
+          ticket.id === updated.id
+            ? { ...ticket, status: updated.status, updatedAt: updated.updatedAt }
+            : ticket,
+        ),
+      )
       setStatusReason('')
-      loadQueue()
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Lỗi đổi trạng thái.')
-    }
-  }
-
-  const handleAssign = async () => {
-    if (!selectedTicket || !assignReason.trim()) {
-      alert('Vui lòng nhập lý do gán ticket.')
-      return
-    }
-    try {
-      const updated = await adminAssignFeedback(
-        selectedTicket.id,
-        assignAdminId.trim() || null,
-        assignReason.trim(),
-      )
-      setSelectedTicket(updated)
-      setAssignReason('')
-      loadQueue()
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Lỗi gán ticket.')
+    } finally {
+      setStatusUpdating(false)
     }
   }
 
@@ -295,11 +280,11 @@ export function AdminFeedbackPage() {
                 )}
               </div>
 
-              {/* Status & Assign Controls */}
+              {/* Status Control */}
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
+                  gridTemplateColumns: '1fr',
                   gap: 16,
                   padding: '12px 16px',
                   background: 'var(--canvas)',
@@ -327,9 +312,13 @@ export function AdminFeedbackPage() {
                     <button
                       className="admin-btn admin-btn-secondary"
                       onClick={handleChangeStatus}
-                      disabled={selectedTicket.status === 'CLOSED' || newStatus === selectedTicket.status}
+                      disabled={
+                        statusUpdating ||
+                        selectedTicket.status === 'CLOSED' ||
+                        newStatus === selectedTicket.status
+                      }
                     >
-                      Đổi
+                      {statusUpdating ? 'Đang đổi...' : 'Đổi'}
                     </button>
                   </div>
                   <input
@@ -338,33 +327,6 @@ export function AdminFeedbackPage() {
                     placeholder="Lý do đổi trạng thái..."
                     value={statusReason}
                     onChange={(e) => setStatusReason(e.target.value)}
-                    style={{ width: '100%', marginTop: 6 }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--muted)' }}>
-                    Gán Admin phụ trách:
-                  </label>
-                  <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
-                    <input
-                      type="text"
-                      className="admin-input"
-                      placeholder="Nhập Admin UID..."
-                      value={assignAdminId}
-                      onChange={(e) => setAssignAdminId(e.target.value)}
-                      style={{ flex: 1 }}
-                    />
-                    <button className="admin-btn admin-btn-secondary" onClick={handleAssign}>
-                      Gán
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    placeholder="Lý do phân công..."
-                    value={assignReason}
-                    onChange={(e) => setAssignReason(e.target.value)}
                     style={{ width: '100%', marginTop: 6 }}
                   />
                 </div>
