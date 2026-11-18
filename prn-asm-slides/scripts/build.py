@@ -38,7 +38,7 @@ HEAD = """<!doctype html>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#F2F4F0" />
-  <meta name="description" content="PRN ASM · Sudoku Online — 18 tờ trình chiếu theo rubric PRN232 Final Assignment (REST, background job, Kafka, gRPC, Docker)." />
+  <meta name="description" content="PRN ASM · Sudoku Online — 18 tờ trình chiếu theo rubric PRN232 Final Assignment (C4, ERD, REST, background job, Kafka, gRPC, Docker)." />
   <title>PRN232 · PRN ASM — Sudoku Online · 18 tờ trình chiếu</title>
   <style>
 """
@@ -177,7 +177,7 @@ def main() -> None:
         separators=(",", ":"),
     )
     if len(json.loads(baked)["slides"]) != TOTAL:
-        sys.exit("Không dựng được #prn-baked-state với đúng 18 slide")
+        sys.exit(f"Không dựng được #prn-baked-state với đúng {TOTAL} slide")
 
     html = (
         HEAD

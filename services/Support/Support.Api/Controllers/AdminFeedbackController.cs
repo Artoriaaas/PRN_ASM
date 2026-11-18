@@ -29,15 +29,8 @@ public sealed class AdminFeedbackController(IFeedbackService feedbackService) : 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetTicketDetail(Guid id, CancellationToken ct)
     {
-        try
-        {
-            var detail = await feedbackService.AdminGetTicketDetailAsync(id, ct);
-            return Ok(detail);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound(new { error = "Không tìm thấy ticket." });
-        }
+        var detail = await feedbackService.AdminGetTicketDetailAsync(id, ct);
+        return Ok(detail);
     }
 
     [HttpPost("{id:guid}/reply")]
@@ -46,23 +39,8 @@ public sealed class AdminFeedbackController(IFeedbackService feedbackService) : 
         string? adminUid = User.FindFirst("sub")?.Value;
         if (string.IsNullOrWhiteSpace(adminUid)) return Unauthorized();
 
-        try
-        {
-            var msg = await feedbackService.AdminReplyAsync(adminUid, id, request.Content, request.Reason, ct);
-            return Ok(msg);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound(new { error = "Không tìm thấy ticket." });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        var msg = await feedbackService.AdminReplyAsync(adminUid, id, request.Content, request.Reason, ct);
+        return Ok(msg);
     }
 
     [HttpPatch("{id:guid}/status")]
@@ -71,23 +49,8 @@ public sealed class AdminFeedbackController(IFeedbackService feedbackService) : 
         string? adminUid = User.FindFirst("sub")?.Value;
         if (string.IsNullOrWhiteSpace(adminUid)) return Unauthorized();
 
-        try
-        {
-            var ticket = await feedbackService.AdminChangeStatusAsync(adminUid, id, request.Status, request.Reason, ct);
-            return Ok(ticket);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound(new { error = "Không tìm thấy ticket." });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        var ticket = await feedbackService.AdminChangeStatusAsync(adminUid, id, request.Status, request.Reason, ct);
+        return Ok(ticket);
     }
 
     [HttpPatch("{id:guid}/assign")]
@@ -96,18 +59,7 @@ public sealed class AdminFeedbackController(IFeedbackService feedbackService) : 
         string? adminUid = User.FindFirst("sub")?.Value;
         if (string.IsNullOrWhiteSpace(adminUid)) return Unauthorized();
 
-        try
-        {
-            var ticket = await feedbackService.AdminAssignAsync(adminUid, id, request.AdminId, request.Reason, ct);
-            return Ok(ticket);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound(new { error = "Không tìm thấy ticket." });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+        var ticket = await feedbackService.AdminAssignAsync(adminUid, id, request.AdminId, request.Reason, ct);
+        return Ok(ticket);
     }
 }
