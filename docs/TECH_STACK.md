@@ -2,6 +2,9 @@
 
 > Tài liệu này giải thích **lý do kỹ thuật** và **cách hoạt động thực tế** của từng công nghệ trong repo.
 > Mọi đoạn code trích dẫn đều là code thật, không phải minh hoạ.
+>
+> 📍 Muốn biết từng đoạn cấu hình nằm ở **file nào, dòng nào** và luồng **Kafka publisher → consumer** chạy ra sao:
+> xem [`TECH_STACK_ANNOTATED.md`](./TECH_STACK_ANNOTATED.md).
 
 ---
 

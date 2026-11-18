@@ -1,6 +1,7 @@
 namespace Support.Api.Messaging;
 
 using System;
+using System.Globalization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -200,9 +201,13 @@ public sealed class SupportEventsConsumerWorker : BackgroundService
         CancellationToken ct)
     {
         DateTime publishedAt = DateTime.UtcNow;
-        if (!string.IsNullOrWhiteSpace(rules.EffectiveAt) && DateTime.TryParse(rules.EffectiveAt, out var parsed))
+        if (!string.IsNullOrWhiteSpace(rules.EffectiveAt) &&
+            DateTime.TryParse(rules.EffectiveAt, CultureInfo.InvariantCulture,
+                DateTimeStyles.RoundtripKind, out var parsed))
         {
-            publishedAt = parsed;
+            // PostgreSQL 'timestamp with time zone' chỉ nhận UTC — normalize để tránh
+            // "Cannot write DateTime with Kind=Local" khi event mang offset +07:00.
+            publishedAt = parsed.Kind == DateTimeKind.Utc ? parsed : parsed.ToUniversalTime();
         }
 
         await db.SystemNotices.AddAsync(new SystemNotice

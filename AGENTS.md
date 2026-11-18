@@ -41,6 +41,7 @@ File này luôn được agent nạp. Chỉ chứa **luật bắt buộc + bản
 | Code `Grpc/`, `Domain/`, `Data/`, `Messaging/`, gọi service khác | `docs/HANDOFF.md` §3–4 |
 | Query EF, index, Redis, cache, hiệu năng FE | `docs/OPTIMIZATION.md` |
 | Dùng/mở rộng Auth, Messaging, Observability; tạo building block mới | `docs/BUILDING_BLOCKS.md` |
+| Đọc `TECH_STACK.md` | `docs/TECH_STACK_ANNOTATED.md` — mỗi tech ứng file/dòng nào trong code + luồng Kafka publisher→consumer |
 | Hiểu tổng thể kiến trúc, luồng auth/event | `docs/ARCHITECTURE.md` |
 | Chạy dự án local | `docs/HANDOFF.md` §6 |
 | Deploy FE (Vercel) + backend qua Cloudflare Quick Tunnel, đổi domain/API base | `docs/DEPLOY_VERCEL_TUNNEL.md` |
